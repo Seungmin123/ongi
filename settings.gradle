@@ -1,0 +1,9 @@
+pluginManagement {
+	repositories {
+		maven { url = 'https://repo.spring.io/snapshot' }
+		gradlePluginPortal()
+	}
+}
+rootProject.name = 'ongi'
+
+include 'api', 'recipe-domain', 'ingredients-domain', 'user-domain'
