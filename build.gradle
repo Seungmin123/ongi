@@ -9,6 +9,9 @@ group = 'com'
 version = '0.0.1-SNAPSHOT'
 description = 'Wish project - OnGi'
 
+tasks.named("bootJar") {
+    archiveClassifier = 'boot'
+}
 
 subprojects {
     apply plugin: 'java'

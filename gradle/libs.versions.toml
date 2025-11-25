@@ -1,0 +1,15 @@
+[versions]
+querydsl = "5.1.0"
+mysql      = "9.3.0"
+log4jdbc   = "1.2"
+log4j-api  = "2.17.0"
+
+[libraries]
+querydsl-core        = { module = "com.querydsl:querydsl-core",           version.ref = "querydsl"  }
+querydsl-sql         = { module = "com.querydsl:querydsl-sql",            version.ref = "querydsl"  }
+querydsl-sql-spring  = { module = "com.querydsl:querydsl-sql-spring",     version.ref = "querydsl"  }
+
+mysql-connector      = { module = "com.mysql:mysql-connector-j",          version.ref = "mysql"     }
+
+log4jdbc             = { module = "com.googlecode.log4jdbc:log4jdbc",     version.ref = "log4jdbc"  }
+log4j-api            = { module = "org.apache.logging.log4j:log4j-api",   version.ref = "log4j-api" }
