@@ -33,13 +33,33 @@ public class IngredientEntity extends BaseTimeEntity {
 	@Column(name = "category", nullable = false)
 	private IngredientCategoryEnum category;
 
+	@Column(name = "calories_kcal", nullable = false)
+	private Double caloriesKcal;
+
+	@Column(name = "protein_g", nullable = false)
+	private Double proteinG;
+
+	@Column(name = "fat_g", nullable = false)
+	private Double fatG;
+
+	@Column(name = "carbs_g", nullable = false)
+	private Double carbsG;
+
 	@Builder
 	public IngredientEntity(
 		String name,
-		IngredientCategoryEnum category
+		IngredientCategoryEnum category,
+		Double caloriesKcal,
+		Double proteinG,
+		Double fatG,
+		Double carbsG
 	) {
 		this.name = name;
 		this.category = category;
+		this.caloriesKcal = caloriesKcal;
+		this.proteinG = proteinG;
+		this.fatG = fatG;
+		this.carbsG = carbsG;
 	}
 
 }

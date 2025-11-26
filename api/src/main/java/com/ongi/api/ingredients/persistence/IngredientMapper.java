@@ -11,22 +11,29 @@ public class IngredientMapper {
 		return IngredientEntity.builder()
 			.name(ingredient.getName())
 			.category(ingredient.getCategory())
+			.caloriesKcal(ingredient.getCaloriesKcal())
+			.carbsG(ingredient.getCarbsG())
+			.proteinG(ingredient.getProteinG())
+			.fatG(ingredient.getFatG())
 			.build();
 	}
 
 	public static Ingredient toDomain(IngredientEntity ingredientEntity) {
-		return Ingredient.create(ingredientEntity.getName(), ingredientEntity.getCategory());
+		return Ingredient.create(ingredientEntity.getName(), ingredientEntity.getCategory(),
+			ingredientEntity.getCaloriesKcal(), ingredientEntity.getProteinG(), ingredientEntity.getFatG(), ingredientEntity.getCarbsG());
 	}
 
 	public static IngredientNutritionEntity toEntity(IngredientNutrition nutrition) {
 		return IngredientNutritionEntity.builder()
-			.ingredientId(nutrition.getIngredientId())
-			.nutritionId(nutrition.getNutritionId())
+			.ingredient(IngredientMapper.toEntity(nutrition.getIngredient()))
+			.nutrition(IngredientMapper.toEntity(nutrition.getNutrition()))
+			.quantity(nutrition.getQuantity())
+			.basis(nutrition.getBasis())
 			.build();
 	}
 
 	public static IngredientNutrition toDomain(IngredientNutritionEntity entity) {
-		return IngredientNutrition.create(entity.getIngredientId(), entity.getNutritionId());
+		return IngredientNutrition.create(IngredientMapper.toDomain(entity.getIngredient()), IngredientMapper.toDomain(entity.getNutrition()), entity.getQuantity(), entity.getBasis());
 	}
 
 	public static NutritionEntity toEntity(Nutrition nutrition) {
