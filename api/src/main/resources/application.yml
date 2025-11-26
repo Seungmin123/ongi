@@ -1,0 +1,60 @@
+spring:
+  jmx:
+    enabled: false
+  devtools:
+    restart:
+      enabled: false
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+        use_sql_comments: false
+        query:
+          in_clause_parameter_padding: false
+        jdbc:
+          lob:
+            non_contextual_creation: false
+    com.zaxxer.hikari.HikariConfig: INFO
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 500MB
+      max-request-size: 500MB
+  http:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 2
+  main:
+    allow-circular-references: false
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+#  messages:
+#    always-use-message-format: false
+#    basename: messages/messages
+#    cache-seconds: 10
+#    encoding: UTF-8
+#    fallback-to-system-locale: true
+  codec:
+    max-in-memory-size: 10MB
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+server:
+  port: 8080
+  tomcat:
+    max-http-form-post-size: 200MB

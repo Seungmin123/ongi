@@ -1,0 +1,49 @@
+# local 환경
+spring:
+  application:
+    name: ongi
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:mysql://localhost:3306/ongi?serverTimezone=Asia/Seoul&useSSL=false&characterEncoding=UTF-8
+    username: root
+    password: tmdals285!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-init-sql: SET NAMES utf8mb4
+      leak-detection-threshold: 3000000
+      maximum-pool-size: 10 # 커넥션 수 조정 필요할 때 명시
+      minimum-idle: 5 # 유휴 커넥션 수 조정 시 사용
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: false
+#logging:
+#  level:
+#    io.opentelemetry: DEBUG        # OTel SDK/Export
+#    io.micrometer: DEBUG           # Micrometer(OTLP 레지스트리)
+#    com.github.loki4j: DEBUG
+#management:
+#  metrics:
+#    tags:
+#      app: ${spring.application.name}
+#      service_name: ${spring.application.name}
+#      env: ${spring.profiles.active:local}
+#  tracing:
+#    sampling:
+#      probability: 1.0
+#  otlp:
+#    tracing:
+#      endpoint: http://43.201.71.69:14318/v1/traces
+#      resource-attributes:
+#        deployment.environment: ${spring.profiles.active:local}
+#    metrics:
+#      export:
+#        enabled: true
+#        url: http://43.201.71.69:14318/v1/metrics
