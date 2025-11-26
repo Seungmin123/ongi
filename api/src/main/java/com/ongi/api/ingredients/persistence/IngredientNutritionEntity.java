@@ -44,7 +44,7 @@ public class IngredientNutritionEntity extends BaseTimeEntity {
 	@Column(name = "quantity", nullable = false)
 	private Double quantity;
 
-	@Column(name = "basis", nullable = false, comment = "'100g', '100ml', '조각', '인분' 등 기준")
+	@Column(name = "basis", nullable = false, comment = "100g, 100ml, 조각, 인분 등 기준")
 	private NutritionBasisEnum basis;
 
 	@Builder

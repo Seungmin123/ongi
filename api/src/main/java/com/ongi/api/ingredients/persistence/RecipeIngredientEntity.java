@@ -38,10 +38,10 @@ public class RecipeIngredientEntity extends BaseTimeEntity {
 	private Integer quantity;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "unit", nullable = false, comment = "'g', 'ml', '큰술' 등")
+	@Column(name = "unit", nullable = false, comment = "g, ml, 큰술 등")
 	private RecipeIngredientUnitEnum unit;
 
-	@Column(name = "note", nullable = false, comment = "'다진 것', '썰기' 등")
+	@Column(name = "note", nullable = false, comment = "다진 것, 썰기 등")
 	private String note;
 
 	@Column(name = "sort_order", nullable = false)
