@@ -1,14 +1,15 @@
 package com.ongi.ingredients.domain;
 
 import com.ongi.ingredients.domain.enums.RecipeIngredientUnitEnum;
+import com.ongi.recipe.domain.Recipe;
 
 public class RecipeIngredient {
 
 	private Long id;
 
-	private Long recipeId;
+	private Recipe recipe;
 
-	private Long ingredientId;
+	private Ingredient ingredient;
 
 	private Integer quantity;
 
@@ -19,15 +20,15 @@ public class RecipeIngredient {
 	private Integer sortOrder;
 
 	private RecipeIngredient(
-		Long recipeId,
-		Long ingredientId,
+		Recipe recipe,
+		Ingredient ingredient,
 		Integer quantity,
 		RecipeIngredientUnitEnum unit,
 		String note,
 		Integer sortOrder
 	) {
-		this.recipeId = recipeId;
-		this.ingredientId = ingredientId;
+		this.recipe = recipe;
+		this.ingredient = ingredient;
 		this.quantity = quantity;
 		this.unit = unit;
 		this.note = note;
@@ -35,9 +36,9 @@ public class RecipeIngredient {
 	}
 
 	public static RecipeIngredient create(
-		Long recipeId, Long ingredientId, Integer quantity, RecipeIngredientUnitEnum unit, String note, Integer sortOrder
+		Recipe recipe, Ingredient ingredient, Integer quantity, RecipeIngredientUnitEnum unit, String note, Integer sortOrder
 	) {
-		return new RecipeIngredient(recipeId, ingredientId, quantity, unit, note, sortOrder);
+		return new RecipeIngredient(recipe, ingredient, quantity, unit, note, sortOrder);
 	}
 
 	public Long getId() {
@@ -48,20 +49,36 @@ public class RecipeIngredient {
 		this.id = id;
 	}
 
+	public Recipe getRecipe() {
+		return this.recipe;
+	}
+
+	public void setRecipe(Recipe recipe) {
+		this.recipe = recipe;
+	}
+
+	public Ingredient getIngredient() {
+		return this.ingredient;
+	}
+
+	public void setIngredient(Ingredient ingredient) {
+		this.ingredient = ingredient;
+	}
+
 	public Long getRecipeId() {
-		return recipeId;
+		return recipe.getId();
 	}
 
 	public void setRecipeId(Long recipeId) {
-		this.recipeId = recipeId;
+		this.recipe.setId(recipeId);
 	}
 
 	public Long getIngredientId() {
-		return ingredientId;
+		return ingredient.getIngredientId();
 	}
 
 	public void setIngredientId(Long ingredientId) {
-		this.ingredientId = ingredientId;
+		this.ingredient.setIngredientId(ingredientId);
 	}
 
 	public Integer getQuantity() {

@@ -1,14 +1,18 @@
 package com.ongi.api.ingredients.persistence;
 
 import com.ongi.api.common.persistence.entity.BaseTimeEntity;
+import com.ongi.api.recipe.persistence.RecipeEntity;
 import com.ongi.ingredients.domain.enums.RecipeIngredientUnitEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -27,11 +31,13 @@ public class RecipeIngredientEntity extends BaseTimeEntity {
 	@Column(name = "recipe_ingredient_id", nullable = false)
 	private Long id;
 
-	@Column(name = "recipe_id", nullable = false)
-	private Long recipeId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "recipe_id", nullable = false)
+	private RecipeEntity recipe;
 
-	@Column(name = "ingredient_id", nullable = false)
-	private Long ingredientId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ingredient_id", nullable = false)
+	private IngredientEntity ingredient;
 
 	@ColumnDefault("1")
 	@Column(name = "quantity", nullable = false)
@@ -49,15 +55,15 @@ public class RecipeIngredientEntity extends BaseTimeEntity {
 
 	@Builder
 	public RecipeIngredientEntity(
-		Long recipeId,
-		Long ingredientId,
+		RecipeEntity recipe,
+		IngredientEntity ingredient,
 		Integer quantity,
 		RecipeIngredientUnitEnum unit,
 		String note,
 		Integer sortOrder
 	) {
-		this.recipeId = recipeId;
-		this.ingredientId = ingredientId;
+		this.recipe = recipe;
+		this.ingredient = ingredient;
 		this.quantity = quantity;
 		this.unit = unit;
 		this.note = note;

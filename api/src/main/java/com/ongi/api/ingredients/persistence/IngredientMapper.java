@@ -1,5 +1,6 @@
 package com.ongi.api.ingredients.persistence;
 
+import com.ongi.api.recipe.persistence.RecipeMapper;
 import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.IngredientNutrition;
 import com.ongi.ingredients.domain.Nutrition;
@@ -49,8 +50,8 @@ public class IngredientMapper {
 
 	public static RecipeIngredientEntity toEntity(RecipeIngredient entity) {
 		return RecipeIngredientEntity.builder()
-			.recipeId(entity.getRecipeId())
-			.ingredientId(entity.getIngredientId())
+			.recipe(RecipeMapper.toEntity(entity.getRecipe()))
+			.ingredient(IngredientMapper.toEntity(entity.getIngredient()))
 			.quantity(entity.getQuantity())
 			.unit(entity.getUnit())
 			.note(entity.getNote())
@@ -59,6 +60,6 @@ public class IngredientMapper {
 	}
 
 	public static RecipeIngredient toDomain(RecipeIngredientEntity entity) {
-		return RecipeIngredient.create(entity.getRecipeId(), entity.getIngredientId(), entity.getQuantity(), entity.getUnit(), entity.getNote(), entity.getSortOrder());
+		return RecipeIngredient.create(RecipeMapper.toDomain(entity.getRecipe()), IngredientMapper.toDomain(entity.getIngredient()), entity.getQuantity(), entity.getUnit(), entity.getNote(), entity.getSortOrder());
 	}
 }
