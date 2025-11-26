@@ -5,6 +5,7 @@ import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.IngredientNutrition;
 import com.ongi.ingredients.domain.Nutrition;
 import com.ongi.ingredients.domain.RecipeIngredient;
+import com.ongi.ingredients.domain.enums.RecipeIngredientUnitEnum;
 
 public class IngredientMapper {
 
@@ -50,7 +51,7 @@ public class IngredientMapper {
 
 	public static RecipeIngredientEntity toEntity(RecipeIngredient entity) {
 		return RecipeIngredientEntity.builder()
-			.recipe(RecipeMapper.toEntity(entity.getRecipe()))
+			.recipeId(entity.getRecipeId())
 			.ingredient(IngredientMapper.toEntity(entity.getIngredient()))
 			.quantity(entity.getQuantity())
 			.unit(entity.getUnit())
@@ -60,6 +61,49 @@ public class IngredientMapper {
 	}
 
 	public static RecipeIngredient toDomain(RecipeIngredientEntity entity) {
-		return RecipeIngredient.create(RecipeMapper.toDomain(entity.getRecipe()), IngredientMapper.toDomain(entity.getIngredient()), entity.getQuantity(), entity.getUnit(), entity.getNote(), entity.getSortOrder());
+		return RecipeIngredient.create(entity.getRecipeId(), IngredientMapper.toDomain(entity.getIngredient()), entity.getQuantity(), entity.getUnit(), entity.getNote(), entity.getSortOrder());
+	}
+
+	public static RecipeIngredientUnitEnum mapUnit(String unitStr) {
+		if (unitStr == null || unitStr.isBlank()) {
+			// 애매하면 일단 "기호에 맞게"로 처리
+			return RecipeIngredientUnitEnum.TO_TASTE;
+		}
+
+		String u = unitStr.trim().toLowerCase();
+
+		return switch (u) {
+			// 용량
+			case "ml", "밀리리터" -> RecipeIngredientUnitEnum.ML;
+			case "l", "리터" -> RecipeIngredientUnitEnum.L;
+
+			// 무게
+			case "g", "그램" -> RecipeIngredientUnitEnum.G;
+			case "kg", "킬로그램" -> RecipeIngredientUnitEnum.KG;
+
+			// 계량
+			case "큰술", "스푼", "tbsp" -> RecipeIngredientUnitEnum.TBSP;
+			case "작은술", "티스푼", "tsp" -> RecipeIngredientUnitEnum.TSP;
+			case "컵", "cup" -> RecipeIngredientUnitEnum.CUP;
+
+			// 개수
+			case "개", "알", "조각", "모", "마리", "덩이" -> RecipeIngredientUnitEnum.PIECE;
+			case "팩", "pack" -> RecipeIngredientUnitEnum.PACK;
+			case "줌", "다발", "단" -> RecipeIngredientUnitEnum.BUNCH;
+
+			// 애매
+			case "약간" -> RecipeIngredientUnitEnum.DASH;
+			case "꼬집" -> RecipeIngredientUnitEnum.PINCH;
+			case "기호에맞게", "기호에", "기호" -> RecipeIngredientUnitEnum.TO_TASTE;
+
+			// 온도
+			case "c", "°c", "섭씨" -> RecipeIngredientUnitEnum.CELSIUS;
+
+			// 길이/사이즈
+			case "슬라이스" -> RecipeIngredientUnitEnum.SLICE;
+			case "장" -> RecipeIngredientUnitEnum.SHEET;
+
+			default -> RecipeIngredientUnitEnum.TO_TASTE; // 모르면 일단 애매한 계량으로
+		};
 	}
 }

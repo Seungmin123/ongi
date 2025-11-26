@@ -8,8 +8,11 @@ import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.IngredientNutrition;
 import com.ongi.ingredients.domain.Nutrition;
 import com.ongi.ingredients.domain.RecipeIngredient;
+import com.ongi.ingredients.domain.enums.IngredientCategoryEnum;
 import com.ongi.ingredients.port.IngredientsRepositoryPort;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -79,5 +82,36 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 		return recipeIngredientRepository
 			.findById(id)
 			.map(IngredientMapper::toDomain);
+	}
+
+	@Override
+	public List<RecipeIngredient> saveAll(List<RecipeIngredient> recipeIngredients) {
+		List<RecipeIngredientEntity> entites = recipeIngredients.stream().map(IngredientMapper::toEntity).toList();
+		List<RecipeIngredientEntity> saved = recipeIngredientRepository.saveAll(entites);
+		return saved.stream().map(IngredientMapper::toDomain).toList();
+	}
+
+	@Override
+	public Optional<Ingredient> findByName(String name) {
+		return ingredientRepository.findByName(name)
+			.map(IngredientMapper::toDomain);
+	}
+
+	@Override
+	public Ingredient findOrCreateIngredient(String name) {
+		return ingredientRepository.findByName(name)
+			.map(IngredientMapper::toDomain)
+			.orElseGet(() -> {
+				IngredientEntity entity = IngredientEntity.builder()
+					.name(name)
+					.category(IngredientCategoryEnum.OTHER)
+					.caloriesKcal(0d)
+					.proteinG(0d)
+					.fatG(0d)
+					.carbsG(0d)
+					.build();
+				IngredientEntity saved = ingredientRepository.save(entity);
+				return IngredientMapper.toDomain(saved);
+			});
 	}
 }

@@ -14,7 +14,8 @@ public enum IngredientCategoryEnum {
 	NUTS("NUTS", "견과류"),
 	BEVERAGE("BEVERAGE", "음료"),
 	SAUCE("SAUCE", "소스"),
-	FROZEN("FROZEN", "냉동식품");
+	FROZEN("FROZEN", "냉동식품"),
+	OTHER("OTHER", "기타");
 
 	private final String code;
 	private final String description;

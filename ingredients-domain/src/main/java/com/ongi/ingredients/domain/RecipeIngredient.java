@@ -1,13 +1,12 @@
 package com.ongi.ingredients.domain;
 
 import com.ongi.ingredients.domain.enums.RecipeIngredientUnitEnum;
-import com.ongi.recipe.domain.Recipe;
 
 public class RecipeIngredient {
 
 	private Long id;
 
-	private Recipe recipe;
+	private Long recipeId;
 
 	private Ingredient ingredient;
 
@@ -20,14 +19,14 @@ public class RecipeIngredient {
 	private Integer sortOrder;
 
 	private RecipeIngredient(
-		Recipe recipe,
+		Long recipeId,
 		Ingredient ingredient,
 		Integer quantity,
 		RecipeIngredientUnitEnum unit,
 		String note,
 		Integer sortOrder
 	) {
-		this.recipe = recipe;
+		this.recipeId = recipeId;
 		this.ingredient = ingredient;
 		this.quantity = quantity;
 		this.unit = unit;
@@ -36,9 +35,9 @@ public class RecipeIngredient {
 	}
 
 	public static RecipeIngredient create(
-		Recipe recipe, Ingredient ingredient, Integer quantity, RecipeIngredientUnitEnum unit, String note, Integer sortOrder
+		Long recipeId, Ingredient ingredient, Integer quantity, RecipeIngredientUnitEnum unit, String note, Integer sortOrder
 	) {
-		return new RecipeIngredient(recipe, ingredient, quantity, unit, note, sortOrder);
+		return new RecipeIngredient(recipeId, ingredient, quantity, unit, note, sortOrder);
 	}
 
 	public Long getId() {
@@ -47,14 +46,6 @@ public class RecipeIngredient {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public Recipe getRecipe() {
-		return this.recipe;
-	}
-
-	public void setRecipe(Recipe recipe) {
-		this.recipe = recipe;
 	}
 
 	public Ingredient getIngredient() {
@@ -66,11 +57,11 @@ public class RecipeIngredient {
 	}
 
 	public Long getRecipeId() {
-		return recipe.getId();
+		return this.getRecipeId();
 	}
 
 	public void setRecipeId(Long recipeId) {
-		this.recipe.setId(recipeId);
+		this.recipeId = recipeId;
 	}
 
 	public Long getIngredientId() {

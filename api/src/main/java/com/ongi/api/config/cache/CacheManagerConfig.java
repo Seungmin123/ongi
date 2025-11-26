@@ -3,6 +3,7 @@ package com.ongi.api.config.cache;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
@@ -19,8 +20,11 @@ import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializ
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import tools.jackson.databind.ObjectMapper;
 
+@RequiredArgsConstructor
 @Configuration
 public class CacheManagerConfig {
+
+	private final ObjectMapper objectMapper;
 
 	@Bean
 	@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true")
@@ -33,7 +37,7 @@ public class CacheManagerConfig {
 	@Bean
 	@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true")
 	public CacheManager redisCacheManager(RedisConnectionFactory factory) {
-		GenericJacksonJsonRedisSerializer serializer = new GenericJacksonJsonRedisSerializer(new ObjectMapper());
+		GenericJacksonJsonRedisSerializer serializer = new GenericJacksonJsonRedisSerializer(objectMapper);
 
 
 		RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()

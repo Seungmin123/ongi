@@ -4,6 +4,7 @@ import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.IngredientNutrition;
 import com.ongi.ingredients.domain.Nutrition;
 import com.ongi.ingredients.domain.RecipeIngredient;
+import java.util.List;
 import java.util.Optional;
 
 public interface IngredientsRepositoryPort {
@@ -23,4 +24,10 @@ public interface IngredientsRepositoryPort {
 	RecipeIngredient save(RecipeIngredient recipeIngredient);
 
 	Optional<RecipeIngredient> findRecipeIngredientById(Long id);
+
+	List<RecipeIngredient> saveAll(List<RecipeIngredient> recipeIngredients);
+
+	Optional<Ingredient> findByName(String name);
+
+	Ingredient findOrCreateIngredient(String name);
 }

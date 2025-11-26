@@ -31,9 +31,8 @@ public class RecipeIngredientEntity extends BaseTimeEntity {
 	@Column(name = "recipe_ingredient_id", nullable = false)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "recipe_id", nullable = false)
-	private RecipeEntity recipe;
+	@Column(name = "recipe_id", nullable = false)
+	private Long recipeId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ingredient_id", nullable = false)
@@ -55,14 +54,14 @@ public class RecipeIngredientEntity extends BaseTimeEntity {
 
 	@Builder
 	public RecipeIngredientEntity(
-		RecipeEntity recipe,
+		Long recipeId,
 		IngredientEntity ingredient,
 		Integer quantity,
 		RecipeIngredientUnitEnum unit,
 		String note,
 		Integer sortOrder
 	) {
-		this.recipe = recipe;
+		this.recipeId = recipeId;
 		this.ingredient = ingredient;
 		this.quantity = quantity;
 		this.unit = unit;
