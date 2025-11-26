@@ -1,6 +1,7 @@
 package com.ongi.ingredients.domain;
 
 import com.ongi.ingredients.domain.enums.NutritionEnum;
+import com.ongi.ingredients.domain.enums.NutritionUnitEnum;
 
 public class Nutrition {
 
@@ -10,20 +11,22 @@ public class Nutrition {
 
 	private String displayName;
 
-	private String unit;
+	private NutritionUnitEnum unit;
 
 	private Nutrition(
-		NutritionEnum code
+		NutritionEnum code,
+		NutritionUnitEnum unit
 	) {
 		this.code = code;
 		this.displayName = code.getDisplayName();
-		this.unit = code.getUnit();
+		this.unit = unit;
 	}
 
 	public static Nutrition create(
-		NutritionEnum nutritionEnum
+		NutritionEnum nutritionEnum,
+		NutritionUnitEnum unit
 	) {
-		return new Nutrition(nutritionEnum);
+		return new Nutrition(nutritionEnum, unit);
 	}
 
 	public Long getId() {
@@ -50,11 +53,11 @@ public class Nutrition {
 		this.displayName = displayName;
 	}
 
-	public String getUnit() {
+	public NutritionUnitEnum getUnit() {
 		return unit;
 	}
 
-	public void setUnit(String unit) {
+	public void setUnit(NutritionUnitEnum unit) {
 		this.unit = unit;
 	}
 }

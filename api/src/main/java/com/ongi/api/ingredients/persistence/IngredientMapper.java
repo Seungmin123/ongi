@@ -39,11 +39,12 @@ public class IngredientMapper {
 	public static NutritionEntity toEntity(Nutrition nutrition) {
 		return NutritionEntity.builder()
 			.code(nutrition.getCode())
+			.unit(nutrition.getUnit())
 			.build();
 	}
 
 	public static Nutrition toDomain(NutritionEntity entity){
-		return Nutrition.create(entity.getCode());
+		return Nutrition.create(entity.getCode(), entity.getUnit());
 	}
 
 	public static RecipeIngredientEntity toEntity(RecipeIngredient entity) {

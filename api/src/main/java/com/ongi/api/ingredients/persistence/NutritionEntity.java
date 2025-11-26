@@ -2,6 +2,7 @@ package com.ongi.api.ingredients.persistence;
 
 import com.ongi.api.common.persistence.entity.BaseTimeEntity;
 import com.ongi.ingredients.domain.enums.NutritionEnum;
+import com.ongi.ingredients.domain.enums.NutritionUnitEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -33,16 +34,18 @@ public class NutritionEntity extends BaseTimeEntity {
 	@Column(name = "display_name", nullable = false, length = 100)
 	private String displayName;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "unit", nullable = false, length = 20)
-	private String unit;
+	private NutritionUnitEnum unit;
 
 	@Builder
 	public NutritionEntity(
-		NutritionEnum code
+		NutritionEnum code,
+		NutritionUnitEnum unit
 	) {
 		this.code = code;
 		this.displayName = code.getDisplayName();
-		this.unit = code.getUnit();
+		this.unit = unit;
 	}
 
 }
