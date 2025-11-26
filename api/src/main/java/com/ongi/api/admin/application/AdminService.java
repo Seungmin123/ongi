@@ -45,13 +45,16 @@ public class AdminService {
 		CookRcpResponse response = objectMapper.readValue(resource.getInputStream(), CookRcpResponse.class);
 
 		for (CookRcpRow row : response.COOKRCP01().row()) {
+			System.out.println(row);
 			// TODO
 			// Long recipeId = parseToRecipe(row);
 			// save recipe
 			// save nutrition
 			// save ingredient
 			// save recipe ingredient
+			// savve nutrition ingredient
 			// save recipe steps
+			// save recipe tags
 			// saveIngredients(recipeId, row.RCP_PARTS_DTLS());
 			// saveSteps(recipeId, row); ...
 		}
@@ -71,6 +74,34 @@ public class AdminService {
 		);
 
 		return recipe.getId();
+	}
+
+	@Transactional
+	public void saveIngredients(Long recipeId, String partsDetails) {
+		if (partsDetails == null || partsDetails.isBlank()) return;
+
+		// 줄바꿈/콤마 기준으로 나눔
+		String normalized = partsDetails.replace("\n", ",");
+		String[] tokens = normalized.split(",");
+
+		List<RecipeIngredient> domains = new ArrayList<>();
+		int sortOrder = 1;
+
+		for (String token : tokens) {
+			String trimmed = token.trim();
+			if (trimmed.isBlank()) continue;
+
+			ParsedIngredient parsed = this.parseIngredient(trimmed);
+			if (parsed == null) continue;
+
+			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(parsed.name());
+
+			RecipeIngredient domain = RecipeIngredient.create(recipeId, ingredient, parsed.quantity(), parsed.unit(), parsed.note(), sortOrder++);
+
+			domains.add(domain);
+		}
+
+		ingredientAdapter.saveAll(domains);
 	}
 
 	public ParsedIngredient parseIngredient(String rawText) {
@@ -152,31 +183,4 @@ public class AdminService {
 		return new ParsedIngredient(name, quantity, unit, note);
 	}
 
-	@Transactional
-	public void saveIngredients(Long recipeId, String partsDetails) {
-		if (partsDetails == null || partsDetails.isBlank()) return;
-
-		// 줄바꿈/콤마 기준으로 나눔
-		String normalized = partsDetails.replace("\n", ",");
-		String[] tokens = normalized.split(",");
-
-		List<RecipeIngredient> domains = new ArrayList<>();
-		int sortOrder = 1;
-
-		for (String token : tokens) {
-			String trimmed = token.trim();
-			if (trimmed.isBlank()) continue;
-
-			ParsedIngredient parsed = this.parseIngredient(trimmed);
-			if (parsed == null) continue;
-
-			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(parsed.name());
-
-			RecipeIngredient domain = RecipeIngredient.create(recipeId, ingredient, parsed.quantity(), parsed.unit(), parsed.note(), sortOrder++);
-
-			domains.add(domain);
-		}
-
-		ingredientAdapter.saveAll(domains);
-	}
 }
