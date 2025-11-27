@@ -42,12 +42,14 @@ public class UserProfileEntity extends BaseTimeEntity {
 
 	@Builder
 	public UserProfileEntity(
+		Long id,
 		Long userId,
 		String displayName,
 		String allergens,
 		Integer dietGoal,
 		String dislikedIngredients
 	) {
+		this.id = id;
 		this.userId = userId;
 		this.displayName = displayName;
 		this.allergens = allergens;

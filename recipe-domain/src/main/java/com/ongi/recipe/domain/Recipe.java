@@ -19,6 +19,7 @@ public class Recipe {
 	private String source;
 
 	private Recipe(
+		Long id,
 		String title,
 		String description,
 		Integer serving,
@@ -26,6 +27,7 @@ public class Recipe {
 		RecipeDifficultyEnum difficulty,
 		String source
 	) {
+		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.serving = serving;
@@ -35,10 +37,10 @@ public class Recipe {
 	}
 
 	public static Recipe create(
-		String title, String description, Integer serving, Integer cookingTimeMin,
+		Long id, String title, String description, Integer serving, Integer cookingTimeMin,
 		RecipeDifficultyEnum difficulty, String source
 	) {
-		return new Recipe(title, description, serving, cookingTimeMin, difficulty, source);
+		return new Recipe(id, title, description, serving, cookingTimeMin, difficulty, source);
 	}
 
 	public Long getId() {

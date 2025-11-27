@@ -14,19 +14,22 @@ public class Nutrition {
 	private NutritionUnitEnum unit;
 
 	private Nutrition(
+		Long id,
 		NutritionEnum code,
 		NutritionUnitEnum unit
 	) {
+		this.id = id;
 		this.code = code;
 		this.displayName = code.getDisplayName();
 		this.unit = unit;
 	}
 
 	public static Nutrition create(
+		Long id,
 		NutritionEnum nutritionEnum,
 		NutritionUnitEnum unit
 	) {
-		return new Nutrition(nutritionEnum, unit);
+		return new Nutrition(id, nutritionEnum, unit);
 	}
 
 	public Long getId() {

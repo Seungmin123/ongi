@@ -31,11 +31,13 @@ public class IngredientNutrition {
 	}
 
 	private IngredientNutrition(
+		Long id,
 		Ingredient ingredient,
 		Nutrition nutrition,
 		Double quantity,
 		NutritionBasisEnum basis
 	) {
+		this.id = id;
 		this.ingredient = ingredient;
 		this.nutrition = nutrition;
 		this.quantity = quantity;
@@ -43,9 +45,9 @@ public class IngredientNutrition {
 	}
 
 	public static IngredientNutrition create(
-		Ingredient ingredient, Nutrition nutrition, Double quantity, NutritionBasisEnum basis
+		Long id, Ingredient ingredient, Nutrition nutrition, Double quantity, NutritionBasisEnum basis
 	) {
-		return new IngredientNutrition(ingredient, nutrition, quantity, basis);
+		return new IngredientNutrition(id, ingredient, nutrition, quantity, basis);
 	}
 
 	public Long getId() {

@@ -54,6 +54,7 @@ public class RecipeStepsEntity extends BaseTimeEntity {
 
 	@Builder
 	public RecipeStepsEntity(
+		Long id,
 		Long recipeId,
 		Integer stepOrder,
 		String title,
@@ -64,6 +65,7 @@ public class RecipeStepsEntity extends BaseTimeEntity {
 		String imageUrl,
 		String videoUrl
 	) {
+		this.id = id;
 		this.recipeId = recipeId;
 		this.stepOrder = stepOrder;
 		this.title = title;

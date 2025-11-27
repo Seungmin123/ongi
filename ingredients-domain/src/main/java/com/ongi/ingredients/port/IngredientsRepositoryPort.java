@@ -4,6 +4,8 @@ import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.IngredientNutrition;
 import com.ongi.ingredients.domain.Nutrition;
 import com.ongi.ingredients.domain.RecipeIngredient;
+import com.ongi.ingredients.domain.enums.IngredientCategoryEnum;
+import com.ongi.ingredients.domain.enums.NutritionEnum;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,5 +31,9 @@ public interface IngredientsRepositoryPort {
 
 	Optional<Ingredient> findByName(String name);
 
-	Ingredient findOrCreateIngredient(String name);
+	Ingredient findIngredientByName(String name);
+
+	Ingredient findOrCreateIngredient(String name, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG);
+
+	Nutrition findNutritionByCode(NutritionEnum code);
 }

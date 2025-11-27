@@ -14,9 +14,15 @@ public class AdminController {
 	private final AdminService adminService;
 
 
-	@PostMapping("/foodSafetyKorea")
-	public String foodSafetyKorea() throws Exception{
-		adminService.importFromJson("");
+	@PostMapping("/foodSafetyKorea/recipe")
+	public String foodSafetyKoreaRecipe() throws Exception{
+		adminService.importSafetyKoreaRecipeFromJson("");
+		return "ok";
+	}
+
+	@PostMapping("/foodSafetyKorea/nutrition")
+	public String foodSafetyKoreaNutrition() throws Exception{
+		adminService.importSafetyKoreaNutritionFromJson("");
 		return "ok";
 	}
 }

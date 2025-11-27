@@ -11,6 +11,7 @@ public class IngredientMapper {
 
 	public static IngredientEntity toEntity(Ingredient ingredient) {
 		return IngredientEntity.builder()
+			.id(ingredient.getIngredientId())
 			.name(ingredient.getName())
 			.category(ingredient.getCategory())
 			.caloriesKcal(ingredient.getCaloriesKcal())
@@ -21,36 +22,39 @@ public class IngredientMapper {
 	}
 
 	public static Ingredient toDomain(IngredientEntity ingredientEntity) {
-		return Ingredient.create(ingredientEntity.getName(), ingredientEntity.getCategory(),
+		return Ingredient.create(ingredientEntity.getId(), ingredientEntity.getName(), ingredientEntity.getCategory(),
 			ingredientEntity.getCaloriesKcal(), ingredientEntity.getProteinG(), ingredientEntity.getFatG(), ingredientEntity.getCarbsG());
 	}
 
-	public static IngredientNutritionEntity toEntity(IngredientNutrition nutrition) {
+	public static IngredientNutritionEntity toEntity(IngredientNutrition domain) {
 		return IngredientNutritionEntity.builder()
-			.ingredient(IngredientMapper.toEntity(nutrition.getIngredient()))
-			.nutrition(IngredientMapper.toEntity(nutrition.getNutrition()))
-			.quantity(nutrition.getQuantity())
-			.basis(nutrition.getBasis())
+			.id(domain.getId())
+			.ingredient(IngredientMapper.toEntity(domain.getIngredient()))
+			.nutrition(IngredientMapper.toEntity(domain.getNutrition()))
+			.quantity(domain.getQuantity())
+			.basis(domain.getBasis())
 			.build();
 	}
 
 	public static IngredientNutrition toDomain(IngredientNutritionEntity entity) {
-		return IngredientNutrition.create(IngredientMapper.toDomain(entity.getIngredient()), IngredientMapper.toDomain(entity.getNutrition()), entity.getQuantity(), entity.getBasis());
+		return IngredientNutrition.create(entity.getId(), IngredientMapper.toDomain(entity.getIngredient()), IngredientMapper.toDomain(entity.getNutrition()), entity.getQuantity(), entity.getBasis());
 	}
 
 	public static NutritionEntity toEntity(Nutrition nutrition) {
 		return NutritionEntity.builder()
+			.id(nutrition.getId())
 			.code(nutrition.getCode())
 			.unit(nutrition.getUnit())
 			.build();
 	}
 
 	public static Nutrition toDomain(NutritionEntity entity){
-		return Nutrition.create(entity.getCode(), entity.getUnit());
+		return Nutrition.create(entity.getId(), entity.getCode(), entity.getUnit());
 	}
 
 	public static RecipeIngredientEntity toEntity(RecipeIngredient entity) {
 		return RecipeIngredientEntity.builder()
+			.id(entity.getId())
 			.recipeId(entity.getRecipeId())
 			.ingredient(IngredientMapper.toEntity(entity.getIngredient()))
 			.quantity(entity.getQuantity())
@@ -61,7 +65,7 @@ public class IngredientMapper {
 	}
 
 	public static RecipeIngredient toDomain(RecipeIngredientEntity entity) {
-		return RecipeIngredient.create(entity.getRecipeId(), IngredientMapper.toDomain(entity.getIngredient()), entity.getQuantity(), entity.getUnit(), entity.getNote(), entity.getSortOrder());
+		return RecipeIngredient.create(entity.getId(), entity.getRecipeId(), IngredientMapper.toDomain(entity.getIngredient()), entity.getQuantity(), entity.getUnit(), entity.getNote(), entity.getSortOrder());
 	}
 
 	public static RecipeIngredientUnitEnum mapUnit(String unitStr) {

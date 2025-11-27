@@ -38,10 +38,12 @@ public class UserEntity extends BaseTimeEntity {
 
 	@Builder
 	public UserEntity(
+		Long id,
 		String email,
 		String passwordHash,
 		UserTypeEnum type
 	) {
+		this.id = id;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.type = type;

@@ -50,6 +50,7 @@ public class RecipeEntity extends BaseTimeEntity {
 
 	@Builder
 	public RecipeEntity(
+		Long id,
 		String title,
 		String description,
 		Integer serving,
@@ -57,6 +58,7 @@ public class RecipeEntity extends BaseTimeEntity {
 		RecipeDifficultyEnum difficulty,
 		String source
 	) {
+		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.serving = serving;

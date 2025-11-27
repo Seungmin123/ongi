@@ -54,6 +54,7 @@ public class RecipeIngredientEntity extends BaseTimeEntity {
 
 	@Builder
 	public RecipeIngredientEntity(
+		Long id,
 		Long recipeId,
 		IngredientEntity ingredient,
 		Integer quantity,
@@ -61,6 +62,7 @@ public class RecipeIngredientEntity extends BaseTimeEntity {
 		String note,
 		Integer sortOrder
 	) {
+		this.id = id;
 		this.recipeId = recipeId;
 		this.ingredient = ingredient;
 		this.quantity = quantity;

@@ -19,6 +19,7 @@ public class RecipeIngredient {
 	private Integer sortOrder;
 
 	private RecipeIngredient(
+		Long id,
 		Long recipeId,
 		Ingredient ingredient,
 		Integer quantity,
@@ -26,6 +27,7 @@ public class RecipeIngredient {
 		String note,
 		Integer sortOrder
 	) {
+		this.id = id;
 		this.recipeId = recipeId;
 		this.ingredient = ingredient;
 		this.quantity = quantity;
@@ -35,9 +37,9 @@ public class RecipeIngredient {
 	}
 
 	public static RecipeIngredient create(
-		Long recipeId, Ingredient ingredient, Integer quantity, RecipeIngredientUnitEnum unit, String note, Integer sortOrder
+		Long id, Long recipeId, Ingredient ingredient, Integer quantity, RecipeIngredientUnitEnum unit, String note, Integer sortOrder
 	) {
-		return new RecipeIngredient(recipeId, ingredient, quantity, unit, note, sortOrder);
+		return new RecipeIngredient(id, recipeId, ingredient, quantity, unit, note, sortOrder);
 	}
 
 	public Long getId() {
@@ -57,7 +59,7 @@ public class RecipeIngredient {
 	}
 
 	public Long getRecipeId() {
-		return this.getRecipeId();
+		return this.recipeId;
 	}
 
 	public void setRecipeId(Long recipeId) {

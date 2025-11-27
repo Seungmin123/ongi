@@ -17,12 +17,14 @@ public class UserProfile {
 	private String dislikedIngredients;
 
 	private UserProfile(
+		Long id,
 		Long userId,
 		String displayName,
 		String allergens,
 		Integer dietGoal,
 		String dislikedIngredients
 	) {
+		this.id = id;
 		this.userId = userId;
 		this.displayName = displayName;
 		this.allergens = allergens;
@@ -31,9 +33,9 @@ public class UserProfile {
 	}
 
 	public static UserProfile create(
-		Long userId, String displayName, String allergens, Integer dietGoal, String dislikedIngredients
+		Long id, Long userId, String displayName, String allergens, Integer dietGoal, String dislikedIngredients
 	) {
-		return new UserProfile(userId, displayName, allergens, dietGoal, dislikedIngredients);
+		return new UserProfile(id, userId, displayName, allergens, dietGoal, dislikedIngredients);
 	}
 
 	public Long getId() {

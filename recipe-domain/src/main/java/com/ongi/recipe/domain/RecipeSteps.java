@@ -23,6 +23,7 @@ public class RecipeSteps {
 	private String videoUrl;
 
 	private RecipeSteps(
+		Long id,
 		Long recipeId,
 		Integer stepOrder,
 		String title,
@@ -33,6 +34,7 @@ public class RecipeSteps {
 		String imageUrl,
 		String videoUrl
 	) {
+		this.id = id;
 		this.recipeId = recipeId;
 		this.stepOrder = stepOrder;
 		this.title = title;
@@ -45,10 +47,10 @@ public class RecipeSteps {
 	}
 
 	public static RecipeSteps create(
-		Long recipeId, Integer stepOrder, String title, String description, Integer estimatedMin, Integer waitMin,
+		Long id, Long recipeId, Integer stepOrder, String title, String description, Integer estimatedMin, Integer waitMin,
 		String temperature, String imageUrl, String videoUrl
 	) {
-		return new RecipeSteps(recipeId, stepOrder, title, description, estimatedMin, waitMin, temperature, imageUrl, videoUrl);
+		return new RecipeSteps(id, recipeId, stepOrder, title, description, estimatedMin, waitMin, temperature, imageUrl, videoUrl);
 	}
 
 	public Long getId() {

@@ -9,17 +9,19 @@ public class RecipeTags {
 	private String tag;
 
 	private RecipeTags(
+		Long id,
 		Long recipeId,
 		String tag
 	) {
+		this.id = id;
 		this.recipeId = recipeId;
 		this.tag = tag;
 	}
 
 	public static RecipeTags create(
-		Long recipeId, String tag
+		Long id, Long recipeId, String tag
 	) {
-		return new RecipeTags(recipeId, tag);
+		return new RecipeTags(id, recipeId, tag);
 	}
 
 	public Long getId() {

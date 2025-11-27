@@ -13,19 +13,21 @@ public class User {
 	private UserTypeEnum type;
 
 	private User(
+		Long id,
 		String email,
 		String passwordHash,
 		UserTypeEnum type
 	) {
+		this.id = id;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.type = type;
 	}
 
 	public static User create(
-		String email, String passwordHash, UserTypeEnum type
+		Long id, String email, String passwordHash, UserTypeEnum type
 	) {
-		return new User(email, passwordHash, type);
+		return new User(id, email, passwordHash, type);
 	}
 
 	public Long getId() {

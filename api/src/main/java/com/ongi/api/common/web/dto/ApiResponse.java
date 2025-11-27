@@ -6,19 +6,25 @@ public record ApiResponse<T> (
 	ErrorResponse error, // 에러 발생 시 정보
 	Meta meta
 ) {
-	public ApiResponse<T> ok(T data) {
+
+	public static <T> ApiResponse<T> ok() {
+		return new ApiResponse<>(true, null, null, null);
+	}
+
+	public static <T> ApiResponse<T> ok(T data) {
 		return new ApiResponse<>(true, data, null, null);
 	}
 
-	public ApiResponse<T> okWithMeta(T data, Meta meta) {
+	public static <T> ApiResponse<T> okWithMeta(T data, Meta meta) {
 		return new ApiResponse<>(true, data, null, meta);
 	}
 
-	public ApiResponse<T> okWithError(T data, ErrorResponse error) {
+	public static <T> ApiResponse<T> okWithError(T data, ErrorResponse error) {
 		return new ApiResponse<>(true, data, error, null);
 	}
 
-	public ApiResponse<T> error(String code, String message) {
+	/* 실패 응답 */
+	public static <T> ApiResponse<T> error(String code, String message) {
 		return new ApiResponse<>(false, null, new ErrorResponse(code, message), null);
 	}
 

@@ -47,6 +47,7 @@ public class IngredientEntity extends BaseTimeEntity {
 
 	@Builder
 	public IngredientEntity(
+		Long id,
 		String name,
 		IngredientCategoryEnum category,
 		Double caloriesKcal,
@@ -54,6 +55,7 @@ public class IngredientEntity extends BaseTimeEntity {
 		Double fatG,
 		Double carbsG
 	) {
+		this.id = id;
 		this.name = name;
 		this.category = category;
 		this.caloriesKcal = caloriesKcal;

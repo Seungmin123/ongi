@@ -19,6 +19,7 @@ public class Ingredient {
 	private Double carbsG;
 
 	private Ingredient(
+		Long ingredientId,
 		String name,
 		IngredientCategoryEnum category,
 		Double caloriesKcal,
@@ -26,6 +27,7 @@ public class Ingredient {
 		Double fatG,
 		Double carbsG
 	) {
+		this.ingredientId = ingredientId;
 		this.name = name;
 		this.category = category;
 		this.caloriesKcal = caloriesKcal;
@@ -35,9 +37,9 @@ public class Ingredient {
 	}
 
 	public static Ingredient create(
-		String name, IngredientCategoryEnum category, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG
+		Long ingredientId, String name, IngredientCategoryEnum category, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG
 	) {
-		return new Ingredient(name, category, caloriesKcal, proteinG, fatG, carbsG);
+		return new Ingredient(ingredientId, name, category, caloriesKcal, proteinG, fatG, carbsG);
 	}
 
 	public Long getIngredientId() {

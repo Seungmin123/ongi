@@ -31,9 +31,11 @@ public class RecipeTagsEntity extends BaseTimeEntity {
 
 	@Builder
 	public RecipeTagsEntity(
+		Long id,
 		Long recipeId,
 		String tag
 	) {
+		this.id = id;
 		this.recipeId = recipeId;
 		this.tag = tag;
 	}

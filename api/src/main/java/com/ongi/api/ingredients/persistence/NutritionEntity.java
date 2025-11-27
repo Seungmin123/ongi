@@ -40,9 +40,11 @@ public class NutritionEntity extends BaseTimeEntity {
 
 	@Builder
 	public NutritionEntity(
+		Long id,
 		NutritionEnum code,
 		NutritionUnitEnum unit
 	) {
+		this.id = id;
 		this.code = code;
 		this.displayName = code.getDisplayName();
 		this.unit = unit;
