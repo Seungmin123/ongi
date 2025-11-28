@@ -17,9 +17,13 @@ public interface IngredientsRepositoryPort {
 
 	IngredientNutrition save(IngredientNutrition ingredientNutrition);
 
+	List<IngredientNutrition> saveAllIngredientNutrions(List<IngredientNutrition> ingredientNutritions);
+
 	Optional<IngredientNutrition> findIngredientNutritionById(Long id);
 
 	Nutrition save(Nutrition nutrition);
+
+	List<Nutrition> saveAllNutritions(List<Nutrition> nutritions);
 
 	Optional<Nutrition> findNutritionById(Long id);
 
@@ -27,7 +31,7 @@ public interface IngredientsRepositoryPort {
 
 	Optional<RecipeIngredient> findRecipeIngredientById(Long id);
 
-	List<RecipeIngredient> saveAll(List<RecipeIngredient> recipeIngredients);
+	List<RecipeIngredient> saveAllRecipeIngredients(List<RecipeIngredient> recipeIngredients);
 
 	Optional<Ingredient> findByName(String name);
 

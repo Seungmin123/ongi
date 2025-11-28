@@ -4,6 +4,8 @@ import com.ongi.api.admin.web.dto.CookNutritionItem;
 import com.ongi.api.admin.web.dto.CookNutritionResponse;
 import com.ongi.api.admin.web.dto.CookRcpResponse;
 import com.ongi.api.admin.web.dto.CookRcpRow;
+import com.ongi.api.admin.web.dto.GovernmentNutritionRecord;
+import com.ongi.api.admin.web.dto.GovernmentNutritionResponse;
 import com.ongi.api.admin.web.dto.ParsedIngredient;
 import com.ongi.api.ingredients.persistence.IngredientAdapter;
 import com.ongi.api.ingredients.persistence.IngredientMapper;
@@ -21,6 +23,7 @@ import com.ongi.recipe.domain.enums.RecipeDifficultyEnum;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -44,33 +47,90 @@ public class AdminService {
 
 	private static final String[] NOTE_KEYWORDS = {"다진", "채썬", "송송 썬", "송송썬", "다져", "곱게 다진"};
 
+	Map<NutritionEnum, Nutrition> nutritionCache = new HashMap<>();
+
+	public void importSafetyKoreaNutritionFromJson() throws IOException {
+		for(int i = 1; i <= 335; i++) {
+			importSafetyKoreaNutritionFromJson(i);
+		}
+	}
+
 	@Transactional
-	public void importSafetyKoreaNutritionFromJson(String classPathResource) throws IOException {
-		final String base = "data/식품의약품안전처/영양성분/식품의약품안전처_식품영양성분_";
-		final String ext = ".json";
-		for(int i = 2; i <= 335; i++){
-			Resource resource = new ClassPathResource(base + i + ext);
-			CookNutritionResponse response = objectMapper.readValue(resource.getInputStream(), CookNutritionResponse.class);
+	public void importGovernmentNutritionFromJson() throws IOException {
+		final String base = "data/전국통합식품영양성분정보표준데이터.json";
 
-			for(CookNutritionItem item : response.body().items()) {
-				IngredientCategoryEnum category = mapCategory(item.FOOD_CAT1_NM(), item.DB_GRP_NM()); // 카테고리
-				Double calories = toDouble(item.AMT_NUM1()); // 에너지(kcal)
-				Double protein = toDouble(item.AMT_NUM3());  // 단백질(g)
-				Double fat = toDouble(item.AMT_NUM4());      // 지방(g)
-				Double carbs = toDouble(item.AMT_NUM6());    // 탄수화물(g)
+		Resource resource = new ClassPathResource(base);
+		GovernmentNutritionResponse response = objectMapper.readValue(resource.getInputStream(), GovernmentNutritionResponse.class);
 
-				Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(item.FOOD_NM_KR(), category, calories, protein, fat, carbs);
+		List<IngredientNutrition> ingredientNutritions = new ArrayList<>();
 
-				Map<NutritionEnum, Double> nutritionValues = extractNutritions(item);
-				for (Map.Entry<NutritionEnum, Double> entry : nutritionValues.entrySet()) {
-					NutritionEnum code = entry.getKey();
-					Double quantity = entry.getValue();
-					if (quantity == null || quantity == 0d) continue;
-					Nutrition nutrition = ingredientAdapter.findOrCreateNutrition(code);
-					IngredientNutrition ingredientNutrition = IngredientNutrition.create(null, ingredient, nutrition, quantity, deduceBasis(item.SERVING_SIZE(), item.NUTRI_AMOUNT_SERVING()));
-					ingredientAdapter.save(ingredientNutrition);
+		for(GovernmentNutritionRecord record : response.records()) {
+			String foodName = record.식품코드();
+			Double calories = toDouble(record.에너지());
+			Double protein = toDouble(record.단백질());
+			Double fat = toDouble(record.지방());
+			Double carbs = toDouble(record.탄수화물());
+
+			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(foodName, IngredientCategoryEnum.OTHER, calories, protein, fat, carbs);
+			Map<NutritionEnum, Double> nutritionValues = extractNutritions(record);
+
+			for (Map.Entry<NutritionEnum, Double> entry : nutritionValues.entrySet()) {
+				NutritionEnum code = entry.getKey();
+				Double quantity = entry.getValue();
+				if (quantity == null || quantity == 0d) continue;
+				Nutrition nutrition = nutritionCache.computeIfAbsent(code, ingredientAdapter::findOrCreateNutrition);
+				IngredientNutrition ingredientNutrition = IngredientNutrition.create(null, ingredient, nutrition, quantity, deduceBasis(record.영양성분함량기준량()));
+				ingredientNutritions.add(ingredientNutrition);
+
+				if(ingredientNutritions.size() >= 1000) {
+					ingredientAdapter.saveAllIngredientNutrions(ingredientNutritions);
+					ingredientNutritions.clear();
 				}
 			}
+		}
+
+		if (!ingredientNutritions.isEmpty()) {
+			ingredientAdapter.saveAllIngredientNutrions(ingredientNutritions);
+		}
+	}
+
+	@Transactional
+	public void importSafetyKoreaNutritionFromJson(int fileNo) throws IOException {
+		final String base = "data/식품의약품안전처/영양성분/식품의약품안전처_식품영양성분_";
+		final String ext = ".json";
+
+		Resource resource = new ClassPathResource(base + fileNo + ext);
+		CookNutritionResponse response = objectMapper.readValue(resource.getInputStream(), CookNutritionResponse.class);
+
+		List<IngredientNutrition> ingredientNutritions = new ArrayList<>();
+
+		for(CookNutritionItem item : response.body().items()) {
+			IngredientCategoryEnum category = mapCategory(item.FOOD_CAT1_NM(), item.DB_GRP_NM()); // 카테고리
+			Double calories = toDouble(item.AMT_NUM1()); // 에너지(kcal)
+			Double protein = toDouble(item.AMT_NUM3());  // 단백질(g)
+			Double fat = toDouble(item.AMT_NUM4());      // 지방(g)
+			Double carbs = toDouble(item.AMT_NUM6());    // 탄수화물(g)
+
+			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(item.FOOD_NM_KR(), category, calories, protein, fat, carbs);
+
+			Map<NutritionEnum, Double> nutritionValues = extractNutritions(item);
+			for (Map.Entry<NutritionEnum, Double> entry : nutritionValues.entrySet()) {
+				NutritionEnum code = entry.getKey();
+				Double quantity = entry.getValue();
+				if (quantity == null || quantity == 0d) continue;
+				Nutrition nutrition = nutritionCache.computeIfAbsent(code, ingredientAdapter::findOrCreateNutrition);
+				IngredientNutrition ingredientNutrition = IngredientNutrition.create(null, ingredient, nutrition, quantity, deduceBasis(item.SERVING_SIZE()));
+				ingredientNutritions.add(ingredientNutrition);
+
+				if(ingredientNutritions.size() >= 1000) {
+					ingredientAdapter.saveAllIngredientNutrions(ingredientNutritions);
+					ingredientNutritions.clear();
+				}
+			}
+		}
+
+		if (!ingredientNutritions.isEmpty()) {
+			ingredientAdapter.saveAllIngredientNutrions(ingredientNutritions);
 		}
 	}
 
@@ -259,6 +319,38 @@ public class AdminService {
 		return map;
 	}
 
+	private Map<NutritionEnum, Double> extractNutritions(GovernmentNutritionRecord r) {
+		Map<NutritionEnum, Double> map = new EnumMap<>(NutritionEnum.class);
+
+		map.put(NutritionEnum.ENERGY_KCAL, toDouble(r.에너지()));
+		map.put(NutritionEnum.PROTEIN, toDouble(r.단백질()));
+		map.put(NutritionEnum.FAT, toDouble(r.지방()));
+		map.put(NutritionEnum.CARBOHYDRATE, toDouble(r.탄수화물()));
+		map.put(NutritionEnum.SUGAR, toDouble(r.당류()));
+		map.put(NutritionEnum.DIETARY_FIBER, toDouble(r.식이섬유()));
+		map.put(NutritionEnum.SATURATED_FAT, toDouble(r.포화지방산()));
+		map.put(NutritionEnum.TRANS_FAT, toDouble(r.트랜스지방산()));
+		map.put(NutritionEnum.CHOLESTEROL, toDouble(r.콜레스테롤()));
+		map.put(NutritionEnum.SODIUM, toDouble(r.나트륨()));
+
+		map.put(NutritionEnum.CALCIUM, toDouble(r.칼슘()));
+		map.put(NutritionEnum.IRON, toDouble(r.철분()));
+		map.put(NutritionEnum.POTASSIUM, toDouble(r.칼륨()));
+		// map.put(NutritionEnum.MAGNESIUM, toDouble(r.마그네슘()));
+		map.put(NutritionEnum.PHOSPHORUS, toDouble(r.인()));
+
+		map.put(NutritionEnum.VITAMIN_A, toDouble(r.비타민A()));  // 비타민 A(μg RAE)
+		map.put(NutritionEnum.VITAMIN_B1, toDouble(r.티아민()));
+		map.put(NutritionEnum.VITAMIN_B2, toDouble(r.리보플라빈()));
+		map.put(NutritionEnum.VITAMIN_B3, toDouble(r.니아신())); // 니아신
+		map.put(NutritionEnum.VITAMIN_C, toDouble(r.비타민C()));
+		map.put(NutritionEnum.VITAMIN_D, toDouble(r.비타민D()));
+		//map.put(NutritionEnum.VITAMIN_E, toDouble(r.AMT_NUM36()));
+		//map.put(NutritionEnum.VITAMIN_K, toDouble(r.AMT_NUM48()));
+
+		return map;
+	}
+
 	private Double toDouble(String v) {
 		if (v == null || v.isBlank()) return null;
 		try {
@@ -273,7 +365,7 @@ public class AdminService {
 	 * 대부분 이 API는 100g 기준이므로,
 	 * SERVING_SIZE에 "100g" 포함되어 있으면 PER_100G, 아니면 일단 PER_SERVING
 	 **/
-	private NutritionBasisEnum deduceBasis(String servingSize, String nutriAmountServing) {
+	private NutritionBasisEnum deduceBasis(String servingSize) {
 		String s = servingSize != null ? servingSize.trim() : "";
 		if (s.contains("100g") || s.equalsIgnoreCase("100 g")) {
 			return NutritionBasisEnum.PER_100G;
@@ -354,7 +446,7 @@ public class AdminService {
 			domains.add(domain);
 		}
 
-		ingredientAdapter.saveAll(domains);
+		ingredientAdapter.saveAllRecipeIngredients(domains);
 	}
 
 	public ParsedIngredient parseIngredient(String rawText) {

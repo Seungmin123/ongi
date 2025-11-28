@@ -16,15 +16,16 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
-	name = "ingredient_nutrition"/*,
+	name = "ingredient_nutrition",
 	uniqueConstraints = @UniqueConstraint(
 		columnNames = {"ingredient_id", "nutrition_id"}
-	)*/
+	)
 )
 public class IngredientNutritionEntity extends BaseTimeEntity {
 
@@ -41,9 +42,11 @@ public class IngredientNutritionEntity extends BaseTimeEntity {
 	@JoinColumn(name = "nutrition_id", nullable = false)
 	private NutritionEntity nutrition;
 
+	@Setter
 	@Column(name = "quantity", nullable = false)
 	private Double quantity;
 
+	@Setter
 	@Column(name = "basis", nullable = false, comment = "100g, 100ml, 조각, 인분 등 기준")
 	private NutritionBasisEnum basis;
 

@@ -1,6 +1,5 @@
 package com.ongi.api.ingredients.persistence;
 
-import com.ongi.api.recipe.persistence.RecipeMapper;
 import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.IngredientNutrition;
 import com.ongi.ingredients.domain.Nutrition;
@@ -10,15 +9,26 @@ import com.ongi.ingredients.domain.enums.RecipeIngredientUnitEnum;
 public class IngredientMapper {
 
 	public static IngredientEntity toEntity(Ingredient ingredient) {
-		return IngredientEntity.builder()
-			.id(ingredient.getIngredientId())
-			.name(ingredient.getName())
-			.category(ingredient.getCategory())
-			.caloriesKcal(ingredient.getCaloriesKcal())
-			.carbsG(ingredient.getCarbsG())
-			.proteinG(ingredient.getProteinG())
-			.fatG(ingredient.getFatG())
-			.build();
+		if (ingredient.getIngredientId() == null) {
+			return IngredientEntity.builder()
+				.name(ingredient.getName())
+				.category(ingredient.getCategory())
+				.caloriesKcal(ingredient.getCaloriesKcal())
+				.carbsG(ingredient.getCarbsG())
+				.proteinG(ingredient.getProteinG())
+				.fatG(ingredient.getFatG())
+				.build();
+		} else {
+			return IngredientEntity.builder()
+				.id(ingredient.getIngredientId())
+				.name(ingredient.getName())
+				.category(ingredient.getCategory())
+				.caloriesKcal(ingredient.getCaloriesKcal())
+				.carbsG(ingredient.getCarbsG())
+				.proteinG(ingredient.getProteinG())
+				.fatG(ingredient.getFatG())
+				.build();
+		}
 	}
 
 	public static Ingredient toDomain(IngredientEntity ingredientEntity) {
@@ -26,11 +36,11 @@ public class IngredientMapper {
 			ingredientEntity.getCaloriesKcal(), ingredientEntity.getProteinG(), ingredientEntity.getFatG(), ingredientEntity.getCarbsG());
 	}
 
-	public static IngredientNutritionEntity toEntity(IngredientNutrition domain) {
+	public static IngredientNutritionEntity toEntity(IngredientNutrition domain, IngredientEntity ingredientRef, NutritionEntity nutritionRef) {
 		return IngredientNutritionEntity.builder()
 			.id(domain.getId())
-			.ingredient(IngredientMapper.toEntity(domain.getIngredient()))
-			.nutrition(IngredientMapper.toEntity(domain.getNutrition()))
+			.ingredient(ingredientRef)
+			.nutrition(nutritionRef)
 			.quantity(domain.getQuantity())
 			.basis(domain.getBasis())
 			.build();
@@ -52,11 +62,11 @@ public class IngredientMapper {
 		return Nutrition.create(entity.getId(), entity.getCode(), entity.getUnit());
 	}
 
-	public static RecipeIngredientEntity toEntity(RecipeIngredient entity) {
+	public static RecipeIngredientEntity toEntity(RecipeIngredient entity, IngredientEntity ingredientRef) {
 		return RecipeIngredientEntity.builder()
 			.id(entity.getId())
 			.recipeId(entity.getRecipeId())
-			.ingredient(IngredientMapper.toEntity(entity.getIngredient()))
+			.ingredient(ingredientRef)
 			.quantity(entity.getQuantity())
 			.unit(entity.getUnit())
 			.note(entity.getNote())
