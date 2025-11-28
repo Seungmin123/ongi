@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+## JSON
+api/src/main/resources/data/
