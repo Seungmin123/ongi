@@ -7,7 +7,9 @@ import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
 import com.ongi.recipe.port.RecipeRepositoryPort;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -43,6 +45,13 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	}
 
 	@Override
+	public List<RecipeSteps> saveAllRecipeSteps(List<RecipeSteps> recipeSteps) {
+		List<RecipeStepsEntity> entities = recipeSteps.stream().map(RecipeMapper::toEntity).toList();
+		List<RecipeStepsEntity> saved = recipeStepsRepository.saveAll(entities);
+		return saved.stream().map(RecipeMapper::toDomain).toList();
+	}
+
+	@Override
 	public Optional<RecipeSteps> findRecipeStepsById(Long id) {
 		return recipeStepsRepository
 			.findById(id)
@@ -54,6 +63,13 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 		RecipeTagsEntity entity = RecipeMapper.toEntity(recipeTags);
 		RecipeTagsEntity saved = recipeTagsRepository.save(entity);
 		return RecipeMapper.toDomain(saved);
+	}
+
+	@Override
+	public List<RecipeTags> saveAllRecipeTags(List<RecipeTags> recipeTags) {
+		List<RecipeTagsEntity> entities = recipeTags.stream().map(RecipeMapper::toEntity).toList();
+		List<RecipeTagsEntity> saved = recipeTagsRepository.saveAll(entities);
+		return saved.stream().map(RecipeMapper::toDomain).toList();
 	}
 
 	@Override

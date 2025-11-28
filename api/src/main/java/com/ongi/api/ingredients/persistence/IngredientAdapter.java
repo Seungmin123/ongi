@@ -231,6 +231,32 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 			});
 	}
 
+	@Override
+	public Ingredient findLikeOrCreateIngredient(String name, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG) {
+		/*
+		* // 캐시 우선
+		if (ingredientCache.containsKey(name)) {
+			return ingredientCache.get(name);
+		}
+
+		* ingredientCache.put(name, saved);
+		* */
+		return ingredientRepository.findFirstByNameLikeOrderByNameAsc(name)
+			.map(IngredientMapper::toDomain)
+			.orElseGet(() -> {
+				IngredientEntity entity = IngredientEntity.builder()
+					.name(name)
+					.category(ingredientCategory)
+					.caloriesKcal(defaultZero(caloriesKcal))
+					.proteinG(defaultZero(proteinG))
+					.fatG(defaultZero(fatG))
+					.carbsG(defaultZero(carbsG))
+					.build();
+				IngredientEntity saved = ingredientRepository.save(entity);
+				return IngredientMapper.toDomain(saved);
+			});
+	}
+
 	private Double defaultZero(Double v) {
 		return v == null ? 0d : v;
 	}

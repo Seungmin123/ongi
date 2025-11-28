@@ -3,6 +3,7 @@ package com.ongi.recipe.port;
 import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
+import java.util.List;
 import java.util.Optional;
 
 public interface RecipeRepositoryPort {
@@ -13,9 +14,13 @@ public interface RecipeRepositoryPort {
 
 	RecipeSteps save(RecipeSteps recipeSteps);
 
+	List<RecipeSteps> saveAllRecipeSteps(List<RecipeSteps> recipeSteps);
+
 	Optional<RecipeSteps> findRecipeStepsById(Long id);
 
 	RecipeTags save(RecipeTags recipeTags);
+
+	List<RecipeTags> saveAllRecipeTags(List<RecipeTags> recipeSteps);
 
 	Optional<RecipeTags> findRecipeTagsById(Long id);
 }

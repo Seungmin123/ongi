@@ -40,7 +40,7 @@ public class RecipeIngredientEntity extends BaseTimeEntity {
 
 	@ColumnDefault("1")
 	@Column(name = "quantity", nullable = false)
-	private Integer quantity;
+	private Double quantity;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "unit", nullable = false, comment = "g, ml, 큰술 등")
@@ -57,7 +57,7 @@ public class RecipeIngredientEntity extends BaseTimeEntity {
 		Long id,
 		Long recipeId,
 		IngredientEntity ingredient,
-		Integer quantity,
+		Double quantity,
 		RecipeIngredientUnitEnum unit,
 		String note,
 		Integer sortOrder

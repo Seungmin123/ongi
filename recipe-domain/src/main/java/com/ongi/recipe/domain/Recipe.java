@@ -16,6 +16,10 @@ public class Recipe {
 
 	private RecipeDifficultyEnum difficulty;
 
+	private String imageUrl;
+
+	private String videoUrl;
+
 	private String source;
 
 	private Recipe(
@@ -25,6 +29,8 @@ public class Recipe {
 		Integer serving,
 		Integer cookingTimeMin,
 		RecipeDifficultyEnum difficulty,
+		String imageUrl,
+		String videoUrl,
 		String source
 	) {
 		this.id = id;
@@ -33,14 +39,16 @@ public class Recipe {
 		this.serving = serving;
 		this.cookingTimeMin = cookingTimeMin;
 		this.difficulty = difficulty;
+		this.imageUrl = imageUrl;
+		this.videoUrl = videoUrl;
 		this.source = source;
 	}
 
 	public static Recipe create(
 		Long id, String title, String description, Integer serving, Integer cookingTimeMin,
-		RecipeDifficultyEnum difficulty, String source
+		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source
 	) {
-		return new Recipe(id, title, description, serving, cookingTimeMin, difficulty, source);
+		return new Recipe(id, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source);
 	}
 
 	public Long getId() {
@@ -89,6 +97,22 @@ public class Recipe {
 
 	public void setDifficulty(RecipeDifficultyEnum difficulty) {
 		this.difficulty = difficulty;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+
+	public String getVideoUrl() {
+		return videoUrl;
+	}
+
+	public void setVideoUrl(String videoUrl) {
+		this.videoUrl = videoUrl;
 	}
 
 	public String getSource() {

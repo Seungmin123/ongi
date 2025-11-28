@@ -10,7 +10,7 @@ public class RecipeIngredient {
 
 	private Ingredient ingredient;
 
-	private Integer quantity;
+	private Double quantity;
 
 	private RecipeIngredientUnitEnum unit;
 
@@ -22,7 +22,7 @@ public class RecipeIngredient {
 		Long id,
 		Long recipeId,
 		Ingredient ingredient,
-		Integer quantity,
+		Double quantity,
 		RecipeIngredientUnitEnum unit,
 		String note,
 		Integer sortOrder
@@ -37,7 +37,7 @@ public class RecipeIngredient {
 	}
 
 	public static RecipeIngredient create(
-		Long id, Long recipeId, Ingredient ingredient, Integer quantity, RecipeIngredientUnitEnum unit, String note, Integer sortOrder
+		Long id, Long recipeId, Ingredient ingredient, Double quantity, RecipeIngredientUnitEnum unit, String note, Integer sortOrder
 	) {
 		return new RecipeIngredient(id, recipeId, ingredient, quantity, unit, note, sortOrder);
 	}
@@ -74,11 +74,11 @@ public class RecipeIngredient {
 		this.ingredient.setIngredientId(ingredientId);
 	}
 
-	public Integer getQuantity() {
+	public Double getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(Integer quantity) {
+	public void setQuantity(Double quantity) {
 		this.quantity = quantity;
 	}
 

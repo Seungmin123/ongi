@@ -45,6 +45,12 @@ public class RecipeEntity extends BaseTimeEntity {
 	@Column(name = "difficulty", nullable = false)
 	private RecipeDifficultyEnum difficulty;
 
+	@Column(name = "image_url")
+	private String imageUrl;
+
+	@Column(name = "video_url")
+	private String videoUrl;
+
 	@Column(name = "source", comment = "출처")
 	private String source;
 
@@ -56,6 +62,8 @@ public class RecipeEntity extends BaseTimeEntity {
 		Integer serving,
 		Integer cookingTimeMin,
 		RecipeDifficultyEnum difficulty,
+		String imageUrl,
+		String videoUrl,
 		String source
 	) {
 		this.id = id;
@@ -64,6 +72,8 @@ public class RecipeEntity extends BaseTimeEntity {
 		this.serving = serving;
 		this.cookingTimeMin = cookingTimeMin;
 		this.difficulty = difficulty;
+		this.imageUrl = imageUrl;
+		this.videoUrl = videoUrl;
 		this.source = source;
 	}
 

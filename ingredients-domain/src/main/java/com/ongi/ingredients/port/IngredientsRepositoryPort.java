@@ -39,5 +39,7 @@ public interface IngredientsRepositoryPort {
 
 	Ingredient findOrCreateIngredient(String name, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG);
 
+	Ingredient findLikeOrCreateIngredient(String name, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG);
+
 	Nutrition findNutritionByCode(NutritionEnum code);
 }

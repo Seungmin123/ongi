@@ -19,6 +19,8 @@ import com.ongi.ingredients.domain.enums.NutritionBasisEnum;
 import com.ongi.ingredients.domain.enums.NutritionEnum;
 import com.ongi.ingredients.domain.enums.RecipeIngredientUnitEnum;
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeSteps;
+import com.ongi.recipe.domain.RecipeTags;
 import com.ongi.recipe.domain.enums.RecipeDifficultyEnum;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,51 +51,25 @@ public class AdminService {
 
 	Map<NutritionEnum, Nutrition> nutritionCache = new HashMap<>();
 
-	public void importSafetyKoreaNutritionFromJson() throws IOException {
-		for(int i = 1; i <= 335; i++) {
-			importSafetyKoreaNutritionFromJson(i);
-		}
-	}
-
+	/**
+	 * 식품의약품안전처_조리식품 레시피 Import Parser
+ 	 */
 	@Transactional
-	public void importGovernmentNutritionFromJson() throws IOException {
-		final String base = "data/전국통합식품영양성분정보표준데이터.json";
+	public void importSafetyKoreaRecipeFromJson(int fileNo) throws IOException {
+		Resource resource = new ClassPathResource("data/식품의약품안전처_조리식품레시피DB_" + fileNo + ".json");
+		CookRcpResponse response = objectMapper.readValue(resource.getInputStream(), CookRcpResponse.class);
 
-		Resource resource = new ClassPathResource(base);
-		GovernmentNutritionResponse response = objectMapper.readValue(resource.getInputStream(), GovernmentNutritionResponse.class);
+		for (CookRcpRow row : response.COOKRCP01().row()) {
+			Long recipeId = parseToRecipeAndStepsAndTags(row);
 
-		List<IngredientNutrition> ingredientNutritions = new ArrayList<>();
-
-		for(GovernmentNutritionRecord record : response.records()) {
-			String foodName = record.식품코드();
-			Double calories = toDouble(record.에너지());
-			Double protein = toDouble(record.단백질());
-			Double fat = toDouble(record.지방());
-			Double carbs = toDouble(record.탄수화물());
-
-			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(foodName, IngredientCategoryEnum.OTHER, calories, protein, fat, carbs);
-			Map<NutritionEnum, Double> nutritionValues = extractNutritions(record);
-
-			for (Map.Entry<NutritionEnum, Double> entry : nutritionValues.entrySet()) {
-				NutritionEnum code = entry.getKey();
-				Double quantity = entry.getValue();
-				if (quantity == null || quantity == 0d) continue;
-				Nutrition nutrition = nutritionCache.computeIfAbsent(code, ingredientAdapter::findOrCreateNutrition);
-				IngredientNutrition ingredientNutrition = IngredientNutrition.create(null, ingredient, nutrition, quantity, deduceBasis(record.영양성분함량기준량()));
-				ingredientNutritions.add(ingredientNutrition);
-
-				if(ingredientNutritions.size() >= 1000) {
-					ingredientAdapter.saveAllIngredientNutrions(ingredientNutritions);
-					ingredientNutritions.clear();
-				}
-			}
-		}
-
-		if (!ingredientNutritions.isEmpty()) {
-			ingredientAdapter.saveAllIngredientNutrions(ingredientNutritions);
+			saveRecipeIngredients(recipeId, row.RCP_PARTS_DTLS());
 		}
 	}
 
+	/**
+	 * 식품의약품안전처_영양정보 Import Parser
+	 * @throws IOException
+	 */
 	@Transactional
 	public void importSafetyKoreaNutritionFromJson(int fileNo) throws IOException {
 		final String base = "data/식품의약품안전처/영양성분/식품의약품안전처_식품영양성분_";
@@ -120,6 +96,49 @@ public class AdminService {
 				if (quantity == null || quantity == 0d) continue;
 				Nutrition nutrition = nutritionCache.computeIfAbsent(code, ingredientAdapter::findOrCreateNutrition);
 				IngredientNutrition ingredientNutrition = IngredientNutrition.create(null, ingredient, nutrition, quantity, deduceBasis(item.SERVING_SIZE()));
+				ingredientNutritions.add(ingredientNutrition);
+
+				if(ingredientNutritions.size() >= 1000) {
+					ingredientAdapter.saveAllIngredientNutrions(ingredientNutritions);
+					ingredientNutritions.clear();
+				}
+			}
+		}
+
+		if (!ingredientNutritions.isEmpty()) {
+			ingredientAdapter.saveAllIngredientNutrions(ingredientNutritions);
+		}
+	}
+
+	/**
+	 * 공공데이텊포탈_전국 통합 식품 영양 성분 정보 표준 데이터 Import Parser
+	 * @throws IOException
+	 */
+	@Transactional
+	public void importGovernmentNutritionFromJson() throws IOException {
+		final String base = "data/전국통합식품영양성분정보표준데이터.json";
+
+		Resource resource = new ClassPathResource(base);
+		GovernmentNutritionResponse response = objectMapper.readValue(resource.getInputStream(), GovernmentNutritionResponse.class);
+
+		List<IngredientNutrition> ingredientNutritions = new ArrayList<>();
+
+		for(GovernmentNutritionRecord record : response.records()) {
+			String foodName = record.식품코드();
+			Double calories = toDouble(record.에너지());
+			Double protein = toDouble(record.단백질());
+			Double fat = toDouble(record.지방());
+			Double carbs = toDouble(record.탄수화물());
+
+			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(foodName, IngredientCategoryEnum.OTHER, calories, protein, fat, carbs);
+			Map<NutritionEnum, Double> nutritionValues = extractNutritions(record);
+
+			for (Map.Entry<NutritionEnum, Double> entry : nutritionValues.entrySet()) {
+				NutritionEnum code = entry.getKey();
+				Double quantity = entry.getValue();
+				if (quantity == null || quantity == 0d) continue;
+				Nutrition nutrition = nutritionCache.computeIfAbsent(code, ingredientAdapter::findOrCreateNutrition);
+				IngredientNutrition ingredientNutrition = IngredientNutrition.create(null, ingredient, nutrition, quantity, deduceBasis(record.영양성분함량기준량()));
 				ingredientNutritions.add(ingredientNutrition);
 
 				if(ingredientNutritions.size() >= 1000) {
@@ -377,51 +396,52 @@ public class AdminService {
 		return NutritionBasisEnum.PER_SERVING;
 	}
 
-	// 식품의약품안전처_조리식품 레시피 Import Parser
-	@Transactional
-	public void importSafetyKoreaRecipeFromJson(String classPathResource) throws IOException {
-		//CookRcpResponse response = objectMapper.readValue(json, CookRcpResponse.class);
-
-		Resource resource = new ClassPathResource("data/식품의약품안전처_조리식품레시피DB_1.json");
-		//Resource resource = new ClassPathResource(classPathResource);
-		CookRcpResponse response = objectMapper.readValue(resource.getInputStream(), CookRcpResponse.class);
-
-		for (CookRcpRow row : response.COOKRCP01().row()) {
-			System.out.println(row);
-			// TODO
-			// Long recipeId = parseToRecipe(row);
-			// save recipe
-			// save nutrition
-			// save ingredient
-			// save recipe ingredient
-			// savve nutrition ingredient
-			// save recipe steps
-			// save recipe tags
-			// saveIngredients(recipeId, row.RCP_PARTS_DTLS());
-			// saveSteps(recipeId, row); ...
-		}
-	}
-
-	private Long parseToRecipe(CookRcpRow row) {
-		// 도메인 만들기
+	private Long parseToRecipeAndStepsAndTags(CookRcpRow row) {
+		// Create Recipe
 		var recipe = recipeAdapter.save(
 			Recipe.create(
 				null,
 				row.RCP_NM(),
-				row.RCP_PARTS_DTLS(),
-				Integer.parseInt(row.INFO_WGT()),
+				row.RCP_PAT2(),
+				row.INFO_WGT() == null ? 1 : Integer.parseInt(row.INFO_WGT()),
 				0, // 조리시간 없음
 				RecipeDifficultyEnum.LOW,
+				row.ATT_FILE_NO_MAIN(),
+				row.ATT_FILE_NO_MK(),  // 임시로 모바일 이미지 넣음. TODO Image 별도의 컬럼으로 빼서 사이즈 별로 정의할 수 있도록 할 것.
 				"식품의약품안전처"
 			)
 		);
 
+		// Create Recipe Steps
+		List<RecipeSteps> steps = new ArrayList<>();
+		for(int i = 1; i <= 20; i++) {
+			String desc = row.getManual(i);
+			if (desc == null || desc.isBlank()) continue;
+
+			String img  = row.getManualImg(i);
+
+			steps.add(RecipeSteps.create(
+				null, recipe.getId(), i, "STEP " + i, desc, null, null, null, img, null
+			));
+		}
+		recipeAdapter.saveAllRecipeSteps(steps);
+
+		// Create Recipe Tags
+		List<RecipeTags> tags = new ArrayList<>();
+		if (row.HASH_TAG() != null && !row.HASH_TAG().isBlank()) {
+			String[] arr = row.HASH_TAG().split(",");
+			for (String t : arr) {
+				if (t.isBlank()) continue;
+				tags.add(RecipeTags.create(null, recipe.getId(), t.trim()));
+			}
+		}
+		recipeAdapter.saveAllRecipeTags(tags);
+
 		return recipe.getId();
 	}
 
-	// TODO Parser Saver 분리
 	@Transactional
-	public void saveIngredients(Long recipeId, String partsDetails) {
+	public void saveRecipeIngredients(Long recipeId, String partsDetails) {
 		if (partsDetails == null || partsDetails.isBlank()) return;
 
 		// 줄바꿈/콤마 기준으로 나눔
@@ -431,6 +451,7 @@ public class AdminService {
 		List<RecipeIngredient> domains = new ArrayList<>();
 		int sortOrder = 1;
 
+		// Ingredient + Recipe Ingredient
 		for (String token : tokens) {
 			String trimmed = token.trim();
 			if (trimmed.isBlank()) continue;
@@ -438,11 +459,9 @@ public class AdminService {
 			ParsedIngredient parsed = this.parseIngredient(trimmed);
 			if (parsed == null) continue;
 
-			// TODO 수정
-			Ingredient ingredient = ingredientAdapter.findIngredientByName(parsed.name());
+			Ingredient ingredient = ingredientAdapter.findLikeOrCreateIngredient(parsed.name(), IngredientCategoryEnum.OTHER, 0.0, 0.0, 0.0, 0.0);
 
 			RecipeIngredient domain = RecipeIngredient.create(null, recipeId, ingredient, parsed.quantity(), parsed.unit(), parsed.note(), sortOrder++);
-
 			domains.add(domain);
 		}
 
@@ -486,7 +505,7 @@ public class AdminService {
 		Matcher m = p.matcher(base);
 
 		String name;
-		Integer quantity = 1;
+		Double quantity = 1.0;
 		RecipeIngredientUnitEnum unit = RecipeIngredientUnitEnum.TO_TASTE;
 
 		if (m.find()) {
@@ -494,7 +513,7 @@ public class AdminService {
 			String unitStr = m.group(2);
 
 			name = base.substring(0, m.start()).trim();
-			quantity = (int) Math.round(Double.parseDouble(quantityStr));
+			quantity = Double.parseDouble(quantityStr);
 			unit = IngredientMapper.mapUnit(unitStr);
 		} else {
 			// 숫자 패턴이 없으면
@@ -510,7 +529,7 @@ public class AdminService {
 					|| mappedUnit == RecipeIngredientUnitEnum.TO_TASTE) {
 
 					unit = mappedUnit;
-					quantity = 1;
+					quantity = 1.0;
 					note = (note == null) ? maybeUnitOrNote : (note + ", " + maybeUnitOrNote);
 				} else {
 					// 단위로 애매하면 통째로 이름으로

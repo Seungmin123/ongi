@@ -17,13 +17,17 @@ public class AdminController {
 
 	@PostMapping("/foodSafetyKorea/recipe")
 	public String foodSafetyKoreaRecipe() throws Exception{
-		adminService.importSafetyKoreaRecipeFromJson("");
+		for(int i = 1; i <= 2; i++) {
+			adminService.importSafetyKoreaRecipeFromJson(i);
+		}
 		return "ok";
 	}
 
 	@PostMapping("/foodSafetyKorea/nutrition")
 	public String foodSafetyKoreaNutrition() throws Exception{
-		adminService.importSafetyKoreaNutritionFromJson();
+		for(int i = 1; i <= 335; i++) {
+			adminService.importSafetyKoreaNutritionFromJson(i);
+		}
 		return "ok";
 	}
 
