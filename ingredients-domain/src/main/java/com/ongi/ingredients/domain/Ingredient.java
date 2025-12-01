@@ -8,6 +8,8 @@ public class Ingredient {
 
 	private String name;
 
+	private String code;
+
 	private IngredientCategoryEnum category;
 
 	private Double caloriesKcal;
@@ -21,6 +23,7 @@ public class Ingredient {
 	private Ingredient(
 		Long ingredientId,
 		String name,
+		String code,
 		IngredientCategoryEnum category,
 		Double caloriesKcal,
 		Double proteinG,
@@ -29,6 +32,7 @@ public class Ingredient {
 	) {
 		this.ingredientId = ingredientId;
 		this.name = name;
+		this.code = code;
 		this.category = category;
 		this.caloriesKcal = caloriesKcal;
 		this.proteinG = proteinG;
@@ -37,9 +41,9 @@ public class Ingredient {
 	}
 
 	public static Ingredient create(
-		Long ingredientId, String name, IngredientCategoryEnum category, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG
+		Long ingredientId, String name, String code, IngredientCategoryEnum category, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG
 	) {
-		return new Ingredient(ingredientId, name, category, caloriesKcal, proteinG, fatG, carbsG);
+		return new Ingredient(ingredientId, name, code, category, caloriesKcal, proteinG, fatG, carbsG);
 	}
 
 	public Long getIngredientId() {
@@ -56,6 +60,14 @@ public class Ingredient {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public IngredientCategoryEnum getCategory() {

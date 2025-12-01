@@ -10,7 +10,7 @@ public class Recipe {
 
 	private String description;
 
-	private Integer serving;
+	private Double serving;
 
 	private Integer cookingTimeMin;
 
@@ -26,7 +26,7 @@ public class Recipe {
 		Long id,
 		String title,
 		String description,
-		Integer serving,
+		Double serving,
 		Integer cookingTimeMin,
 		RecipeDifficultyEnum difficulty,
 		String imageUrl,
@@ -45,7 +45,7 @@ public class Recipe {
 	}
 
 	public static Recipe create(
-		Long id, String title, String description, Integer serving, Integer cookingTimeMin,
+		Long id, String title, String description, Double serving, Integer cookingTimeMin,
 		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source
 	) {
 		return new Recipe(id, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source);
@@ -75,11 +75,11 @@ public class Recipe {
 		this.description = description;
 	}
 
-	public Integer getServing() {
+	public Double getServing() {
 		return serving;
 	}
 
-	public void setServing(Integer serving) {
+	public void setServing(Double serving) {
 		this.serving = serving;
 	}
 

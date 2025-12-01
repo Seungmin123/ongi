@@ -64,7 +64,8 @@ public enum IngredientCategoryEnum {
 	SPECIAL_NUTRITION("SPECIAL_NUTRITION", "특수영양식품"),
 
 	// 기타
-	OTHER("OTHER", "기타/분류불명");
+	OTHER("OTHER", "기타"),
+	UNKNOWN("UNKNOWN", "분류불명");
 
 	private final String code;
 	private final String description;

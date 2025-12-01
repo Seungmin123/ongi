@@ -31,13 +31,16 @@ public class RecipeStepsEntity extends BaseTimeEntity {
 	@Column(name = "step_order", nullable = false)
 	private Integer stepOrder;
 
-	@Column(name = "title", nullable = false)
+	@ColumnDefault("''")
+	@Column(name = "title")
 	private String title;
 
-	@Column(name = "description", nullable = false)
+	@ColumnDefault("''")
+	@Column(name = "description")
 	private String description;
 
-	@Column(name = "estimated_min", nullable = false, comment = "예상 소요 시간(분)")
+	@ColumnDefault("0")
+	@Column(name = "estimated_min", comment = "예상 소요 시간(분)")
 	private Integer estimatedMin;
 
 	@Column(name = "wait_min", comment = "숙성/끓이기 등 기다리는 시간(분)")

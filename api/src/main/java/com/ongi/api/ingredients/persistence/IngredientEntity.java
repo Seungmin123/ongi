@@ -29,6 +29,9 @@ public class IngredientEntity extends BaseTimeEntity {
 	@Column(name = "name", nullable = false)
 	private String name;
 
+	@Column(name = "code")
+	private String code;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category", nullable = false)
 	private IngredientCategoryEnum category;
@@ -49,6 +52,7 @@ public class IngredientEntity extends BaseTimeEntity {
 	public IngredientEntity(
 		Long id,
 		String name,
+		String code,
 		IngredientCategoryEnum category,
 		Double caloriesKcal,
 		Double proteinG,
@@ -57,6 +61,7 @@ public class IngredientEntity extends BaseTimeEntity {
 	) {
 		this.id = id;
 		this.name = name;
+		this.code = code;
 		this.category = category;
 		this.caloriesKcal = caloriesKcal;
 		this.proteinG = proteinG;

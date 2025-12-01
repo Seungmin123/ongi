@@ -35,7 +35,7 @@ public class RecipeEntity extends BaseTimeEntity {
 
 	@ColumnDefault("1")
 	@Column(name = "serving", nullable = false)
-	private Integer serving;
+	private Double serving;
 
 	@ColumnDefault("0")
 	@Column(name = "cooking_time_min", nullable = false)
@@ -59,7 +59,7 @@ public class RecipeEntity extends BaseTimeEntity {
 		Long id,
 		String title,
 		String description,
-		Integer serving,
+		Double serving,
 		Integer cookingTimeMin,
 		RecipeDifficultyEnum difficulty,
 		String imageUrl,

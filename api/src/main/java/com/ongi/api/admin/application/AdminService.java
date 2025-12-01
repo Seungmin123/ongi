@@ -22,12 +22,16 @@ import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
 import com.ongi.recipe.domain.enums.RecipeDifficultyEnum;
+import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -47,16 +51,16 @@ public class AdminService {
 
 	private final ObjectMapper objectMapper;
 
-	private static final String[] NOTE_KEYWORDS = {"다진", "채썬", "송송 썬", "송송썬", "다져", "곱게 다진"};
-
 	Map<NutritionEnum, Nutrition> nutritionCache = new HashMap<>();
+
+	private final EntityManager em;
 
 	/**
 	 * 식품의약품안전처_조리식품 레시피 Import Parser
  	 */
 	@Transactional
 	public void importSafetyKoreaRecipeFromJson(int fileNo) throws IOException {
-		Resource resource = new ClassPathResource("data/식품의약품안전처_조리식품레시피DB_" + fileNo + ".json");
+		Resource resource = new ClassPathResource("data/식품의약품안전처/조리식품_레시피/식품의약품안전처_조리식품레시피DB_" + fileNo + ".json");
 		CookRcpResponse response = objectMapper.readValue(resource.getInputStream(), CookRcpResponse.class);
 
 		for (CookRcpRow row : response.COOKRCP01().row()) {
@@ -87,7 +91,7 @@ public class AdminService {
 			Double fat = toDouble(item.AMT_NUM4());      // 지방(g)
 			Double carbs = toDouble(item.AMT_NUM6());    // 탄수화물(g)
 
-			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(item.FOOD_NM_KR(), category, calories, protein, fat, carbs);
+			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(item.FOOD_NM_KR(), item.FOOD_CD(), category, calories, protein, fat, carbs);
 
 			Map<NutritionEnum, Double> nutritionValues = extractNutritions(item);
 			for (Map.Entry<NutritionEnum, Double> entry : nutritionValues.entrySet()) {
@@ -124,13 +128,14 @@ public class AdminService {
 		List<IngredientNutrition> ingredientNutritions = new ArrayList<>();
 
 		for(GovernmentNutritionRecord record : response.records()) {
-			String foodName = record.식품코드();
+			String foodName = record.식품명();
+			String foodCode = record.식품코드();
 			Double calories = toDouble(record.에너지());
 			Double protein = toDouble(record.단백질());
 			Double fat = toDouble(record.지방());
 			Double carbs = toDouble(record.탄수화물());
 
-			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(foodName, IngredientCategoryEnum.OTHER, calories, protein, fat, carbs);
+			Ingredient ingredient = ingredientAdapter.findOrCreateIngredient(foodName, foodCode, IngredientCategoryEnum.OTHER, calories, protein, fat, carbs);
 			Map<NutritionEnum, Double> nutritionValues = extractNutritions(record);
 
 			for (Map.Entry<NutritionEnum, Double> entry : nutritionValues.entrySet()) {
@@ -144,6 +149,8 @@ public class AdminService {
 				if(ingredientNutritions.size() >= 1000) {
 					ingredientAdapter.saveAllIngredientNutrions(ingredientNutritions);
 					ingredientNutritions.clear();
+					em.flush();
+
 				}
 			}
 		}
@@ -403,7 +410,7 @@ public class AdminService {
 				null,
 				row.RCP_NM(),
 				row.RCP_PAT2(),
-				row.INFO_WGT() == null ? 1 : Integer.parseInt(row.INFO_WGT()),
+				row.INFO_WGT() == null|| row.INFO_WGT().isEmpty() ? 1 : Double.parseDouble(row.INFO_WGT()),
 				0, // 조리시간 없음
 				RecipeDifficultyEnum.LOW,
 				row.ATT_FILE_NO_MAIN(),
@@ -421,7 +428,7 @@ public class AdminService {
 			String img  = row.getManualImg(i);
 
 			steps.add(RecipeSteps.create(
-				null, recipe.getId(), i, "STEP " + i, desc, null, null, null, img, null
+				null, recipe.getId(), i, "STEP " + i, desc, 0, null, null, img, null
 			));
 		}
 		recipeAdapter.saveAllRecipeSteps(steps);
@@ -444,107 +451,416 @@ public class AdminService {
 	public void saveRecipeIngredients(Long recipeId, String partsDetails) {
 		if (partsDetails == null || partsDetails.isBlank()) return;
 
-		// 줄바꿈/콤마 기준으로 나눔
-		String normalized = partsDetails.replace("\n", ",");
-		String[] tokens = normalized.split(",");
-
+		String[] lines = partsDetails.split("\\r?\\n");
 		List<RecipeIngredient> domains = new ArrayList<>();
 		int sortOrder = 1;
 
-		// Ingredient + Recipe Ingredient
-		for (String token : tokens) {
-			String trimmed = token.trim();
-			if (trimmed.isBlank()) continue;
+		for (String line : lines) {
+			if (line == null) continue;
+			line = line.trim();
+			if (line.isBlank()) continue;
 
-			ParsedIngredient parsed = this.parseIngredient(trimmed);
-			if (parsed == null) continue;
+			// 1) 완전 헤더 같은 라인은 날린다 (●, 재료, 소스, 곁들임채소 등)
+			if (isHeaderLine(line)) {
+				continue;
+			}
 
-			Ingredient ingredient = ingredientAdapter.findLikeOrCreateIngredient(parsed.name(), IngredientCategoryEnum.OTHER, 0.0, 0.0, 0.0, 0.0);
+			// 2) 콜론이 있으면 뒤쪽만 재료 부분으로 사용
+			int colonIdx = line.indexOf(':');
+			if (colonIdx >= 0 && colonIdx < line.length() - 1) {
+				String rhs = line.substring(colonIdx + 1).trim();
+				if (!rhs.isBlank()) {
+					line = rhs;
+				} else {
+					// 콜론 뒤에 아무것도 없으면 그냥 스킵
+					continue;
+				}
+			}
 
-			RecipeIngredient domain = RecipeIngredient.create(null, recipeId, ingredient, parsed.quantity(), parsed.unit(), parsed.note(), sortOrder++);
-			domains.add(domain);
+			// 3) 한 줄 안에서도 콤마로 여러 재료가 있을 수 있음
+			String[] pieces = splitPartsSafe(line);
+			for (String piece : pieces) {
+				String token = piece.trim();
+				if (token.isBlank()) continue;
+
+				// 숫자/분수/약간/적당량 하나도 없으면 재료로 보기 애매 → 스킵
+				if (!looksLikeIngredientToken(token)) {
+					continue;
+				}
+
+				ParsedIngredient parsed = parseIngredient(token);
+				if (parsed == null) continue;
+
+				Ingredient ingredient = ingredientAdapter.findLikeOrCreateIngredient(
+					parsed.name(),
+					IngredientCategoryEnum.UNKNOWN,
+					0.0, 0.0, 0.0, 0.0
+				);
+
+				RecipeIngredient domain = RecipeIngredient.create(
+					null,
+					recipeId,
+					ingredient,
+					parsed.quantity(),
+					parsed.unit(),
+					parsed.note(),
+					sortOrder++
+				);
+				domains.add(domain);
+			}
 		}
 
 		ingredientAdapter.saveAllRecipeIngredients(domains);
 	}
 
-	public ParsedIngredient parseIngredient(String rawText) {
-		if (rawText == null || rawText.isBlank()) {
-			return null;
-		}
+	private String[] splitPartsSafe(String raw) {
+		List<String> result = new ArrayList<>();
+		StringBuilder current = new StringBuilder();
+		int depth = 0;
 
-		String text = rawText.trim();
+		for (int i = 0; i < raw.length(); i++) {
+			char c = raw.charAt(i);
 
-		// 1) 괄호 안은 note 후보로 분리
-		//    "연두부 75g(3/4모)" -> base: "연두부 75g", note: "3/4모"
-		String note = null;
-		String base = text;
-
-		Matcher parenMatcher = Pattern.compile("\\((.*?)\\)").matcher(text);
-		if (parenMatcher.find()) {
-			note = parenMatcher.group(1).trim();
-			base = text.substring(0, parenMatcher.start()).trim();
-		}
-
-		// 2) 전처리(다진/채썬 등) note 분리
-		for (String keyword : NOTE_KEYWORDS) {
-			if (base.startsWith(keyword)) {
-				String remaining = base.substring(keyword.length()).trim(); // "대파 1큰술"
-				note = (note == null) ? keyword : (keyword + ", " + note);
-				base = remaining;
-				break;
+			if (c == '(') {
+				depth++;
+				current.append(c);
+			} else if (c == ')') {
+				if (depth > 0) depth--;
+				current.append(c);
+			} else if ((c == ',' || c == '\n' || c == '\r') && depth == 0) {
+				String token = current.toString().trim();
+				if (!token.isEmpty()) {
+					result.add(token);
+				}
+				current.setLength(0);
 			} else {
-				System.out.println(base);
+				current.append(c);
 			}
 		}
 
-		// 3) 숫자 + 단위 추출
-		//  "연두부 75g" -> name: 연두부, quantity: 75, unitStr: g
-		//  "간장 약간"   -> quantity 없음, 단위/노트 처리
-		Pattern p = Pattern.compile("([0-9]+\\.?[0-9]*)\\s*([a-zA-Z가-힣°]+)");
-		Matcher m = p.matcher(base);
+		String last = current.toString().trim();
+		if (!last.isEmpty()) {
+			result.add(last);
+		}
+
+		return result.toArray(new String[0]);
+	}
+
+	private boolean isHeaderLine(String line) {
+		// ●, :, 재료/양념/소스/곁들임채소 등이 있고 숫자는 거의 없는 라인 → 헤더로 간주
+		String cleaned = line.replaceAll("\\s+", "");
+		boolean hasDigitOrFrac = cleaned.matches(".*[0-9⅓⅔¼½¾⅛⅜⅝⅞].*");
+
+		if (!hasDigitOrFrac &&
+			(cleaned.contains("●")
+				|| cleaned.contains("재료")
+				|| cleaned.contains("양념")
+				|| cleaned.contains("소스")
+				|| cleaned.contains("곁들임")
+				|| cleaned.endsWith(":"))) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean looksLikeIngredientToken(String token) {
+		String cleaned = token.replaceAll("\\s+", "");
+		boolean hasDigitOrFrac = cleaned.matches(".*[0-9⅓⅔¼½¾⅛⅜⅝⅞].*");
+		boolean hasApproxWord =
+			token.contains("약간") || token.contains("적당량") || token.contains("알맞게");
+
+		return hasDigitOrFrac || hasApproxWord;
+	}
+
+	// 수량 + 단위 (정수, 소수, 분수, 유니코드 분수 포함)
+	// 예: "10g", "7 g", "1/2컵", "1⅓작은술", "½컵"
+	private static final Pattern QTY_UNIT_PATTERN = Pattern.compile(
+		//"([0-9]+(?:/[0-9]+)?(?:\\.[0-9]+)?|[0-9]*[⅓⅔½¼¾⅛⅜⅝⅞])\\s*([a-zA-Z가-힣°]+)"
+		"([0-9]+(?:/[0-9]+)?(?:\\.[0-9]+)?|[0-9]*[⅓⅔½¼¾⅛⅜⅝⅞])\\s*([a-zA-Z가-힣°㎖㎜㎝㎏㎎㎥㎔㎞㎚]+)"
+	);
+
+	// 그룹 라벨 prefix (재료, 소스, 양념 등)
+	private static final String[] GROUP_PREFIXES = {
+		"재료", "주재료", "부재료", "양념", "소스", "고명", "곁들임채소", "곁들임 채소"
+	};
+
+	// 전처리/상태 키워드 -> note 로 빼기 (name 앞에 붙어 있는 경우)
+	private static final String[] NOTE_KEYWORDS = {
+		"다진", "채썬", "썬", "곱게 다진", "잘게 다진",
+		"불린", "데친", "삶은", "볶은", "찐", "구운", "말린"
+	};
+
+	private static final Set<String> GENERIC_PREFIXES = Set.of(
+		"재료", "불린", "삶은", "데친", "다진", "볶은", "구운"
+	);
+
+	private static final Pattern BRACKET_PATTERN = Pattern.compile("\\((.*?)\\)");
+	// 숫자 + 단위: "7g", "1.5컵", "1/2컵", "1⅓작은술" 등
+
+	private static final Map<Character, Double> FRACTION_MAP = Map.ofEntries(
+		Map.entry('¼', 1.0 / 4),
+		Map.entry('½', 1.0 / 2),
+		Map.entry('¾', 3.0 / 4),
+		Map.entry('⅓', 1.0 / 3),
+		Map.entry('⅔', 2.0 / 3),
+		Map.entry('⅛', 1.0 / 8),
+		Map.entry('⅜', 3.0 / 8),
+		Map.entry('⅝', 5.0 / 8),
+		Map.entry('⅞', 7.0 / 8)
+	);
+
+
+	public ParsedIngredient parseIngredient(String rawText) {
+		if (rawText == null) return null;
+
+		String text = rawText.trim();
+		if (text.isEmpty()) return null;
+
+		// [1인분] 같은 헤더 제거
+		text = text.replaceAll("^\\[[^\\]]*\\]", "").trim();
+		if (text.isEmpty()) return null;
+
+		String note = null;
+		String base = text;
+
+		// 1) 괄호 내용 분리
+		//    "오리고기(훈제오리 가슴살, 150g)" ->
+		//       base = "오리고기"
+		//       parenContent = "훈제오리 가슴살, 150g"
+		String parenContent = null;
+		Matcher parenMatcher = BRACKET_PATTERN.matcher(text);
+		if (parenMatcher.find()) {
+			parenContent = parenMatcher.group(1).trim();
+			base = text.substring(0, parenMatcher.start()).trim();
+		}
+
+		// 2) 전처리 키워드 NOTE 처리
+		for (String keyword : NOTE_KEYWORDS) {
+			if (base.startsWith(keyword)) {
+				String remaining = base.substring(keyword.length()).trim();
+				note = joinNotes(note, keyword);
+				base = remaining;
+				break;
+			}
+		}
+
+		// 3) base 에서 숫자 + 단위 찾기
+		//    ex) "연두부 75g" -> name: 연두부, qty: 75, unit: g
+		Matcher m = QTY_UNIT_PATTERN.matcher(base);
 
 		String name;
-		Double quantity = 1.0;
-		RecipeIngredientUnitEnum unit = RecipeIngredientUnitEnum.TO_TASTE;
+		double quantity;
+		RecipeIngredientUnitEnum unit;
 
 		if (m.find()) {
+			// 3-1) base 자체에 수량이 있는 케이스
 			String quantityStr = m.group(1);
 			String unitStr = m.group(2);
 
 			name = base.substring(0, m.start()).trim();
-			quantity = Double.parseDouble(quantityStr);
+			quantity = parseQuantityNumber(quantityStr);
 			unit = IngredientMapper.mapUnit(unitStr);
+
+			// 괄호 안 내용은 note로만 활용
+			if (parenContent != null && !parenContent.isBlank()) {
+				note = joinNotes(note, parenContent);
+			}
+
+			if (name.isEmpty() && parenContent != null) {
+				// 엣지 케이스: 괄호밖은 비어 있고, 괄호 안에 이름/수량이 다 들어간 경우
+				return parseNoNumberCase(base, parenContent, note);
+			}
 		} else {
-			// 숫자 패턴이 없으면
-			// "간장 약간" 같은 케이스 처리
-			String[] tokens = base.split("\\s+");
-			if (tokens.length >= 2) {
-				name = tokens[0].trim();
-				String maybeUnitOrNote = tokens[1].trim();
+			// 3-2) base 에는 숫자가 없고, 괄호 안에만 수량이 있는 케이스 등
+			if (parenContent != null && !parenContent.isBlank()) {
+				Matcher m2 = QTY_UNIT_PATTERN.matcher(parenContent);
+				if (m2.find()) {
+					// 괄호 안에서 수량 + 단위 추출
+					String quantityStr = m2.group(1);
+					String unitStr = m2.group(2);
 
-				RecipeIngredientUnitEnum mappedUnit = IngredientMapper.mapUnit(maybeUnitOrNote);
-				if (mappedUnit == RecipeIngredientUnitEnum.DASH
-					|| mappedUnit == RecipeIngredientUnitEnum.PINCH
-					|| mappedUnit == RecipeIngredientUnitEnum.TO_TASTE) {
+					name = base.trim();
+					quantity = parseQuantityNumber(quantityStr);
+					unit = IngredientMapper.mapUnit(unitStr);
 
-					unit = mappedUnit;
-					quantity = 1.0;
-					note = (note == null) ? maybeUnitOrNote : (note + ", " + maybeUnitOrNote);
+					// 예: "오리고기(훈제오리 가슴살, 150g)"
+					String before2 = parenContent.substring(0, m2.start())
+						.replaceAll("[,\\s]+$", "")
+						.trim();
+					String after2 = parenContent.substring(m2.end())
+						.replaceAll("^[,\\s]+", "")
+						.trim();
+
+					if (before2.isEmpty() && after2.isEmpty()) {
+						// "1⅓작은술" 처럼 수량+단위만 있는 경우
+						note = joinNotes(note, parenContent);
+					} else {
+						note = joinNotes(note, before2); // "훈제오리 가슴살"
+						note = joinNotes(note, after2);
+					}
+
+					// "재료 느타리버섯(10g)" 같은 케이스 처리:
+					// base 가 "재료 느타리버섯" 이면, 이름을 뒷부분으로 정교하게 자르기
+					name = normalizeGenericPrefixName(name);
+
 				} else {
-					// 단위로 애매하면 통째로 이름으로
-					name = base;
+					// 괄호 안에도 수량이 없으면, 통째로 이름/노트로 처리
+					return parseNoNumberCase(base, parenContent, note);
 				}
 			} else {
-				name = base;
+				// 숫자 패턴이 전혀 없는 경우
+				return parseNoNumberCase(base, null, note);
 			}
 		}
 
-		if (note == null) {
-			note = "";
+		if (note == null) note = "";
+		return new ParsedIngredient(name, quantity, unit, note);
+	}
+
+	/**
+	 * base 에 숫자가 없고, 괄호에도 숫자가 없거나 수량 패턴을 못 찾은 경우 처리.
+	 */
+	private ParsedIngredient parseNoNumberCase(String base, String parenContent, String note) {
+		String text = base.trim();
+		if (text.isEmpty()) return null;
+
+		// "재료 느타리버섯" 같은 구문에서 "재료" 제거
+		String name = normalizeGenericPrefixName(text);
+
+		// note 에 괄호 내용 추가
+		if (parenContent != null && !parenContent.isBlank()) {
+			note = joinNotes(note, parenContent.trim());
 		}
 
-		return new ParsedIngredient(name, quantity, unit, note);
+		if (note == null) note = "";
+
+		// 수량/단위 불명 -> 기본값
+		return new ParsedIngredient(
+			name,
+			1.0,
+			RecipeIngredientUnitEnum.TO_TASTE,
+			note
+		);
+	}
+
+	/**
+	 * "재료 느타리버섯" → "느타리버섯"
+	 * "불린 당면"      → "당면"
+	 */
+	private String normalizeGenericPrefixName(String text) {
+		String[] tokens = text.split("\\s+");
+		if (tokens.length >= 2 && GENERIC_PREFIXES.contains(tokens[0])) {
+			// 첫 토큰이 일반 접두사면, 나머지를 이름으로 사용
+			return String.join(" ", Arrays.copyOfRange(tokens, 1, tokens.length)).trim();
+		}
+		return text;
+	}
+
+	/**
+	 * note 병합 유틸.
+	 */
+	private String joinNotes(String base, String extra) {
+		if (extra == null || extra.isBlank()) return base;
+		if (base == null || base.isBlank()) return extra.trim();
+		return base.trim() + ", " + extra.trim();
+	}
+
+	/**
+	 * "1", "1.5", "1/2", "3/4", "1 1/2", "1⅓" 등 문자열을 double 로 변환
+	 */
+	private double parseQuantityNumber(String raw) {
+		if (raw == null) return 1.0;
+		String s = raw.trim();
+		if (s.isEmpty()) return 1.0;
+
+		// "1½" → "1 ½" 처럼 정수와 분수 사이에 공백 삽입
+		s = insertSpaceBeforeFractionChar(s);
+
+		// 유니코드 분수 문자를 "1/2" 같은 텍스트로 치환
+		s = normalizeFractionText(s);
+
+		// "1 1/2" 같은 혼합 분수 처리
+		if (s.contains(" ")) {
+			String[] parts = s.split("\\s+");
+			double total = 0.0;
+			for (String part : parts) {
+				total += parseSingleNumber(part);
+			}
+			return total;
+		} else {
+			return parseSingleNumber(s);
+		}
+	}
+
+	/**
+	 * 단일 숫자 토큰 파싱: "1", "1.5", "1/2" 등
+	 */
+	private double parseSingleNumber(String token) {
+		String t = token.trim();
+		if (t.isEmpty()) return 1.0;
+
+		// "1/2" 같은 분수
+		if (t.matches("\\d+\\/\\d+")) {
+			String[] arr = t.split("/");
+			double num = Double.parseDouble(arr[0]);
+			double den = Double.parseDouble(arr[1]);
+			if (den == 0) return 0.0;
+			return num / den;
+		}
+
+		try {
+			return Double.parseDouble(t);
+		} catch (NumberFormatException e) {
+			// 파싱 실패 시 기본값
+			return 1.0;
+		}
+	}
+
+	/**
+	 * "1½" → "1 ½" 처럼 정수와 유니코드 분수 사이에 공백을 넣음.
+	 */
+	private String insertSpaceBeforeFractionChar(String s) {
+		StringBuilder sb = new StringBuilder();
+		char prev = 0;
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			if (FRACTION_MAP.containsKey(c) && Character.isDigit(prev)) {
+				sb.append(' ');
+			}
+			sb.append(c);
+			prev = c;
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * 유니코드 분수를 "1/2" 같은 형태로 치환
+	 */
+	private String normalizeFractionText(String s) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			Double v = FRACTION_MAP.get(c);
+			if (v != null) {
+				// 유니코드 분수를 "a/b" 형태로 치환
+				// 여기선 실제 분수값 대신 "1/2" 같은 텍스트로 통일
+				// 하지만 이미 insertSpaceBeforeFractionChar 로 공백이 들어가 있으므로
+				// "1 1/2" 형태가 됨.
+				if (c == '¼') sb.append("1/4");
+				else if (c == '½') sb.append("1/2");
+				else if (c == '¾') sb.append("3/4");
+				else if (c == '⅓') sb.append("1/3");
+				else if (c == '⅔') sb.append("2/3");
+				else if (c == '⅛') sb.append("1/8");
+				else if (c == '⅜') sb.append("3/8");
+				else if (c == '⅝') sb.append("5/8");
+				else if (c == '⅞') sb.append("7/8");
+				else sb.append(c); // fallback
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
 	}
 
 }

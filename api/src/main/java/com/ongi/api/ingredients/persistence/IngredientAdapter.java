@@ -97,7 +97,8 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 				Long ingredientId = domain.getIngredientId();
 				Long nutritionId  = domain.getNutritionId();
 
-				return ingredientNutritionRepository.findByIngredientIdAndNutritionId(ingredientId, nutritionId)
+				// TODO 검색 후 없을 경우 Insert -> 추후 부활
+				/*return ingredientNutritionRepository.findByIngredientIdAndNutritionId(ingredientId, nutritionId)
 					.map(existing -> {
 						existing.setQuantity(domain.getQuantity());
 						existing.setBasis(domain.getBasis());
@@ -107,7 +108,11 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 						IngredientEntity ingredientRef = ingredientRepository.getReferenceById(ingredientId);
 						NutritionEntity nutritionRef   = nutritionRepository.getReferenceById(nutritionId);
 						return IngredientMapper.toEntity(domain, ingredientRef, nutritionRef);
-					});
+					});*/
+
+				IngredientEntity ingredientRef = ingredientRepository.getReferenceById(ingredientId);
+				NutritionEntity nutritionRef   = nutritionRepository.getReferenceById(nutritionId);
+				return IngredientMapper.toEntity(domain, ingredientRef, nutritionRef);
 			})
 			.toList();
 
@@ -206,7 +211,7 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 
 	// TODO Cache 관련 로직 추가
 	@Override
-	public Ingredient findOrCreateIngredient(String name, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG) {
+	public Ingredient findOrCreateIngredient(String name, String code, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG) {
 		/*
 		* // 캐시 우선
 		if (ingredientCache.containsKey(name)) {
@@ -215,11 +220,14 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 
 		* ingredientCache.put(name, saved);
 		* */
-		return ingredientRepository.findByName(name)
+
+		// TODO 검색 후 없을 경우 Insert -> 부활
+		/*return ingredientRepository.findByName(name)
 			.map(IngredientMapper::toDomain)
 			.orElseGet(() -> {
 				IngredientEntity entity = IngredientEntity.builder()
 					.name(name)
+					.code(code)
 					.category(ingredientCategory)
 					.caloriesKcal(defaultZero(caloriesKcal))
 					.proteinG(defaultZero(proteinG))
@@ -228,7 +236,19 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 					.build();
 				IngredientEntity saved = ingredientRepository.save(entity);
 				return IngredientMapper.toDomain(saved);
-			});
+			});*/
+
+		IngredientEntity entity = IngredientEntity.builder()
+			.name(name)
+			.code(code)
+			.category(ingredientCategory)
+			.caloriesKcal(defaultZero(caloriesKcal))
+			.proteinG(defaultZero(proteinG))
+			.fatG(defaultZero(fatG))
+			.carbsG(defaultZero(carbsG))
+			.build();
+		IngredientEntity saved = ingredientRepository.save(entity);
+		return IngredientMapper.toDomain(saved);
 	}
 
 	@Override
@@ -241,7 +261,7 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 
 		* ingredientCache.put(name, saved);
 		* */
-		return ingredientRepository.findFirstByNameLikeOrderByNameAsc(name)
+		return ingredientRepository.findFirstByNameOrderByNameAsc(name)
 			.map(IngredientMapper::toDomain)
 			.orElseGet(() -> {
 				IngredientEntity entity = IngredientEntity.builder()
@@ -270,7 +290,8 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 		nutritionCache.put(code, entity);
 
 		*/
-		return nutritionRepository.findByCode(code)
+		// TODO 검색 후 없을 경우 Insert -> 추후 부활
+		/*return nutritionRepository.findByCode(code)
 			.map(IngredientMapper::toDomain)
 			.orElseGet(() -> {
 				NutritionEntity entity = NutritionEntity.builder()
@@ -279,6 +300,13 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 					.build();
 				NutritionEntity saved = nutritionRepository.save(entity);
 				return IngredientMapper.toDomain(saved);
-			});
+			});*/
+
+		NutritionEntity entity = NutritionEntity.builder()
+			.code(code)
+			.unit(code.getUnit())
+			.build();
+		NutritionEntity saved = nutritionRepository.save(entity);
+		return IngredientMapper.toDomain(saved);
 	}
 }

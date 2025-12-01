@@ -37,7 +37,7 @@ public interface IngredientsRepositoryPort {
 
 	Ingredient findIngredientByName(String name);
 
-	Ingredient findOrCreateIngredient(String name, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG);
+	Ingredient findOrCreateIngredient(String name, String code, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG);
 
 	Ingredient findLikeOrCreateIngredient(String name, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG);
 

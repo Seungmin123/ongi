@@ -22,10 +22,10 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
-	name = "ingredient_nutrition",
+	name = "ingredient_nutrition"/*,
 	uniqueConstraints = @UniqueConstraint(
 		columnNames = {"ingredient_id", "nutrition_id"}
-	)
+	)*/
 )
 public class IngredientNutritionEntity extends BaseTimeEntity {
 

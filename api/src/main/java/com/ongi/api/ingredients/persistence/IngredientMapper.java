@@ -12,6 +12,7 @@ public class IngredientMapper {
 		if (ingredient.getIngredientId() == null) {
 			return IngredientEntity.builder()
 				.name(ingredient.getName())
+				.code(ingredient.getCode())
 				.category(ingredient.getCategory())
 				.caloriesKcal(ingredient.getCaloriesKcal())
 				.carbsG(ingredient.getCarbsG())
@@ -22,6 +23,7 @@ public class IngredientMapper {
 			return IngredientEntity.builder()
 				.id(ingredient.getIngredientId())
 				.name(ingredient.getName())
+				.code(ingredient.getCode())
 				.category(ingredient.getCategory())
 				.caloriesKcal(ingredient.getCaloriesKcal())
 				.carbsG(ingredient.getCarbsG())
@@ -32,7 +34,7 @@ public class IngredientMapper {
 	}
 
 	public static Ingredient toDomain(IngredientEntity ingredientEntity) {
-		return Ingredient.create(ingredientEntity.getId(), ingredientEntity.getName(), ingredientEntity.getCategory(),
+		return Ingredient.create(ingredientEntity.getId(), ingredientEntity.getName(), ingredientEntity.getCode(), ingredientEntity.getCategory(),
 			ingredientEntity.getCaloriesKcal(), ingredientEntity.getProteinG(), ingredientEntity.getFatG(), ingredientEntity.getCarbsG());
 	}
 
@@ -80,44 +82,48 @@ public class IngredientMapper {
 
 	public static RecipeIngredientUnitEnum mapUnit(String unitStr) {
 		if (unitStr == null || unitStr.isBlank()) {
-			// 애매하면 일단 "기호에 맞게"로 처리
 			return RecipeIngredientUnitEnum.TO_TASTE;
 		}
 
-		String u = unitStr.trim().toLowerCase();
+		String u = unitStr.trim();
 
 		return switch (u) {
-			// 용량
-			case "ml", "밀리리터" -> RecipeIngredientUnitEnum.ML;
-			case "l", "리터" -> RecipeIngredientUnitEnum.L;
 
-			// 무게
-			case "g", "그램" -> RecipeIngredientUnitEnum.G;
-			case "kg", "킬로그램" -> RecipeIngredientUnitEnum.KG;
+			// === 용량 ===
+			case "ml", "ML", "㎖", "밀리리터" -> RecipeIngredientUnitEnum.ML;
+			case "L", "l", "리터" -> RecipeIngredientUnitEnum.L;
 
-			// 계량
-			case "큰술", "스푼", "tbsp" -> RecipeIngredientUnitEnum.TBSP;
-			case "작은술", "티스푼", "tsp" -> RecipeIngredientUnitEnum.TSP;
-			case "컵", "cup" -> RecipeIngredientUnitEnum.CUP;
+			// === 무게 ===
+			case "g", "G", "그램" -> RecipeIngredientUnitEnum.G;
+			case "kg", "KG", "킬로그램" -> RecipeIngredientUnitEnum.KG;
 
-			// 개수
+			// === 큰술 (Tablespoon) ===
+			case "T", "tbs", "TBS", "Tbsp", "TBSP",
+			     "Ts", "TS", "T스푼", "큰술", "스푼" -> RecipeIngredientUnitEnum.TBSP;
+
+			// === 작은술 (Teaspoon) ===
+			case "t", "ts", "tsp", "TSP",
+			     "작은술", "티스푼" -> RecipeIngredientUnitEnum.TSP;
+
+			// === 컵 ===
+			case "컵", "cup", "Cup", "CUP" -> RecipeIngredientUnitEnum.CUP;
+
+			// === 개수 ===
 			case "개", "알", "조각", "모", "마리", "덩이" -> RecipeIngredientUnitEnum.PIECE;
-			case "팩", "pack" -> RecipeIngredientUnitEnum.PACK;
+			case "팩", "Pack", "PACK" -> RecipeIngredientUnitEnum.PACK;
 			case "줌", "다발", "단" -> RecipeIngredientUnitEnum.BUNCH;
 
-			// 애매
+			// === 애매한 계량 ===
 			case "약간" -> RecipeIngredientUnitEnum.DASH;
 			case "꼬집" -> RecipeIngredientUnitEnum.PINCH;
 			case "기호에맞게", "기호에", "기호" -> RecipeIngredientUnitEnum.TO_TASTE;
 
-			// 온도
-			case "c", "°c", "섭씨" -> RecipeIngredientUnitEnum.CELSIUS;
-
-			// 길이/사이즈
+			// === 길이/온도/기타 ===
+			case "℃", "°C", "c", "C", "섭씨" -> RecipeIngredientUnitEnum.CELSIUS;
 			case "슬라이스" -> RecipeIngredientUnitEnum.SLICE;
 			case "장" -> RecipeIngredientUnitEnum.SHEET;
 
-			default -> RecipeIngredientUnitEnum.TO_TASTE; // 모르면 일단 애매한 계량으로
+			default -> RecipeIngredientUnitEnum.TO_TASTE;
 		};
 	}
 }
