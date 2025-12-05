@@ -22,6 +22,9 @@ public class Recipe {
 
 	private String source;
 
+	// TODO likes, comments 추가?
+	// TODO category 추가
+
 	private Recipe(
 		Long id,
 		String title,

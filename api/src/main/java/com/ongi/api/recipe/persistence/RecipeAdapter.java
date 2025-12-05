@@ -1,12 +1,21 @@
 package com.ongi.api.recipe.persistence;
 
+import com.ongi.api.ingredients.persistence.QIngredientEntity;
+import com.ongi.api.ingredients.persistence.QRecipeIngredientEntity;
 import com.ongi.api.recipe.persistence.repository.RecipeRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeStepsRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeTagsRepository;
 import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
+import com.ongi.recipe.domain.enums.PageSortOptionEnum;
+import com.ongi.recipe.domain.search.RecipeSearchCondition;
 import com.ongi.recipe.port.RecipeRepositoryPort;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,6 +25,8 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 @Repository
 public class RecipeAdapter implements RecipeRepositoryPort {
+
+	private final JPAQueryFactory queryFactory;
 
 	private final RecipeRepository recipeRepository;
 
@@ -77,5 +88,120 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 		return recipeTagsRepository
 			.findById(id)
 			.map(RecipeMapper::toDomain);
+	}
+
+	@Override
+	public List<Recipe> search(RecipeSearchCondition condition, Long cursor, Integer size, PageSortOptionEnum sort) {
+		QRecipeEntity recipe = QRecipeEntity.recipeEntity;
+		QRecipeTagsEntity recipeTags = QRecipeTagsEntity.recipeTagsEntity;
+		QRecipeIngredientEntity recipeIngredients = QRecipeIngredientEntity.recipeIngredientEntity;
+		// QIngredientEntity ingredients = QIngredientEntity.ingredientEntity;
+
+		JPAQuery<RecipeEntity> query = queryFactory
+			.selectFrom(recipe)
+			.distinct();
+
+		BooleanBuilder where = new BooleanBuilder();
+
+		// ====== 1) 검색 조건 ======
+		// 키워드
+		if (condition.getKeyword() != null && !condition.getKeyword().isBlank()) {
+			String kw = condition.getKeyword().trim();
+			where.and(
+				recipe.title.containsIgnoreCase(kw)
+			);
+		}
+
+		// 태그
+		if (condition.getTag() != null && !condition.getTag().isBlank()) {
+			query.leftJoin(recipeTags).on(recipeTags.recipeId.eq(recipe.id));
+			where.and(recipeTags.tag.eq(condition.getTag().trim()));
+		}
+
+		// 카테고리 (지금은 String)
+		if (condition.getCategory() != null && !condition.getCategory().isBlank()) {
+			// TODO: category 가 Enum 으로 바뀌면 eq(enum) 으로 교체
+			where.and(recipe.description.eq(condition.getCategory().trim()));
+		}
+
+		// 특정 재료 포함 레시피
+		if (condition.getIngredientId() != null) {
+			query.leftJoin(recipeIngredients).on(recipeIngredients.recipeId.eq(recipe.id));
+			// TODO 확인 필요 + 재료 이름으로 할 수도 있음.
+			//query.leftJoin(ingredients).on(recipeIngredients.ingredient.eq(ingredients));
+			where.and(recipeIngredients.ingredient.id.eq(condition.getIngredientId()));
+		}
+
+		// 최대 조리 시간
+		if (condition.getMaxCookingTimeMin() != null) {
+			where.and(recipe.cookingTimeMin.loe(condition.getMaxCookingTimeMin()));
+		}
+
+		// ====== 2) 커서 조건 ======
+		if (cursor != null) {
+			switch (sort) {
+				case CREATED_ASC, ID_ASC, VIEWS_ASC -> {
+					// ASC 계열 → cursor 보다 큰 id
+					where.and(recipe.id.gt(cursor));
+				}
+				case CREATED_DESC, ID_DESC, VIEWS_DESC -> {
+					// DESC 계열 → cursor 보다 작은 id
+					where.and(recipe.id.lt(cursor));
+				}
+			}
+		}
+
+		query.where(where);
+
+		// ====== 3) 정렬 ======
+		OrderSpecifier<?>[] orderSpecifiers = toOrderSpecifiers(sort, recipe);
+		query.orderBy(orderSpecifiers);
+
+		// ====== 4) limit ======
+		int pageSize = (size == null || size <= 0) ? 20 : Math.min(size, 100);
+		query.limit(pageSize);
+
+		// ====== 5) 실행 & 매핑 ======
+		List<RecipeEntity> entities = query.fetch();
+
+		return entities.stream()
+			.map(RecipeMapper::toDomain)
+			.toList();
+	}
+
+
+	private OrderSpecifier<?>[] toOrderSpecifiers(PageSortOptionEnum sort, QRecipeEntity recipe) {
+		return switch (sort) {
+			case CREATED_ASC -> new OrderSpecifier[]{
+				new OrderSpecifier<>(Order.ASC, recipe.createdAt),
+				new OrderSpecifier<>(Order.ASC, recipe.id)
+			};
+			case CREATED_DESC -> new OrderSpecifier[]{
+				new OrderSpecifier<>(Order.DESC, recipe.createdAt),
+				new OrderSpecifier<>(Order.DESC, recipe.id)
+			};
+			case ID_ASC -> new OrderSpecifier[]{
+				new OrderSpecifier<>(Order.ASC, recipe.id)
+			};
+			case ID_DESC -> new OrderSpecifier[]{
+				new OrderSpecifier<>(Order.DESC, recipe.id)
+			};
+
+			// TODO View 관련 추가 필요.
+			case VIEWS_ASC -> new OrderSpecifier[]{
+				new OrderSpecifier<>(Order.ASC, recipe.id),
+			};
+			case VIEWS_DESC -> new OrderSpecifier[]{
+				new OrderSpecifier<>(Order.DESC, recipe.id),
+			};
+			/*case VIEWS_ASC -> new OrderSpecifier[]{
+				new OrderSpecifier<>(Order.ASC, recipe.views),
+				new OrderSpecifier<>(Order.ASC, recipe.id)
+			};
+			case VIEWS_DESC -> new OrderSpecifier[]{
+				new OrderSpecifier<>(Order.DESC, recipe.views),
+				new OrderSpecifier<>(Order.DESC, recipe.id)
+			};*/
+		};
 	}
 }
