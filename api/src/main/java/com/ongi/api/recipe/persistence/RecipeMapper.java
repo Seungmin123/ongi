@@ -17,6 +17,7 @@ public class RecipeMapper {
 				.imageUrl(recipe.getImageUrl())
 				.videoUrl(recipe.getVideoUrl())
 				.source(recipe.getSource())
+				.category(recipe.getCategory())
 				.build();
 		} else {
 			return RecipeEntity.builder()
@@ -29,13 +30,14 @@ public class RecipeMapper {
 				.imageUrl(recipe.getImageUrl())
 				.videoUrl(recipe.getVideoUrl())
 				.source(recipe.getSource())
+				.category(recipe.getCategory())
 				.build();
 		}
 	}
 
 	public static Recipe toDomain(RecipeEntity entity) {
 		return Recipe.create(entity.getId(), entity.getTitle(), entity.getDescription(), entity.getServing(), entity.getCookingTimeMin(), entity.getDifficulty(), entity.getImageUrl(),
-			entity.getVideoUrl(), entity.getSource());
+			entity.getVideoUrl(), entity.getSource(), entity.getCategory());
 	}
 
 	public static RecipeStepsEntity toEntity(RecipeSteps steps) {

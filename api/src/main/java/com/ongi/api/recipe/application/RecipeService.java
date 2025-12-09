@@ -4,6 +4,7 @@ import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.recipe.persistence.RecipeAdapter;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
+import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
 import com.ongi.recipe.domain.search.RecipeSearch;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
@@ -23,11 +24,17 @@ public class RecipeService {
 	) {
 		RecipeSearchCondition condition = mapToCondition(search);
 		Long cursor = cursorPageRequest.cursor();
-		int size = cursorPageRequest.size();
+		int size = cursorPageRequest.resolvedSize();
 		PageSortOptionEnum sort = cursorPageRequest.resolveSort();
 
-        return ApiResponse.ok();
-		//return recipeAdapter.search(condition, cursor, size, sort);
+		// TODO 다른 방식으로도 데이터를 불러올 수 있게 수정
+		List<Recipe> recipes = recipeAdapter.search(condition, cursor, size, sort);
+		List<RecipeCardResponse> recipeCardResponses =
+			recipes.stream()
+			.map(this::toRecipeCardResponse)
+			.toList();
+
+		return ApiResponse.ok(recipeCardResponses);
 	}
 
 	private RecipeSearchCondition mapToCondition(RecipeSearch search) {
@@ -56,6 +63,52 @@ public class RecipeService {
 				s.keyword(), s.tag(), s.category(), s.ingredientId(), s.maxCookingTimeMin()
 			);
 		};
+	}
+
+	private RecipeCardResponse toRecipeCardResponse(Recipe recipe) {
+		String cookTimeText = formatCookTime(recipe.getCookingTimeMin());
+
+		Integer servings = null;
+		if (recipe.getServing() != null) {
+			// 정책에 따라 선택
+			servings = (int) Math.round(recipe.getServing()); // 또는 Math.floor / ceil
+		}
+
+		String difficultyCode = null;
+		if (recipe.getDifficulty() != null) {
+			difficultyCode = recipe.getDifficulty().getCode();
+		}
+
+		return new RecipeCardResponse(
+			recipe.getId(),
+			recipe.getTitle(),
+			recipe.getImageUrl(),
+			recipe.getCookingTimeMin(),
+			cookTimeText,
+			servings,
+			difficultyCode,
+			// TODO: rating, likes, comments
+			null,
+			recipe.getCategory(),
+			null,
+			null
+		);
+	}
+
+	private String formatCookTime(Integer minutes) {
+		if (minutes == null || minutes <= 0) {
+			return null;
+		}
+		int min = minutes;
+		if (min < 60) {
+			return min + "분";
+		}
+		int hours = min / 60;
+		int remain = min % 60;
+		if (remain == 0) {
+			return hours + "시간";
+		}
+		return hours + "시간 " + remain + "분";
 	}
 
 }

@@ -22,8 +22,9 @@ public class Recipe {
 
 	private String source;
 
+	private String category;
+
 	// TODO likes, comments 추가?
-	// TODO category 추가
 
 	private Recipe(
 		Long id,
@@ -34,7 +35,8 @@ public class Recipe {
 		RecipeDifficultyEnum difficulty,
 		String imageUrl,
 		String videoUrl,
-		String source
+		String source,
+		String category
 	) {
 		this.id = id;
 		this.title = title;
@@ -45,13 +47,14 @@ public class Recipe {
 		this.imageUrl = imageUrl;
 		this.videoUrl = videoUrl;
 		this.source = source;
+		this.category = category;
 	}
 
 	public static Recipe create(
 		Long id, String title, String description, Double serving, Integer cookingTimeMin,
-		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source
+		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source, String category
 	) {
-		return new Recipe(id, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source);
+		return new Recipe(id, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source, category);
 	}
 
 	public Long getId() {
@@ -124,5 +127,13 @@ public class Recipe {
 
 	public void setSource(String source) {
 		this.source = source;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 }

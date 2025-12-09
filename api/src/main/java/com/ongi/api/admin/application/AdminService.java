@@ -409,13 +409,14 @@ public class AdminService {
 			Recipe.create(
 				null,
 				row.RCP_NM(),
-				row.RCP_PAT2(),
+				null,
 				row.INFO_WGT() == null|| row.INFO_WGT().isEmpty() ? 1 : Double.parseDouble(row.INFO_WGT()),
 				0, // 조리시간 없음
 				RecipeDifficultyEnum.LOW,
 				row.ATT_FILE_NO_MAIN(),
 				row.ATT_FILE_NO_MK(),  // 임시로 모바일 이미지 넣음. TODO Image 별도의 컬럼으로 빼서 사이즈 별로 정의할 수 있도록 할 것.
-				"식품의약품안전처"
+				"식품의약품안전처",
+				row.RCP_PAT2()
 			)
 		);
 
