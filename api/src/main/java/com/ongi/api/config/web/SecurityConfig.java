@@ -36,9 +36,9 @@ public class SecurityConfig {
 			)
 			.authorizeHttpRequests(auth -> auth
 				// TODO 수정 필요
-				.requestMatchers("/public/**")
+				.requestMatchers("/recipe/public/**")
 				.permitAll()
-				.requestMatchers("/private/**")
+				.requestMatchers("/recipe/private/**")
 				.permitAll()
 //				.requestMatchers("/v1/user/checkTag", // 체크 태그
 //					"/v1/user/mic/processed", "/v1/user/mic", "/v1/user/version", // 버전 정보, 마이크 정보
