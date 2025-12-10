@@ -20,6 +20,8 @@ public interface RecipeRepositoryPort {
 
 	Optional<RecipeSteps> findRecipeStepsById(Long id);
 
+	List<RecipeSteps> findRecipeStepsByRecipeId(Long id);
+
 	RecipeTags save(RecipeTags recipeTags);
 
 	List<RecipeTags> saveAllRecipeTags(List<RecipeTags> recipeSteps);

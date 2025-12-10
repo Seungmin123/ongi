@@ -31,6 +31,8 @@ public interface IngredientsRepositoryPort {
 
 	Optional<RecipeIngredient> findRecipeIngredientById(Long id);
 
+	List<RecipeIngredient> findRecipeIngredientByRecipeId(Long recipeId);
+
 	List<RecipeIngredient> saveAllRecipeIngredients(List<RecipeIngredient> recipeIngredients);
 
 	Optional<Ingredient> findByName(String name);

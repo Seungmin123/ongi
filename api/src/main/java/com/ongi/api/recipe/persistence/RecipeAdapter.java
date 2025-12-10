@@ -70,6 +70,15 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	}
 
 	@Override
+	public List<RecipeSteps> findRecipeStepsByRecipeId(Long id) {
+		return recipeStepsRepository
+			.findRecipeStepsByRecipeId(id)
+			.stream()
+			.map(RecipeMapper::toDomain)
+			.toList();
+	}
+
+	@Override
 	public RecipeTags save(RecipeTags recipeTags) {
 		RecipeTagsEntity entity = RecipeMapper.toEntity(recipeTags);
 		RecipeTagsEntity saved = recipeTagsRepository.save(entity);

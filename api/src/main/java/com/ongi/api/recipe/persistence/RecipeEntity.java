@@ -1,6 +1,7 @@
 package com.ongi.api.recipe.persistence;
 
 import com.ongi.api.common.persistence.entity.BaseTimeEntity;
+import com.ongi.recipe.domain.enums.RecipeCategoryEnum;
 import com.ongi.recipe.domain.enums.RecipeDifficultyEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,8 +55,9 @@ public class RecipeEntity extends BaseTimeEntity {
 	@Column(name = "source", comment = "출처")
 	private String source;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "category")
-	private String category;
+	private RecipeCategoryEnum category;
 
 	@Builder
 	public RecipeEntity(
@@ -68,7 +70,7 @@ public class RecipeEntity extends BaseTimeEntity {
 		String imageUrl,
 		String videoUrl,
 		String source,
-		String category
+		RecipeCategoryEnum category
 	) {
 		this.id = id;
 		this.title = title;

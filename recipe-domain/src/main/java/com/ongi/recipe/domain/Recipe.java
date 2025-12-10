@@ -1,5 +1,6 @@
 package com.ongi.recipe.domain;
 
+import com.ongi.recipe.domain.enums.RecipeCategoryEnum;
 import com.ongi.recipe.domain.enums.RecipeDifficultyEnum;
 
 public class Recipe {
@@ -22,7 +23,7 @@ public class Recipe {
 
 	private String source;
 
-	private String category;
+	private RecipeCategoryEnum category;
 
 	// TODO likes, comments 추가?
 
@@ -36,7 +37,7 @@ public class Recipe {
 		String imageUrl,
 		String videoUrl,
 		String source,
-		String category
+		RecipeCategoryEnum category
 	) {
 		this.id = id;
 		this.title = title;
@@ -52,7 +53,7 @@ public class Recipe {
 
 	public static Recipe create(
 		Long id, String title, String description, Double serving, Integer cookingTimeMin,
-		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source, String category
+		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source, RecipeCategoryEnum category
 	) {
 		return new Recipe(id, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source, category);
 	}
@@ -129,11 +130,11 @@ public class Recipe {
 		this.source = source;
 	}
 
-	public String getCategory() {
+	public RecipeCategoryEnum getCategory() {
 		return category;
 	}
 
-	public void setCategory(String category) {
+	public void setCategory(RecipeCategoryEnum category) {
 		this.category = category;
 	}
 }

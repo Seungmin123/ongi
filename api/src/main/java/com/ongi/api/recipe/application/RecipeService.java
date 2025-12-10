@@ -1,22 +1,34 @@
 package com.ongi.api.recipe.application;
 
 import com.ongi.api.common.web.dto.ApiResponse;
+import com.ongi.api.ingredients.persistence.IngredientAdapter;
 import com.ongi.api.recipe.persistence.RecipeAdapter;
+import com.ongi.api.recipe.persistence.RecipeDetailMapper;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
+import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
+import com.ongi.api.recipe.web.dto.RecipeIngredientResponse;
+import com.ongi.api.recipe.web.dto.RecipeStepsResponse;
 import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
 import com.ongi.recipe.domain.search.RecipeSearch;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
 public class RecipeService {
 
 	private final RecipeAdapter recipeAdapter;
+
+	private final IngredientAdapter ingredientAdapter;
+
+	private final JPAQueryFactory queryFactory;
 
 	public ApiResponse<List<RecipeCardResponse>> search(
 		CursorPageRequest cursorPageRequest,
@@ -89,7 +101,7 @@ public class RecipeService {
 			difficultyCode,
 			// TODO: rating, likes, comments
 			null,
-			recipe.getCategory(),
+			recipe.getCategory().getName(),
 			null,
 			null
 		);
@@ -109,6 +121,37 @@ public class RecipeService {
 			return hours + "시간";
 		}
 		return hours + "시간 " + remain + "분";
+	}
+
+	@Transactional(readOnly = true)
+	public ApiResponse<RecipeDetailResponse> getRecipeDetail(Long recipeId) throws NotFoundException {
+		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(NotFoundException::new);
+		List<RecipeIngredientResponse> recipeIngredients =
+			ingredientAdapter.findRecipeIngredientByRecipeId(recipeId).stream()
+				.map(RecipeDetailMapper::toIngredientResponse)
+				.toList();
+
+		List<RecipeStepsResponse> recipeSteps =
+			recipeAdapter.findRecipeStepsByRecipeId(recipeId).stream()
+				.map(RecipeDetailMapper::toStepsResponse)
+				.toList();
+
+		Integer cookTime = recipe.getCookingTimeMin();
+		String cookTimeText = formatCookTime(cookTime);
+
+		return ApiResponse.ok(
+				new RecipeDetailResponse(
+					recipe.getImageUrl(),
+					recipe.getTitle(),
+					cookTime,
+					cookTimeText,
+					recipe.getServing() == null ? null : recipe.getServing().intValue(),
+					recipe.getDifficulty() != null ? recipe.getDifficulty().getCode() : null,
+					// TODO recipe.getRating(),
+					null,
+					recipeIngredients,
+					recipeSteps
+				));
 	}
 
 }

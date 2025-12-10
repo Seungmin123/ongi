@@ -3,7 +3,7 @@ package com.ongi.recipe.domain.enums;
 public enum RecipeDifficultyEnum {
 
 	HIGH("고급"),
-	MIDDLE("중급"),
+	MEDIUM("중급"),
 	LOW("초급");
 
 	private final String code;

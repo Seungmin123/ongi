@@ -172,6 +172,15 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 	}
 
 	@Override
+	public List<RecipeIngredient> findRecipeIngredientByRecipeId(Long recipeId) {
+		return recipeIngredientRepository
+			.findByRecipeId(recipeId)
+			.stream()
+			.map(IngredientMapper::toDomain)
+			.toList();
+	}
+
+	@Override
 	public List<RecipeIngredient> saveAllRecipeIngredients(List<RecipeIngredient> recipeIngredients) {
 		List<RecipeIngredientEntity> entites = recipeIngredients.stream().map(domain -> {
 			Long ingredientId = domain.getIngredientId();

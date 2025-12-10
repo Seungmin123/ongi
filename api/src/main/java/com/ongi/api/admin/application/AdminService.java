@@ -21,6 +21,7 @@ import com.ongi.ingredients.domain.enums.RecipeIngredientUnitEnum;
 import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
+import com.ongi.recipe.domain.enums.RecipeCategoryEnum;
 import com.ongi.recipe.domain.enums.RecipeDifficultyEnum;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
@@ -416,7 +417,7 @@ public class AdminService {
 				row.ATT_FILE_NO_MAIN(),
 				row.ATT_FILE_NO_MK(),  // 임시로 모바일 이미지 넣음. TODO Image 별도의 컬럼으로 빼서 사이즈 별로 정의할 수 있도록 할 것.
 				"식품의약품안전처",
-				row.RCP_PAT2()
+				RecipeCategoryEnum.from(row.RCP_PAT2())
 			)
 		);
 
