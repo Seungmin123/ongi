@@ -24,13 +24,43 @@ spring:
         show_sql: true
         format_sql: true
         use_sql_comments: false
-  redis:
-    enabled: false
-    host: redis
-    port: 6379
+  data:
+    redis:
+      enabled: true
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 16      # 동시에 사용할 커넥션 최대 수
+          max-idle: 8
+          min-idle: 1
+          max-wait: 2000ms
   health:
     redis:
-      enabled: false
+      enabled: true
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384        # 16KB
+      linger-ms: 10            # 소량 트래픽이면 5~10ms 정도로 batch 효과
+      buffer-memory: 33554432  # 32MB
+      transaction-id-prefix: ongi-tx-
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: sample-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false  # 수동 커밋 추천 (성능·정합성 제어 용이)
+      isolation-level: read_committed
+    listener:
+      type: single
+      ack-mode: manual           # 수동 ack (enable-auto-commit=false와 맞춰서)
 #logging:
 #  level:
 #    io.opentelemetry: DEBUG        # OTel SDK/Export

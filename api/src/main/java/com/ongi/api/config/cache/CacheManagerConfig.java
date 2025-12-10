@@ -27,15 +27,15 @@ public class CacheManagerConfig {
 	private final ObjectMapper objectMapper;
 
 	@Bean
-	@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true")
+	@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true")
 	public RedisConnectionFactory redisConnectionFactory(
-		@Value("${spring.redis.host}") String host,
-		@Value("${spring.redis.port}") int port) {
+		@Value("${spring.data.redis.host}") String host,
+		@Value("${spring.data.redis.port}") int port) {
 		return new LettuceConnectionFactory(host, port);
 	}
 
 	@Bean
-	@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "true")
+	@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true")
 	public CacheManager redisCacheManager(RedisConnectionFactory factory) {
 		GenericJacksonJsonRedisSerializer serializer = new GenericJacksonJsonRedisSerializer(objectMapper);
 
@@ -54,14 +54,14 @@ public class CacheManagerConfig {
 
 	@Bean
 	@Profile("local")
-	@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "false", matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "false", matchIfMissing = true)
 	public CacheManager LocalCacheManager() {
 		return new ConcurrentMapCacheManager("userCache", "shortLived", "longLived", "content");
 	}
 
 	@Bean
 	@Profile("!local")
-	@ConditionalOnProperty(name = "spring.redis.enabled", havingValue = "false", matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "false", matchIfMissing = true)
 	public CacheManager noOpCacheManager() {
 		return new NoOpCacheManager();
 	}

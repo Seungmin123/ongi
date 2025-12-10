@@ -1,0 +1,42 @@
+version: "3.8"
+
+#  docker compose \
+#  -f /Users/leeseumgin/Documents/CODE/ongi/docker-compose.yml \
+#  -f /Users/leeseumgin/Documents/CODE/ongi/kafka/kafka-tuning.yml \
+#  up -d
+
+services:
+  redis:
+    image: redis:7
+    container_name: dev-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - redis-data:/data
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 100000
+        hard: 100000
+    networks:
+      - dev-net
+
+  kafka:
+    image: apache/kafka:4.1.1
+    container_name: dev-kafka
+    ports:
+      - "9092:9092"
+    volumes:
+      - ./kafka-data:/var/lib/kafka/data
+    restart: unless-stopped
+    networks:
+      - dev-net
+
+volumes:
+  redis-data:
+
+networks:
+  dev-net:
+    name: dev-net
