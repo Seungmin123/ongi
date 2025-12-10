@@ -26,31 +26,24 @@ services:
     ports:
       - "9092:9092"
       - "9093:9093"
-    # environment:
-    #   CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
+    # server.properties 파일은 "파일"로 매핑
     volumes:
-      - ./kafka/config:/opt/kafka/config
+      - ./kafka/config/server.properties:/opt/kafka/config/server.properties
+      - ./kafka/data:/var/lib/kafka/data
     command:
       - sh
       - -c
       - |
         set -e
-
-        # CLUSTER_ID 없으면 자동 생성
-        if [ -z "$CLUSTER_ID" ]; then
-          CLUSTER_ID="$(
-            /opt/kafka/bin/kafka-storage.sh random-uuid
-          )"
-          echo "Generated CLUSTER_ID=${CLUSTER_ID}"
-        else
-          echo "Using CLUSTER_ID=${CLUSTER_ID}"
-        fi
-
+        
+        CLUSTER_ID="$(/opt/kafka/bin/kafka-storage.sh random-uuid)"
+        echo "Generated CLUSTER_ID=${CLUSTER_ID}"
+        
         /opt/kafka/bin/kafka-storage.sh format \
           --config /opt/kafka/config/server.properties \
           --cluster-id "${CLUSTER_ID}" \
           --ignore-formatted
-
+        
         exec /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
     restart: unless-stopped
     networks:
