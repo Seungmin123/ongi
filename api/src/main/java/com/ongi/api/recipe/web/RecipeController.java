@@ -9,6 +9,7 @@ import com.ongi.api.recipe.web.dto.RecipeDetailRequest;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
 import com.ongi.api.recipe.web.dto.RecipeSearchRequest;
 import com.ongi.recipe.domain.search.RecipeSearch;
+import com.ongi.recipe.domain.search.RecipeSearchCondition;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,8 @@ public class RecipeController {
 		@ModelAttribute RecipeSearchRequest searchRequest
 	) throws Exception {
 		RecipeSearch search = searchRequest.toSearch();
-		return recipeService.search(cursorPageRequest, search);
+		RecipeSearchCondition condition = RecipeSearchCondition.from(search);
+		return recipeService.search(cursorPageRequest, condition);
 	}
 
 	@GetMapping("/public/v1/recipe/{recipeId}")

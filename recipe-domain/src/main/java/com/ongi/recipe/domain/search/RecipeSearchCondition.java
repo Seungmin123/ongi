@@ -33,4 +33,46 @@ public class RecipeSearchCondition {
 	public static RecipeSearchCondition empty() {
 		return new RecipeSearchCondition(null, null, null, null, null);
 	}
+
+	public String toKeyString() {
+		return String.join(":",
+			keyword != null ? keyword : "",
+			tag != null ? tag : "",
+			category != null ? category.name() : "",
+			ingredientId != null ? ingredientId.toString() : "",
+			maxCookingTimeMin != null ? maxCookingTimeMin.toString() : ""
+		);
+	}
+
+	public static RecipeSearchCondition from(RecipeSearch search) {
+		if (search == null) {
+			return empty();
+		}
+
+		return switch (search) {
+			case RecipeSearch.ByKeyword s -> new RecipeSearchCondition(
+				s.keyword(), null, null, null, null
+			);
+
+			case RecipeSearch.ByTag s -> new RecipeSearchCondition(
+				null, s.tag(), null, null, null
+			);
+
+			case RecipeSearch.ByCategory s -> new RecipeSearchCondition(
+				null, null, s.category(), null, null
+			);
+
+			case RecipeSearch.ByIngredient s -> new RecipeSearchCondition(
+				null, null, null, s.ingredientId(), null
+			);
+
+			case RecipeSearch.ByMaxCookingTimeMin s -> new RecipeSearchCondition(
+				null, null, null, null, s.maxCookingTimeMin()
+			);
+
+			case RecipeSearch.ByComplex s -> new RecipeSearchCondition(
+				s.keyword(), s.tag(), s.category(), s.ingredientId(), s.maxCookingTimeMin()
+			);
+		};
+	}
 }

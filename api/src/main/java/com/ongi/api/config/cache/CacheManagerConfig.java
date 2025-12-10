@@ -3,10 +3,10 @@ package com.ongi.api.config.cache;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.context.annotation.Bean;
@@ -17,14 +17,12 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer.GenericJacksonJsonRedisSerializerBuilder;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import tools.jackson.databind.ObjectMapper;
 
-@RequiredArgsConstructor
+@EnableCaching
 @Configuration
 public class CacheManagerConfig {
-
-	private final ObjectMapper objectMapper;
 
 	@Bean
 	@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true")
@@ -37,11 +35,12 @@ public class CacheManagerConfig {
 	@Bean
 	@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "true")
 	public CacheManager redisCacheManager(RedisConnectionFactory factory) {
-		GenericJacksonJsonRedisSerializer serializer = new GenericJacksonJsonRedisSerializer(objectMapper);
-
+		GenericJacksonJsonRedisSerializer serializer =
+			GenericJacksonJsonRedisSerializer.create(
+				GenericJacksonJsonRedisSerializerBuilder::enableUnsafeDefaultTyping);
 
 		RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-			.prefixCacheNameWith("kitpage::") // 전역 prefix
+			.prefixCacheNameWith("ongi::") // 전역 prefix
 			.entryTtl(Duration.ofMinutes(10)) // 기본 TTL 설정
 			.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
 			.disableCachingNullValues();
@@ -56,7 +55,7 @@ public class CacheManagerConfig {
 	@Profile("local")
 	@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "false", matchIfMissing = true)
 	public CacheManager LocalCacheManager() {
-		return new ConcurrentMapCacheManager("userCache", "shortLived", "longLived", "content");
+		return new ConcurrentMapCacheManager("userCache", "shortLived", "longLived", "content", "recipeList");
 	}
 
 	@Bean
@@ -84,6 +83,8 @@ public class CacheManagerConfig {
 		m.put("shortLived", Duration.ofSeconds(30));
 		m.put("longLived",  Duration.ofHours(1));
 		m.put("content",    Duration.ofDays(1));
+
+		m.put("recipeList", Duration.ofMinutes(5));
 		return m;
 	}
 
