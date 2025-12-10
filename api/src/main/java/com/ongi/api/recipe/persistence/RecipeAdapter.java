@@ -127,9 +127,9 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 			where.and(recipeTags.tag.eq(condition.getTag().trim()));
 		}
 
-		// 카테고리 (지금은 String)
+		// 카테고리
 		if (condition.getCategory() != null) {
-			where.and(recipe.description.eq(condition.getCategory().name()));
+			where.and(recipe.category.eq(condition.getCategory()));
 		}
 
 		// 특정 재료 포함 레시피

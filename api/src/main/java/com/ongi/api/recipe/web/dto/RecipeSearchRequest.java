@@ -6,8 +6,7 @@ import com.ongi.recipe.domain.search.RecipeSearch;
 public record RecipeSearchRequest(
 	String keyword,
 	String tag,
-	// TODO DB 마이그레이션 및 category Enum화
-	String category,
+	RecipeCategoryEnum category,
 	Long ingredientId,
 	Integer maxCookingTimeMin
 ) {
@@ -20,8 +19,8 @@ public record RecipeSearchRequest(
 		if (keyword != null && !keyword.isBlank()) {
 			return new RecipeSearch.ByKeyword(keyword);
 		}
-		if (category != null && !category.isBlank()) {
-			return new RecipeSearch.ByCategory(RecipeCategoryEnum.from(category));
+		if (category != null) {
+			return new RecipeSearch.ByCategory(category);
 		}
 		if (ingredientId != null) {
 			return new RecipeSearch.ByIngredient(ingredientId);
@@ -33,7 +32,7 @@ public record RecipeSearchRequest(
 		return new RecipeSearch.ByComplex(
 			keyword,
 			tag,
-			RecipeCategoryEnum.from(category),
+			category,
 			ingredientId,
 			maxCookingTimeMin
 		);

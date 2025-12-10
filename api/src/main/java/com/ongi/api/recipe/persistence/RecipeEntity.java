@@ -31,7 +31,7 @@ public class RecipeEntity extends BaseTimeEntity {
 	@Column(name = "title", nullable = false)
 	private String title;
 
-	@Column(name = "description")
+	@Column(name = "description", columnDefinition = "MEDIUMTEXT")
 	private String description;
 
 	@ColumnDefault("1")

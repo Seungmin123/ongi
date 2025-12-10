@@ -123,7 +123,10 @@ public class RecipeService {
 		return hours + "시간 " + remain + "분";
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional(
+		readOnly = true,
+		transactionManager = "transactionManager"
+	)
 	public ApiResponse<RecipeDetailResponse> getRecipeDetail(Long recipeId) throws NotFoundException {
 		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(NotFoundException::new);
 		List<RecipeIngredientResponse> recipeIngredients =
