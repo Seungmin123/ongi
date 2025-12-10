@@ -1,18 +1,19 @@
 package com.ongi.recipe.domain.search;
 
+import com.ongi.recipe.domain.enums.RecipeCategoryEnum;
+
 public class RecipeSearchCondition {
 
 	private final String keyword;
 	private final String tag;
-	// TODO DB 마이그레이션 및 category Enum화
-	private final String category;
+	private final RecipeCategoryEnum category;
 	private final Long ingredientId;
 	private final Integer maxCookingTimeMin;
 
 	public RecipeSearchCondition(
 		String keyword,
 		String tag,
-		String category,
+		RecipeCategoryEnum category,
 		Long ingredientId,
 		Integer maxCookingTimeMin
 	) {
@@ -25,7 +26,7 @@ public class RecipeSearchCondition {
 
 	public String getKeyword() { return keyword; }
 	public String getTag() { return tag; }
-	public String getCategory() { return category; }
+	public RecipeCategoryEnum getCategory() { return category; }
 	public Long getIngredientId() { return ingredientId; }
 	public Integer getMaxCookingTimeMin() { return maxCookingTimeMin; }
 

@@ -1,5 +1,7 @@
 package com.ongi.recipe.domain.search;
 
+import com.ongi.recipe.domain.enums.RecipeCategoryEnum;
+
 public sealed interface RecipeSearch permits
 	RecipeSearch.ByKeyword,
 	RecipeSearch.ByTag,
@@ -10,14 +12,13 @@ public sealed interface RecipeSearch permits
 {
 	record ByKeyword(String keyword) implements RecipeSearch {}
 	record ByTag(String tag) implements RecipeSearch {}
-	// TODO DB 마이그레이션 및 category Enum화
-	record ByCategory(String category) implements RecipeSearch {}
+	record ByCategory(RecipeCategoryEnum category) implements RecipeSearch {}
 	record ByIngredient(Long ingredientId) implements RecipeSearch {}
 	record ByMaxCookingTimeMin(Integer maxCookingTimeMin) implements RecipeSearch {}
 	record ByComplex(
 		String keyword,
 		String tag,
-		String category,
+		RecipeCategoryEnum category,
 		Long ingredientId,
 		Integer maxCookingTimeMin
 	) implements RecipeSearch {}

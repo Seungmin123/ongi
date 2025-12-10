@@ -128,9 +128,8 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 		}
 
 		// 카테고리 (지금은 String)
-		if (condition.getCategory() != null && !condition.getCategory().isBlank()) {
-			// TODO: category 가 Enum 으로 바뀌면 eq(enum) 으로 교체
-			where.and(recipe.description.eq(condition.getCategory().trim()));
+		if (condition.getCategory() != null) {
+			where.and(recipe.description.eq(condition.getCategory().name()));
 		}
 
 		// 특정 재료 포함 레시피

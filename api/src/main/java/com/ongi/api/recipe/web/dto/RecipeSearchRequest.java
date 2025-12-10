@@ -1,5 +1,6 @@
 package com.ongi.api.recipe.web.dto;
 
+import com.ongi.recipe.domain.enums.RecipeCategoryEnum;
 import com.ongi.recipe.domain.search.RecipeSearch;
 
 public record RecipeSearchRequest(
@@ -20,7 +21,7 @@ public record RecipeSearchRequest(
 			return new RecipeSearch.ByKeyword(keyword);
 		}
 		if (category != null && !category.isBlank()) {
-			return new RecipeSearch.ByCategory(category);
+			return new RecipeSearch.ByCategory(RecipeCategoryEnum.from(category));
 		}
 		if (ingredientId != null) {
 			return new RecipeSearch.ByIngredient(ingredientId);
@@ -32,7 +33,7 @@ public record RecipeSearchRequest(
 		return new RecipeSearch.ByComplex(
 			keyword,
 			tag,
-			category,
+			RecipeCategoryEnum.from(category),
 			ingredientId,
 			maxCookingTimeMin
 		);
