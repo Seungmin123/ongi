@@ -1,9 +1,6 @@
 version: "3.8"
 
-#  docker compose \
-#  -f /Users/leeseumgin/Documents/CODE/ongi/docker-compose.yml \
-#  -f /Users/leeseumgin/Documents/CODE/ongi/kafka/kafka-tuning.yml \
-#  up -d
+#  docker compose -f /Users/leeseumgin/Documents/CODE/ongi/docker-compose.yml up -d
 
 services:
   redis:
@@ -28,8 +25,33 @@ services:
     container_name: dev-kafka
     ports:
       - "9092:9092"
+      - "9093:9093"
+    # environment:
+    #   CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
     volumes:
-      - ./kafka-data:/var/lib/kafka/data
+      - ./kafka/config:/opt/kafka/config
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+
+        # CLUSTER_ID 없으면 자동 생성
+        if [ -z "$CLUSTER_ID" ]; then
+          CLUSTER_ID="$(
+            /opt/kafka/bin/kafka-storage.sh random-uuid
+          )"
+          echo "Generated CLUSTER_ID=${CLUSTER_ID}"
+        else
+          echo "Using CLUSTER_ID=${CLUSTER_ID}"
+        fi
+
+        /opt/kafka/bin/kafka-storage.sh format \
+          --config /opt/kafka/config/server.properties \
+          --cluster-id "${CLUSTER_ID}" \
+          --ignore-formatted
+
+        exec /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
     restart: unless-stopped
     networks:
       - dev-net
