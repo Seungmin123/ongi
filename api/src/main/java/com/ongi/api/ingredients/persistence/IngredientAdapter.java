@@ -199,6 +199,11 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 	}
 
 	@Override
+	public void deleteRecipeIngredientByRecipeId(Long recipeId) {
+		recipeIngredientRepository.deleteByRecipeId(recipeId);
+	}
+
+	@Override
 	public Optional<Ingredient> findByName(String name) {
 		return ingredientRepository.findByName(name)
 			.map(IngredientMapper::toDomain);

@@ -14,6 +14,8 @@ public interface RecipeRepositoryPort {
 
 	Optional<Recipe> findRecipeById(Long id);
 
+	void deleteRecipeById(Long id);
+
 	RecipeSteps save(RecipeSteps recipeSteps);
 
 	List<RecipeSteps> saveAllRecipeSteps(List<RecipeSteps> recipeSteps);
@@ -21,6 +23,8 @@ public interface RecipeRepositoryPort {
 	Optional<RecipeSteps> findRecipeStepsById(Long id);
 
 	List<RecipeSteps> findRecipeStepsByRecipeId(Long id);
+
+	void deleteRecipeStepsByRecipeId(Long recipeId);
 
 	RecipeTags save(RecipeTags recipeTags);
 

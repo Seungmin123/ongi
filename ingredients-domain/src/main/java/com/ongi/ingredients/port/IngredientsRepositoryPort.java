@@ -35,6 +35,8 @@ public interface IngredientsRepositoryPort {
 
 	List<RecipeIngredient> saveAllRecipeIngredients(List<RecipeIngredient> recipeIngredients);
 
+	void deleteRecipeIngredientByRecipeId(Long recipeId);
+
 	Optional<Ingredient> findByName(String name);
 
 	Ingredient findIngredientByName(String name);

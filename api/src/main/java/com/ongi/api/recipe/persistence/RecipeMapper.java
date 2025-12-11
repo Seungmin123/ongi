@@ -9,6 +9,7 @@ public class RecipeMapper {
 	public static RecipeEntity toEntity(Recipe recipe) {
 		if(recipe.getId() == null) {
 			return RecipeEntity.builder()
+				.authorId(recipe.getAuthorId())
 				.title(recipe.getTitle())
 				.description(recipe.getDescription())
 				.serving(recipe.getServing())
@@ -22,6 +23,7 @@ public class RecipeMapper {
 		} else {
 			return RecipeEntity.builder()
 				.id(recipe.getId())
+				.authorId(recipe.getAuthorId())
 				.title(recipe.getTitle())
 				.description(recipe.getDescription())
 				.serving(recipe.getServing())
@@ -36,7 +38,7 @@ public class RecipeMapper {
 	}
 
 	public static Recipe toDomain(RecipeEntity entity) {
-		return Recipe.create(entity.getId(), entity.getTitle(), entity.getDescription(), entity.getServing(), entity.getCookingTimeMin(), entity.getDifficulty(), entity.getImageUrl(),
+		return Recipe.create(entity.getId(), entity.getAuthorId(), entity.getTitle(), entity.getDescription(), entity.getServing(), entity.getCookingTimeMin(), entity.getDifficulty(), entity.getImageUrl(),
 			entity.getVideoUrl(), entity.getSource(), entity.getCategory());
 	}
 

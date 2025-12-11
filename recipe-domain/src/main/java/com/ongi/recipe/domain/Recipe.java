@@ -7,6 +7,8 @@ public class Recipe {
 
 	private Long id;
 
+	private Long authorId;
+
 	private String title;
 
 	private String description;
@@ -29,6 +31,7 @@ public class Recipe {
 
 	private Recipe(
 		Long id,
+		Long authorId,
 		String title,
 		String description,
 		Double serving,
@@ -40,6 +43,7 @@ public class Recipe {
 		RecipeCategoryEnum category
 	) {
 		this.id = id;
+		this.authorId = authorId;
 		this.title = title;
 		this.description = description;
 		this.serving = serving;
@@ -52,10 +56,10 @@ public class Recipe {
 	}
 
 	public static Recipe create(
-		Long id, String title, String description, Double serving, Integer cookingTimeMin,
+		Long id, Long authorId, String title, String description, Double serving, Integer cookingTimeMin,
 		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source, RecipeCategoryEnum category
 	) {
-		return new Recipe(id, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source, category);
+		return new Recipe(id, authorId, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source, category);
 	}
 
 	public Long getId() {
@@ -64,6 +68,14 @@ public class Recipe {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getAuthorId() {
+		return authorId;
+	}
+
+	public void setAuthorId(Long authorId) {
+		this.authorId = authorId;
 	}
 
 	public String getTitle() {

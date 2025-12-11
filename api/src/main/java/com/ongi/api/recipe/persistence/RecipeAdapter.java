@@ -49,6 +49,11 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	}
 
 	@Override
+	public void deleteRecipeById(Long id) {
+		recipeRepository.deleteById(id);
+	}
+
+	@Override
 	public RecipeSteps save(RecipeSteps recipeSteps) {
 		RecipeStepsEntity entity = RecipeMapper.toEntity(recipeSteps);
 		RecipeStepsEntity saved = recipeStepsRepository.save(entity);
@@ -76,6 +81,11 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 			.stream()
 			.map(RecipeMapper::toDomain)
 			.toList();
+	}
+
+	@Override
+	public void deleteRecipeStepsByRecipeId(Long recipeId) {
+		recipeStepsRepository.deleteById(recipeId);
 	}
 
 	@Override

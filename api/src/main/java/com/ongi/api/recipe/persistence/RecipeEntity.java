@@ -28,6 +28,9 @@ public class RecipeEntity extends BaseTimeEntity {
 	@Column(name = "recipe_id", nullable = false)
 	private Long id;
 
+	@Column(name = "author_id")
+	private Long authorId;
+
 	@Column(name = "title", nullable = false)
 	private String title;
 
@@ -62,6 +65,7 @@ public class RecipeEntity extends BaseTimeEntity {
 	@Builder
 	public RecipeEntity(
 		Long id,
+		Long authorId,
 		String title,
 		String description,
 		Double serving,
@@ -73,6 +77,7 @@ public class RecipeEntity extends BaseTimeEntity {
 		RecipeCategoryEnum category
 	) {
 		this.id = id;
+		this.authorId = authorId;
 		this.title = title;
 		this.description = description;
 		this.serving = serving;

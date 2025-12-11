@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface RecipeIngredientRepository extends JpaRepository<RecipeIngredientEntity, Long> {
 
 	List<RecipeIngredientEntity> findByRecipeId(Long id);
+
+	void deleteByRecipeId(Long id);
 }
