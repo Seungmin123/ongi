@@ -55,7 +55,10 @@ public class CacheManagerConfig {
 	@Profile("local")
 	@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "false", matchIfMissing = true)
 	public CacheManager LocalCacheManager() {
-		return new ConcurrentMapCacheManager("userCache", "shortLived", "longLived", "content", "recipeList");
+		return new ConcurrentMapCacheManager(
+			"userCache", "shortLived", "longLived", "content"
+			, "recipeList", "recipeDetail"
+		);
 	}
 
 	@Bean
@@ -85,6 +88,7 @@ public class CacheManagerConfig {
 		m.put("content",    Duration.ofDays(1));
 
 		m.put("recipeList", Duration.ofMinutes(5));
+		m.put("recipeDetail", Duration.ofMinutes(5));
 		return m;
 	}
 

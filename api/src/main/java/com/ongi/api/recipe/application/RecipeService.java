@@ -105,6 +105,11 @@ public class RecipeService {
 		return hours + "시간 " + remain + "분";
 	}
 
+	@Cacheable(
+		cacheNames = "recipeDetail",
+		key = "#recipeId",
+		unless = "#result == null || #result.data == null"
+	)
 	@Transactional(
 		readOnly = true,
 		transactionManager = "transactionManager"
