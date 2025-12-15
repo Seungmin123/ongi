@@ -56,7 +56,7 @@ public class UserController {
 	 * @param req
 	 * @return
 	 */
-	@PostMapping("/public/logign")
+	@PostMapping("/public/login")
 	public ApiResponse<JwtTokens> login(
 		@RequestBody MemberLoginRequest req
 	) {
