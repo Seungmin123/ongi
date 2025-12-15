@@ -1,6 +1,7 @@
 package com.ongi.api.user.persistence;
 
 import com.ongi.api.common.persistence.entity.BaseTimeEntity;
+import com.ongi.user.domain.enums.UserTier;
 import com.ongi.user.domain.enums.UserTypeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,17 +37,23 @@ public class UserEntity extends BaseTimeEntity {
 	@Column(name = "type", nullable = false)
 	private UserTypeEnum type;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "tier", nullable = false)
+	private UserTier tier;
+
 	@Builder
 	public UserEntity(
 		Long id,
 		String email,
 		String passwordHash,
-		UserTypeEnum type
+		UserTypeEnum type,
+		UserTier tier
 	) {
 		this.id = id;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.type = type;
+		this.tier = tier;
 	}
 
 }

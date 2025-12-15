@@ -24,6 +24,13 @@ spring:
         show_sql: true
         format_sql: true
         use_sql_comments: false
+  security:
+    jwt:
+      issuer: "ongi"
+      access-exp-seconds: 90 # 15분
+      refresh-exp-seconds: 1209600 # 14일
+      access-key: snO+mXp9+ONXBHwX6D8EqsXq38PUaqJuspmkeK+nY+LWRBubp/+OwzlZ2+Tl3zzC
+      refresh-key: ELKy9Qti74caVAWvuKHRWZ4ISZ+YBHfFAIqM3jin5GtaQmk0xlL/CgWZftX4UoTV
   data:
     redis:
       enabled: true

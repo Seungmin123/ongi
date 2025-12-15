@@ -40,6 +40,27 @@ public class UserProfileEntity extends BaseTimeEntity {
 	@Column(name = "disliked_ingredients")
 	private String dislikedIngredients;
 
+	@Column(name = "profile_image_url")
+	private String profileImageUrl;
+
+	@Column(name = "name")
+	private String name;
+
+	@Column(name = "phone_number")
+	private String phoneNumber;
+
+	@Column(name = "birth", comment = "YYYYMMDD")
+	private String birth;
+
+	@Column(name = "zip_code")
+	private String zipCode;
+
+	@Column(name = "address")
+	private String address;
+
+	@Column(name = "address_detail")
+	private String addressDetail;
+
 	@Builder
 	public UserProfileEntity(
 		Long id,
@@ -47,7 +68,14 @@ public class UserProfileEntity extends BaseTimeEntity {
 		String displayName,
 		String allergens,
 		Integer dietGoal,
-		String dislikedIngredients
+		String dislikedIngredients,
+		String profileImageUrl,
+		String name,
+		String phoneNumber,
+		String birth,
+		String zipCode,
+		String address,
+		String addressDetail
 	) {
 		this.id = id;
 		this.userId = userId;
@@ -55,6 +83,13 @@ public class UserProfileEntity extends BaseTimeEntity {
 		this.allergens = allergens;
 		this.dietGoal = dietGoal;
 		this.dislikedIngredients = dislikedIngredients;
+		this.profileImageUrl = profileImageUrl;
+		this.name = name;
+		this.phoneNumber = phoneNumber;
+		this.birth = birth;
+		this.zipCode = zipCode;
+		this.address = address;
+		this.addressDetail = addressDetail;
 	}
 
 }

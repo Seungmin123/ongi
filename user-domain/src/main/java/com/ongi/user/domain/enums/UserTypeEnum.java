@@ -4,6 +4,8 @@ public enum UserTypeEnum {
 
 	EMAIL("EMAIL"),
 	APPLE("APPLE"),
+	NAVER("NAVER"),
+	KAKAO("KAKAO"),
 	GOOGLE("GOOGLE");
 
 	private final String code;

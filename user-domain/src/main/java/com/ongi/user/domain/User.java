@@ -1,5 +1,6 @@
 package com.ongi.user.domain;
 
+import com.ongi.user.domain.enums.UserTier;
 import com.ongi.user.domain.enums.UserTypeEnum;
 
 public class User {
@@ -12,22 +13,26 @@ public class User {
 
 	private UserTypeEnum type;
 
+	private UserTier tier;
+
 	private User(
 		Long id,
 		String email,
 		String passwordHash,
-		UserTypeEnum type
+		UserTypeEnum type,
+		UserTier tier
 	) {
 		this.id = id;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.type = type;
+		this.tier = tier;
 	}
 
 	public static User create(
-		Long id, String email, String passwordHash, UserTypeEnum type
+		Long id, String email, String passwordHash, UserTypeEnum type, UserTier tier
 	) {
-		return new User(id, email, passwordHash, type);
+		return new User(id, email, passwordHash, type, tier);
 	}
 
 	public Long getId() {
@@ -60,5 +65,13 @@ public class User {
 
 	public void setType(UserTypeEnum type) {
 		this.type = type;
+	}
+
+	public UserTier getTier() {
+		return tier;
+	}
+
+	public void setTier(UserTier tier) {
+		this.tier = tier;
 	}
 }

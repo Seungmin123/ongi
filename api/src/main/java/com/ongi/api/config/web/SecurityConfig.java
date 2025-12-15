@@ -19,8 +19,6 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
 	// TODO 수정
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -29,7 +27,9 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthenticationEntryPoint))
+			.exceptionHandling(eh -> eh
+				.authenticationEntryPoint(RestAuthHandlers.unauthorizedEntryPoint())
+				.accessDeniedHandler(RestAuthHandlers.accessDeniedHandler()))
 			.headers(h -> h
 				.contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; img-src 'self' data:;"))
 				.frameOptions(FrameOptionsConfig::disable)
@@ -39,15 +39,8 @@ public class SecurityConfig {
 				.requestMatchers("/recipe/public/**")
 				.permitAll()
 				.requestMatchers("/recipe/private/**")
-				.permitAll()
-//				.requestMatchers("/v1/user/checkTag", // 체크 태그
-//					"/v1/user/mic/processed", "/v1/user/mic", "/v1/user/version", // 버전 정보, 마이크 정보
-//					"/v1/user/kit/**", "/v1/user/url", // 키트 삭제, URL 조회
-//					"/v1/content/list")
-//				.hasAnyRole("GUEST", "HALF_LINKER", "LINKER", "ENGINEER")
-//				.requestMatchers("/v1/**")
-//				.hasAnyRole("HALF_LINKER", "LINKER", "ENGINEER")
-//				.anyRequest().authenticated()
+				.authenticated()
+				.anyRequest().authenticated()
 			);
 
 		return http.build();
