@@ -67,6 +67,12 @@ public class UserProfile {
 		return new UserProfile(id, userId, displayName, allergens, dietGoal, dislikedIngredients, profileImageUrl, name, phoneNumber, birth, zipCode, address, addressDetail);
 	}
 
+	public static UserProfile create(
+		Long userId, String displayName, String profileImageUrl
+	) {
+		return new UserProfile(null, userId, displayName, null, null, null, profileImageUrl, null, null, null, null, null, null);
+	}
+
 	public Long getId() {
 		return id;
 	}
