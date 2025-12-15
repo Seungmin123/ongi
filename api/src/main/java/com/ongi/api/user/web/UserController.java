@@ -69,8 +69,6 @@ public class UserController {
 
 	// TODO 비밀번호 재설정
 
-	// TODO 로그인
-
 	// TODO OAuth Naver
 
 	// TODO OAuth Kakao
