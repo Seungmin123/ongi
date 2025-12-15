@@ -5,6 +5,7 @@ import com.ongi.api.config.auth.JwtTokenProvider;
 import com.ongi.api.config.auth.RefreshTokenStore;
 import com.ongi.api.config.properties.JwtProperties;
 import com.ongi.api.user.persistence.UserAdapter;
+import com.ongi.api.user.web.dto.FindEmailRequest;
 import com.ongi.api.user.web.dto.MemberJoinRequest;
 import com.ongi.api.user.web.dto.MemberLoginRequest;
 import com.ongi.user.domain.User;
@@ -121,5 +122,14 @@ public class AuthService {
 
 		return new JwtTokens(newAccess, newRefresh);
 
+	}
+
+	@Transactional(readOnly = true)
+	public void findEmail(FindEmailRequest request) {
+		userAdapter.findUserProfileByDisplayName(request.displayName())
+			.ifPresent(user -> {
+				// TODO Email 전송
+				// mailService.sendUserIdGuideMail(request.email());
+			});
 	}
 }

@@ -17,4 +17,6 @@ public interface UserRepositoryPort {
 	UserProfile save(UserProfile userProfile);
 
 	Optional<UserProfile> findUserProfileById(Long id);
+
+	Optional<UserProfile> findUserProfileByDisplayName(String displayName);
 }

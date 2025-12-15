@@ -4,12 +4,14 @@ import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.common.web.dto.JwtTokens;
 import com.ongi.api.user.application.AuthService;
 import com.ongi.api.user.application.UserService;
+import com.ongi.api.user.web.dto.FindEmailRequest;
 import com.ongi.api.user.web.dto.MemberJoinRequest;
 import com.ongi.api.user.web.dto.MemberLoginRequest;
 import com.ongi.api.user.web.dto.MemberResponse;
 import com.ongi.user.domain.enums.PresignedTypeEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,6 +63,19 @@ public class UserController {
 		@RequestBody MemberLoginRequest req
 	) {
 		return ApiResponse.ok(authService.login(req));
+	}
+
+	/**
+	 * 아이디 찾기
+	 * @param findEmailRequest
+	 * @return
+	 */
+	@GetMapping("/public/find/id")
+	public ApiResponse<Void> findById(
+		@ModelAttribute FindEmailRequest findEmailRequest
+	) {
+		authService.findEmail(findEmailRequest);
+		return ApiResponse.ok();
 	}
 
 	// TODO Email 발송
