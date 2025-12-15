@@ -2,12 +2,16 @@ package com.ongi.api.user.application;
 
 import com.ongi.api.common.web.dto.JwtTokens;
 import com.ongi.api.config.auth.JwtTokenProvider;
-import com.ongi.api.config.auth.RefreshTokenStore;
+import com.ongi.api.user.application.component.MailSender;
+import com.ongi.api.user.cache.PasswordResetTokenStore;
+import com.ongi.api.user.cache.RefreshTokenStore;
 import com.ongi.api.config.properties.JwtProperties;
 import com.ongi.api.user.persistence.UserAdapter;
 import com.ongi.api.user.web.dto.FindEmailRequest;
 import com.ongi.api.user.web.dto.MemberJoinRequest;
 import com.ongi.api.user.web.dto.MemberLoginRequest;
+import com.ongi.api.user.web.dto.PasswordResetConfirmRequest;
+import com.ongi.api.user.web.dto.PasswordResetRequest;
 import com.ongi.user.domain.User;
 import com.ongi.user.domain.UserProfile;
 import com.ongi.user.domain.UserRoleResolver;
@@ -27,15 +31,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
 
-	private final RefreshTokenStore refreshStore;
-
 	private final UserAdapter userAdapter;
 
 	private final PasswordEncoder passwordEncoder;
 
+	private final RefreshTokenStore refreshStore;
+
+	private final PasswordResetTokenStore passwordResetTokenStore;
+
 	private final JwtTokenProvider jwtTokenProvider;
 
 	private final JwtProperties props;
+
+	private final MailSender mailSender;
+
+	private static final Duration RESET_TTL = Duration.ofMinutes(15);
 
 	@Transactional(transactionManager = "transactionManager")
 	public void join(MemberJoinRequest request) {
@@ -125,11 +135,45 @@ public class AuthService {
 	}
 
 	@Transactional(readOnly = true)
-	public void findEmail(FindEmailRequest request) {
-		userAdapter.findUserProfileByDisplayName(request.displayName())
+	public void findEmail(FindEmailRequest req) {
+		userAdapter.findUserProfileByDisplayName(req.displayName())
 			.ifPresent(user -> {
-				// TODO Email 전송
-				// mailService.sendUserIdGuideMail(request.email());
+				 mailSender.sendUserIdGuideMail(req.email());
 			});
+	}
+
+	@Transactional
+	public void requestPasswordReset(PasswordResetRequest req) {
+		userAdapter.findUserByEmail(req.email()).ifPresent(user -> {
+			String rawToken = UUID.randomUUID().toString();
+			String tokenHash = PasswordResetTokenStore.sha256(rawToken);
+
+			passwordResetTokenStore.put(tokenHash, String.valueOf(user.getId()), RESET_TTL);
+
+			// TODO Front URL 로 교체
+			String link = "https://your-frontend/reset-password?token=" + rawToken;
+			mailSender.sendPasswordResetMail(user.getEmail(), link);
+		});
+	}
+
+	@Transactional
+	public void confirmPasswordReset(PasswordResetConfirmRequest req) {
+		String tokenHash = PasswordResetTokenStore.sha256(req.token());
+		String userId = passwordResetTokenStore.getUserId(tokenHash);
+
+		if (userId == null) {
+			throw new IllegalArgumentException("Invalid or expired reset token");
+		}
+
+		// 1회용 소비
+		passwordResetTokenStore.consume(tokenHash);
+
+		User user = userAdapter.findUserById(Long.valueOf(userId))
+			.orElseThrow(() -> new IllegalStateException("User not found"));
+
+		userAdapter.updatePasswordHash(user.getId(), passwordEncoder.encode(req.newPassword()));
+
+		// 비번 바뀌면 기존 refresh 전부 폐기
+		refreshStore.revokeAll(userId);
 	}
 }

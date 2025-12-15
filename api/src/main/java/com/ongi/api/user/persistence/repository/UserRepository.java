@@ -3,6 +3,9 @@ package com.ongi.api.user.persistence.repository;
 import com.ongi.api.user.persistence.UserEntity;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
@@ -10,4 +13,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
 	Optional<UserEntity> findByEmail(String email);
 
+	@Modifying
+	@Query("update UserEntity u set u.passwordHash = :hash where u.id = :id")
+	int updatePasswordHash(@Param("id") Long id, @Param("hash") String hash);
 }

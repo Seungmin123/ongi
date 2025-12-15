@@ -63,4 +63,9 @@ public class UserAdapter implements UserRepositoryPort {
 			.findByDisplayName(displayName)
 			.map(UserMapper::toDomain);
 	}
+
+	@Override
+	public void updatePasswordHash(Long id, String hash) {
+		userRepository.updatePasswordHash(id, hash);
+	}
 }

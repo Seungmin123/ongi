@@ -19,4 +19,6 @@ public interface UserRepositoryPort {
 	Optional<UserProfile> findUserProfileById(Long id);
 
 	Optional<UserProfile> findUserProfileByDisplayName(String displayName);
+
+	void updatePasswordHash(Long id, String hash);
 }

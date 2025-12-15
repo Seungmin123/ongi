@@ -1,4 +1,4 @@
-package com.ongi.api.config.auth;
+package com.ongi.api.user.cache;
 
 import java.time.Duration;
 import java.util.Set;

@@ -7,7 +7,8 @@ import com.ongi.api.user.application.UserService;
 import com.ongi.api.user.web.dto.FindEmailRequest;
 import com.ongi.api.user.web.dto.MemberJoinRequest;
 import com.ongi.api.user.web.dto.MemberLoginRequest;
-import com.ongi.api.user.web.dto.MemberResponse;
+import com.ongi.api.user.web.dto.PasswordResetConfirmRequest;
+import com.ongi.api.user.web.dto.PasswordResetRequest;
 import com.ongi.user.domain.enums.PresignedTypeEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -70,11 +71,37 @@ public class UserController {
 	 * @param findEmailRequest
 	 * @return
 	 */
-	@GetMapping("/public/find/id")
+	@GetMapping("/public/id/find")
 	public ApiResponse<Void> findById(
 		@ModelAttribute FindEmailRequest findEmailRequest
 	) {
 		authService.findEmail(findEmailRequest);
+		return ApiResponse.ok();
+	}
+
+	/**
+	 * 비밀번호 재설정 메일 전송
+	 * @param passwordResetRequest
+	 * @return
+	 */
+	@PostMapping("/public/password/reset-request")
+	public ApiResponse<Void> resetPassword(
+		@RequestBody PasswordResetRequest passwordResetRequest
+	) {
+		authService.requestPasswordReset(passwordResetRequest);
+		return ApiResponse.ok();
+	}
+
+	/**
+	 * 비밀번호 재설정 메일 확인
+	 * @param passwordResetConfirmRequest
+	 * @return
+	 */
+	@PostMapping("/public/password/reset-confirm")
+	public ApiResponse<Void> resetPasswordConfirm(
+		@RequestBody PasswordResetConfirmRequest passwordResetConfirmRequest
+	) {
+		authService.confirmPasswordReset(passwordResetConfirmRequest);
 		return ApiResponse.ok();
 	}
 
