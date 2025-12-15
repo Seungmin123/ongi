@@ -2,16 +2,22 @@ package com.ongi.api.user.application;
 
 import com.ongi.api.common.web.dto.JwtTokens;
 import com.ongi.api.config.auth.JwtTokenProvider;
+import com.ongi.api.config.cache.RedisTemplate;
+import com.ongi.api.config.cache.store.EmailVerificationStore;
+import com.ongi.api.config.cache.store.SignUpTokenStore;
 import com.ongi.api.user.application.component.MailSender;
-import com.ongi.api.user.cache.PasswordResetTokenStore;
-import com.ongi.api.user.cache.RefreshTokenStore;
+import com.ongi.api.config.cache.store.PasswordResetTokenStore;
+import com.ongi.api.config.cache.store.RefreshTokenStore;
 import com.ongi.api.config.properties.JwtProperties;
 import com.ongi.api.user.persistence.UserAdapter;
+import com.ongi.api.user.web.dto.EmailVerifyConfirmRequest;
+import com.ongi.api.user.web.dto.EmailVerifyRequest;
 import com.ongi.api.user.web.dto.FindEmailRequest;
-import com.ongi.api.user.web.dto.MemberJoinRequest;
+import com.ongi.api.user.web.dto.MemberSignUpRequest;
 import com.ongi.api.user.web.dto.MemberLoginRequest;
 import com.ongi.api.user.web.dto.PasswordResetConfirmRequest;
 import com.ongi.api.user.web.dto.PasswordResetRequest;
+import com.ongi.api.user.web.dto.SignUpTokenResponse;
 import com.ongi.user.domain.User;
 import com.ongi.user.domain.UserProfile;
 import com.ongi.user.domain.UserRoleResolver;
@@ -22,6 +28,7 @@ import io.jsonwebtoken.Jws;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +42,10 @@ public class AuthService {
 
 	private final PasswordEncoder passwordEncoder;
 
+	private final EmailVerificationStore emailVerificationStore;
+
+	private final SignUpTokenStore signUpTokenStore;
+
 	private final RefreshTokenStore refreshStore;
 
 	private final PasswordResetTokenStore passwordResetTokenStore;
@@ -45,18 +56,111 @@ public class AuthService {
 
 	private final MailSender mailSender;
 
+	private static final Duration EMAIL_CODE_TTL = Duration.ofMinutes(10);
+
+	private static final Duration SIGNUP_TOKEN_TTL = Duration.ofMinutes(15);
+
+	private static final long MAX_VERIFY_ATTEMPTS = 5;
+
 	private static final Duration RESET_TTL = Duration.ofMinutes(15);
 
+	@Transactional
+	public void requestEmailVerification(EmailVerifyRequest req) {
+		String email = req.email();
+
+		if (userAdapter.existsUserByEmail(email)) {
+			return;
+		}
+
+		String code = generate6DigitCode();
+		String codeHash = RedisTemplate.sha256(code);
+
+		emailVerificationStore.putCodeHash(email, codeHash, EMAIL_CODE_TTL);
+		mailSender.sendEmailVerificationCode(email, code);
+	}
+
+	private String generate6DigitCode() {
+		int n = ThreadLocalRandom.current().nextInt(0, 1_000_000);
+		return String.format("%06d", n);
+	}
+
+	@Transactional
+	public SignUpTokenResponse confirmEmailVerification(EmailVerifyConfirmRequest req) {
+		String email = req.email();
+
+		// 가입된 이메일 막음
+		if (userAdapter.existsUserByEmail(email)) {
+			throw new IllegalArgumentException("Already registered");
+		}
+
+		String storedHash = emailVerificationStore.getCodeHash(email);
+		if (storedHash == null) {
+			throw new IllegalArgumentException("Invalid or expired code");
+		}
+
+		long attempts = emailVerificationStore.incrAttempt(email);
+		if (attempts > MAX_VERIFY_ATTEMPTS) {
+			emailVerificationStore.clear(email);
+			throw new IllegalArgumentException("Too many attempts");
+		}
+
+		String inputHash = RedisTemplate.sha256(req.code());
+		if (!storedHash.equals(inputHash)) {
+			throw new IllegalArgumentException("Invalid or expired code");
+		}
+
+		// 성공: 인증코드 폐기(재사용 방지)
+		emailVerificationStore.clear(email);
+
+		// signupToken 발급(원문은 클라에, 저장은 해시로)
+		String rawSignupToken = UUID.randomUUID().toString();
+		String tokenHash = RedisTemplate.sha256(rawSignupToken);
+
+		signUpTokenStore.put(tokenHash, email, SIGNUP_TOKEN_TTL);
+
+		return new SignUpTokenResponse(rawSignupToken);
+	}
+
 	@Transactional(transactionManager = "transactionManager")
-	public void join(MemberJoinRequest request) {
+	public void signUp(MemberSignUpRequest request) {
+
+		// signupToken 검증
+		if (request.signUpToken() == null || request.signUpToken().isBlank()) {
+			throw new IllegalArgumentException("signupToken required");
+		}
+
+		String tokenHash = RedisTemplate.sha256(request.signUpToken());
+		String emailFromToken = signUpTokenStore.getEmail(tokenHash);
+
+		if (emailFromToken == null) {
+			throw new IllegalArgumentException("Invalid or expired signupToken");
+		}
+		if (!emailFromToken.equals(request.email())) {
+			throw new IllegalArgumentException("signupToken does not match email");
+		}
+
+		// 재사용 방지: 토큰 먼저 consume (동시성 대응)
+		signUpTokenStore.consume(tokenHash);
+
+		// 실제 가입 처리
 		if (userAdapter.existsUserByEmail(request.email())) {
 			throw new IllegalArgumentException("Email already exists");
 		}
 
-		User user = User.create(null, request.email(), passwordEncoder.encode(request.password()), UserTypeEnum.EMAIL, UserTier.USER);
+		User user = User.create(
+			null,
+			request.email(),
+			passwordEncoder.encode(request.password()),
+			UserTypeEnum.EMAIL,
+			UserTier.USER
+		);
 		user = userAdapter.save(user);
 
-		UserProfile userProfile = UserProfile.create(user.getId(), request.displayName(), request.profileImageUrl());
+		UserProfile userProfile = UserProfile.create(
+			user.getId(),
+			request.displayName(),
+			request.profileImageUrl()
+		);
 		userAdapter.save(userProfile);
 	}
 
@@ -146,7 +250,7 @@ public class AuthService {
 	public void requestPasswordReset(PasswordResetRequest req) {
 		userAdapter.findUserByEmail(req.email()).ifPresent(user -> {
 			String rawToken = UUID.randomUUID().toString();
-			String tokenHash = PasswordResetTokenStore.sha256(rawToken);
+			String tokenHash = RedisTemplate.sha256(rawToken);
 
 			passwordResetTokenStore.put(tokenHash, String.valueOf(user.getId()), RESET_TTL);
 
@@ -158,7 +262,7 @@ public class AuthService {
 
 	@Transactional
 	public void confirmPasswordReset(PasswordResetConfirmRequest req) {
-		String tokenHash = PasswordResetTokenStore.sha256(req.token());
+		String tokenHash = RedisTemplate.sha256(req.token());
 		String userId = passwordResetTokenStore.getUserId(tokenHash);
 
 		if (userId == null) {

@@ -4,8 +4,10 @@ import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.common.web.dto.JwtTokens;
 import com.ongi.api.user.application.AuthService;
 import com.ongi.api.user.application.UserService;
+import com.ongi.api.user.web.dto.EmailVerifyConfirmRequest;
+import com.ongi.api.user.web.dto.EmailVerifyRequest;
 import com.ongi.api.user.web.dto.FindEmailRequest;
-import com.ongi.api.user.web.dto.MemberJoinRequest;
+import com.ongi.api.user.web.dto.MemberSignUpRequest;
 import com.ongi.api.user.web.dto.MemberLoginRequest;
 import com.ongi.api.user.web.dto.PasswordResetConfirmRequest;
 import com.ongi.api.user.web.dto.PasswordResetRequest;
@@ -40,17 +42,44 @@ public class UserController {
 		return ApiResponse.ok();
 	}
 
+	// TODO 회원가입 이메일 인증
+
+	/**
+	 * 이메일 회원가입 - 이메일 인증 요청
+ 	 * @param req
+	 * @return
+	 */
+	@PostMapping("/public/signup/email-request")
+	public ApiResponse<Void> signUpEmailRequest(
+		@RequestBody EmailVerifyRequest req
+	) {
+		authService.requestEmailVerification(req);
+		return ApiResponse.ok();
+	}
+
+	/**
+	 * 이메일 회원가입 - 이메일 인증 확인
+	 * @param req
+	 * @return
+	 */
+	@PostMapping("/public/signup/email-confirm")
+	public ApiResponse<Void> signUpEmailConfirm(
+		@RequestBody EmailVerifyConfirmRequest req
+	) {
+		authService.confirmEmailVerification(req);
+		return ApiResponse.ok();
+	}
 
 	/**
 	 * 이메일 회원가입
-	 * @param memberJoinRequest
+	 * @param memberSignUpRequest
 	 * @return
 	 */
-	@PostMapping("/public/join")
-	public ApiResponse<Void> join(
-		@RequestBody MemberJoinRequest memberJoinRequest
+	@PostMapping("/public/signup")
+	public ApiResponse<Void> signUp(
+		@RequestBody MemberSignUpRequest memberSignUpRequest
 	) {
-		authService.join(memberJoinRequest);
+		authService.signUp(memberSignUpRequest);
 		return ApiResponse.ok();
 	}
 

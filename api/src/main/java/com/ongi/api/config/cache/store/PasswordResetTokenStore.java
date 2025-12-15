@@ -1,4 +1,4 @@
-package com.ongi.api.user.cache;
+package com.ongi.api.config.cache.store;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -33,13 +33,5 @@ public class PasswordResetTokenStore {
 	}
 
 	// 토큰 원문을 그대로 저장하지 말고 해시로 저장
-	public static String sha256(String raw) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			byte[] digest = md.digest(raw.getBytes(StandardCharsets.UTF_8));
-			return HexFormat.of().formatHex(digest);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
+
 }

@@ -1,10 +1,11 @@
 package com.ongi.api.user.web.dto;
 
-public record MemberJoinRequest(
+public record MemberSignUpRequest(
 	String email,
 	String password,
 	String displayName,
-	String profileImageUrl
+	String profileImageUrl,
+	String signUpToken
 ) {
 
 }

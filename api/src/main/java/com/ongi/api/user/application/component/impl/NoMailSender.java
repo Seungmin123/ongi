@@ -8,6 +8,11 @@ import org.springframework.stereotype.Component;
 public class NoMailSender implements MailSender {
 
 	@Override
+	public void sendEmailVerificationCode(String email, String code) {
+
+	}
+
+	@Override
 	public void sendUserIdGuideMail(String email) {
 
 	}
