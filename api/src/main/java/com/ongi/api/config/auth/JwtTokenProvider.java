@@ -1,12 +1,9 @@
-package com.ongi.api.config.web;
+package com.ongi.api.config.auth;
 
 import com.ongi.api.common.web.dto.JwtTokens;
 import com.ongi.api.config.properties.JwtProperties;
-import com.ongi.user.domain.User;
-import com.ongi.user.domain.UserRoleResolver;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

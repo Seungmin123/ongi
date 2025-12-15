@@ -1,4 +1,4 @@
-package com.ongi.api.config.web;
+package com.ongi.api.config.auth;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

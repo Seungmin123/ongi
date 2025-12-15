@@ -1,4 +1,4 @@
-package com.ongi.api.config.web;
+package com.ongi.api.config.auth;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
