@@ -10,6 +10,10 @@ public interface UserRepositoryPort {
 
 	Optional<User> findUserById(Long id);
 
+	boolean existsUserByEmail(String email);
+
+	Optional<User> findUserByEmail(String email);
+
 	UserProfile save(UserProfile userProfile);
 
 	Optional<UserProfile> findUserProfileById(Long id);

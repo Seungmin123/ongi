@@ -4,6 +4,7 @@ import com.ongi.api.common.web.dto.JwtTokens;
 import com.ongi.api.config.properties.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class JwtTokenProvider {
+
+    public enum TokenType { ACCESS, REFRESH }
 
     private final JwtProperties props;
 
@@ -49,11 +52,11 @@ public class JwtTokenProvider {
     }
 
     public String createAccessToken(String userId, Map<String, Object> claims) {
-        return createToken(userId, TokenType.ACCESS, props.accessExpSeconds(), claims, accessKey);
+        return createToken(userId, TokenType.ACCESS, props.accessExpSeconds(), claims, accessKey, null);
     }
 
-    public String createRefreshToken(String userId) {
-        return createToken(userId, TokenType.REFRESH, props.refreshExpSeconds(), Map.of(), refreshKey);
+    public String createRefreshToken(String userId, String jti) {
+        return createToken(userId, TokenType.REFRESH, props.refreshExpSeconds(), Map.of(), refreshKey, jti);
     }
 
     private String createToken(
@@ -61,23 +64,25 @@ public class JwtTokenProvider {
         TokenType type,
         long expSeconds,
         Map<String, Object> claims,
-        Key signingKey
+        Key signingKey,
+        String jti
     ) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(expSeconds);
 
-        return Jwts.builder()
+        JwtBuilder builder =  Jwts.builder()
             .setIssuer(props.issuer())
             .setSubject(userId)
             .setIssuedAt(Date.from(now))
             .setExpiration(Date.from(exp))
             .claim("typ", type.name())
             .addClaims(claims)
-            .signWith(signingKey)
-            .compact();
-    }
+            .signWith(signingKey);
 
-    public enum TokenType { ACCESS, REFRESH }
+        if(jti != null) builder.setId(jti);
+
+        return builder.compact();
+    }
 
     public Jws<Claims> parseAccess(String token) {
         Jws<Claims> jws = accessParser.parseClaimsJws(token);
@@ -97,16 +102,6 @@ public class JwtTokenProvider {
         if (!expected.name().equals(typ)) {
             throw new IllegalArgumentException("Invalid token type: expected=" + expected + ", actual=" + typ);
         }
-    }
-
-    public JwtTokens refresh(String refreshToken, Map<String, Object> newAccessClaims) {
-        String userId = parseRefresh(refreshToken).getBody().getSubject();
-
-        // ✅ 여기서 DB/Redis 조회로 최신 등급/권한 반영 권장
-        String newAccess = createAccessToken(userId, newAccessClaims);
-        String newRefresh = createRefreshToken(userId);
-
-        return new JwtTokens(newAccess, newRefresh);
     }
 
     public String getSubject(String token) {

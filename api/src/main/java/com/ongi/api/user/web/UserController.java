@@ -1,8 +1,11 @@
 package com.ongi.api.user.web;
 
 import com.ongi.api.common.web.dto.ApiResponse;
+import com.ongi.api.common.web.dto.JwtTokens;
+import com.ongi.api.user.application.AuthService;
 import com.ongi.api.user.application.UserService;
 import com.ongi.api.user.web.dto.MemberJoinRequest;
+import com.ongi.api.user.web.dto.MemberLoginRequest;
 import com.ongi.api.user.web.dto.MemberResponse;
 import com.ongi.user.domain.enums.PresignedTypeEnum;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
 	private final UserService userService;
+
+	private final AuthService authService;
 
 	// TODO 이미지 업로드 기능 구현
 	@GetMapping("/public/image/pre-signed/{imageType}")
@@ -42,8 +47,20 @@ public class UserController {
 	public ApiResponse<Void> join(
 		@RequestBody MemberJoinRequest memberJoinRequest
 	) {
-		userService.join(memberJoinRequest);
+		authService.join(memberJoinRequest);
 		return ApiResponse.ok();
+	}
+
+	/**
+	 * 이메일 로그인
+	 * @param req
+	 * @return
+	 */
+	@PostMapping("/public/logign")
+	public ApiResponse<JwtTokens> login(
+		@RequestBody MemberLoginRequest req
+	) {
+		return ApiResponse.ok(authService.login(req));
 	}
 
 	// TODO Email 발송
