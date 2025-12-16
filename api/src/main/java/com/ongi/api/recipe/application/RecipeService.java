@@ -4,6 +4,8 @@ import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.ingredients.persistence.IngredientAdapter;
 import com.ongi.api.recipe.persistence.RecipeAdapter;
 import com.ongi.api.recipe.persistence.RecipeDetailMapper;
+import com.ongi.api.recipe.persistence.repository.RecipeLikeRepository;
+import com.ongi.api.recipe.persistence.repository.RecipeRepository;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
@@ -42,6 +44,10 @@ public class RecipeService {
 	private final IngredientAdapter ingredientAdapter;
 
 	private final JPAQueryFactory queryFactory;
+
+	private final RecipeRepository recipeRepository;
+
+	private final RecipeLikeRepository recipeLikeRepository;
 
 	@Cacheable(
 		value = "recipeList",
@@ -298,5 +304,27 @@ public class RecipeService {
 		ingredientAdapter.deleteRecipeIngredientByRecipeId(recipeId);
 		recipeAdapter.deleteRecipeStepsByRecipeId(recipeId);
 		recipeAdapter.deleteRecipeById(recipeId);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public long like(long recipeId, long userId) {
+		boolean inserted = recipeLikeRepository.insertIfNotExists(recipeId, userId);
+
+		if (inserted) {
+			recipeRepository.incrementLikeCount(recipeId, 1);
+		}
+
+		return recipeRepository.findLikeCount(recipeId);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public long unlike(long recipeId, long userId) {
+		int deleted = recipeLikeRepository.deleteByRecipeIdAndUserId(recipeId, userId);
+
+		if (deleted == 1) {
+			recipeRepository.incrementLikeCount(recipeId, -1);
+		}
+
+		return recipeRepository.findLikeCount(recipeId);
 	}
 }

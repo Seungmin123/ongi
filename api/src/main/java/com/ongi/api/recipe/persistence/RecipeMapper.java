@@ -1,6 +1,7 @@
 package com.ongi.api.recipe.persistence;
 
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeLike;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
 
@@ -98,5 +99,16 @@ public class RecipeMapper {
 
 	public static RecipeTags toDomain(RecipeTagsEntity entity) {
 		return RecipeTags.create(entity.getId(), entity.getRecipeId(), entity.getTag());
+	}
+
+	public static RecipeLikeEntity toEntity(RecipeLike domain) {
+		return RecipeLikeEntity.builder()
+			.recipeId(domain.getRecipeId())
+			.userId(domain.getUserId())
+			.build();
+	}
+
+	public static RecipeLike toDomain(RecipeLikeEntity entity) {
+		return RecipeLike.create(entity.getRecipeId(), entity.getUserId());
 	}
 }

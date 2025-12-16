@@ -5,6 +5,7 @@ import com.ongi.api.common.web.dto.AuthPrincipal;
 import com.ongi.api.config.aspect.CurrentToken;
 import com.ongi.api.recipe.application.RecipeService;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
+import com.ongi.api.recipe.web.dto.LikeResponse;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -89,14 +91,19 @@ public class RecipeController {
 	/**
 	 * 레시피 수정
 	 * @param request
+	 * @param authPrincipal
 	 * @return
 	 * @throws Exception
 	 */
 	@PatchMapping("/private/v1/recipe")
 	public ApiResponse<Void> updateRecipe(
+		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@ModelAttribute RecipeUpsertRequest request
 	) throws Exception {
 		// TODO Kafka User Event 발행?
+
+		// TODO userId 와 Recipe UserId 검증
+
 		recipeService.updateRecipe(request);
 		return ApiResponse.ok();
 	}
@@ -104,24 +111,57 @@ public class RecipeController {
 	/**
 	 * 레시피 삭제
 	 * @param recipeId
-	 * @param jwt
+	 * @param authPrincipal
 	 * @return
 	 * @throws Exception
 	 */
 	@DeleteMapping("/private/v1/recipe/{recipeId}")
 	public ApiResponse<Void> deleteRecipe(
-		@PathVariable Long recipeId,
-		@CurrentToken String jwt
+		@AuthenticationPrincipal AuthPrincipal authPrincipal,
+		@PathVariable Long recipeId
 	) throws Exception {
-		// TODO JWT 관련 Aspect, Token Provider 수정
-
-		// TODO JWT 와 Recipe UserId 검증
+		// TODO userId 와 Recipe UserId 검증
 
 		// TODO Kafka User Event 발행?
 
 		recipeService.deleteRecipe(recipeId);
 		return ApiResponse.ok();
 	}
+
+	/**
+	 * 좋아요 등록
+	 * @param recipeId
+	 * @param authPrincipal
+	 * @return
+	 * @throws Exception
+	 */
+	@PutMapping("/private/{recipeId}/like")
+	public ApiResponse<LikeResponse> like(
+		@PathVariable Long recipeId,
+		@AuthenticationPrincipal AuthPrincipal authPrincipal
+	) throws Exception {
+		long userId = authPrincipal.userId();
+		long likeCount = recipeService.like(recipeId, userId);
+		return ApiResponse.ok(new LikeResponse(true, likeCount));
+	}
+
+	/**
+	 * 좋아요 삭제
+	 * @param recipeId
+	 * @param authPrincipal
+	 * @return
+	 * @throws Exception
+	 */
+	@DeleteMapping("/private/{recipeId}/like")
+	public ApiResponse<LikeResponse> unlike(
+		@PathVariable Long recipeId,
+		@AuthenticationPrincipal AuthPrincipal authPrincipal
+	) throws Exception {
+		long userId = authPrincipal.userId();
+		long likeCount = recipeService.unlike(recipeId, userId);
+		return ApiResponse.ok(new LikeResponse(false, likeCount));
+	}
+
 
 	// TODO 오늘의 추천 레시피 ?
 

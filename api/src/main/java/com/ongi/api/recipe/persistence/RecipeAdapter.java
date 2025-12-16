@@ -1,11 +1,12 @@
 package com.ongi.api.recipe.persistence;
 
-import com.ongi.api.ingredients.persistence.QIngredientEntity;
 import com.ongi.api.ingredients.persistence.QRecipeIngredientEntity;
+import com.ongi.api.recipe.persistence.repository.RecipeLikeRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeStepsRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeTagsRepository;
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeLike;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
@@ -18,7 +19,6 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +33,8 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	private final RecipeStepsRepository recipeStepsRepository;
 
 	private final RecipeTagsRepository recipeTagsRepository;
+
+	private final RecipeLikeRepository recipeLikeRepository;
 
 	@Override
 	public Recipe save(Recipe recipe) {
@@ -187,6 +189,25 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 			.toList();
 	}
 
+	@Override
+	public RecipeLike save(RecipeLike recipeLike) {
+		RecipeLikeEntity entity = RecipeMapper.toEntity(recipeLike);
+		RecipeLikeEntity saved = recipeLikeRepository.save(entity);
+		return RecipeMapper.toDomain(saved);
+	}
+
+	@Override
+	public Optional<RecipeLike> findRecipeLikeByRecipeIdAndUserId(Long recipeId, Long userId) {
+		return recipeLikeRepository
+			.findById(new RecipeLikeId(recipeId, userId))
+			.map(RecipeMapper::toDomain);
+	}
+
+	@Override
+	public void deleteRecipeLikeByRecipeIdAndUserId(Long recipeId, Long userId) {
+		recipeLikeRepository.deleteById(new RecipeLikeId(recipeId, userId));
+	}
+
 
 	private OrderSpecifier<?>[] toOrderSpecifiers(PageSortOptionEnum sort, QRecipeEntity recipe) {
 		return switch (sort) {
@@ -222,4 +243,6 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 			};*/
 		};
 	}
+
+
 }

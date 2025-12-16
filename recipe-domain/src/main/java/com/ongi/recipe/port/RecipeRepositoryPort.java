@@ -1,6 +1,7 @@
 package com.ongi.recipe.port;
 
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeLike;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
@@ -33,4 +34,10 @@ public interface RecipeRepositoryPort {
 	Optional<RecipeTags> findRecipeTagsById(Long id);
 
 	List<Recipe> search(RecipeSearchCondition condition, Long cursor, Integer size, PageSortOptionEnum sort);
+
+	RecipeLike save(RecipeLike recipeLike);
+
+	Optional<RecipeLike> findRecipeLikeByRecipeIdAndUserId(Long recipeId, Long userId);
+
+	void deleteRecipeLikeByRecipeIdAndUserId(Long recipeId, Long userId);
 }
