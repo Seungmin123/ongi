@@ -13,8 +13,10 @@ import com.ongi.recipe.domain.search.RecipeSearch;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -86,7 +88,7 @@ public class RecipeController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PutMapping("/private/v1/recipe")
+	@PatchMapping("/private/v1/recipe")
 	public ApiResponse<Void> updateRecipe(
 		@ModelAttribute RecipeUpsertRequest request
 	) throws Exception {
@@ -102,7 +104,7 @@ public class RecipeController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PutMapping("/private/v1/recipe/{recipeId}")
+	@DeleteMapping("/private/v1/recipe/{recipeId}")
 	public ApiResponse<Void> deleteRecipe(
 		@PathVariable Long recipeId,
 		@CurrentToken String jwt
