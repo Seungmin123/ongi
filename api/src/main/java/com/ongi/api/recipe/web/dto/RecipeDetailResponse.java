@@ -1,7 +1,5 @@
 package com.ongi.api.recipe.web.dto;
 
-import com.ongi.ingredients.domain.Ingredient;
-import com.ongi.recipe.domain.RecipeSteps;
 import java.util.List;
 
 public record RecipeDetailResponse(
@@ -11,7 +9,8 @@ public record RecipeDetailResponse(
 	String cookTimeText,
 	Integer servings,
 	String difficulty,
-	Double rating,
+	Long likeCount,
+	Long commentCount,
 
 	List<RecipeIngredientResponse> ingredients,
 	List<RecipeStepsResponse> recipeSteps

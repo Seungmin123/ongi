@@ -27,7 +27,9 @@ public class Recipe {
 
 	private RecipeCategoryEnum category;
 
-	// TODO likes, comments 추가?
+	private Long likeCount;
+
+	private Long commentsCount;
 
 	private Recipe(
 		Long id,
@@ -40,7 +42,9 @@ public class Recipe {
 		String imageUrl,
 		String videoUrl,
 		String source,
-		RecipeCategoryEnum category
+		RecipeCategoryEnum category,
+		Long likeCount,
+		Long commentsCount
 	) {
 		this.id = id;
 		this.authorId = authorId;
@@ -53,13 +57,16 @@ public class Recipe {
 		this.videoUrl = videoUrl;
 		this.source = source;
 		this.category = category;
+		this.likeCount = likeCount;
+		this.commentsCount = commentsCount;
 	}
 
 	public static Recipe create(
 		Long id, Long authorId, String title, String description, Double serving, Integer cookingTimeMin,
-		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source, RecipeCategoryEnum category
+		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source, RecipeCategoryEnum category,
+		Long likeCount, Long commentsCount
 	) {
-		return new Recipe(id, authorId, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source, category);
+		return new Recipe(id, authorId, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source, category, likeCount, commentsCount);
 	}
 
 	public Long getId() {
@@ -148,5 +155,21 @@ public class Recipe {
 
 	public void setCategory(RecipeCategoryEnum category) {
 		this.category = category;
+	}
+
+	public Long getLikeCount() {
+		return likeCount;
+	}
+
+	public void setLikeCount(Long likeCount) {
+		this.likeCount = likeCount;
+	}
+
+	public Long getCommentsCount() {
+		return commentsCount;
+	}
+
+	public void setCommentsCount(Long commentsCount) {
+		this.commentsCount = commentsCount;
 	}
 }

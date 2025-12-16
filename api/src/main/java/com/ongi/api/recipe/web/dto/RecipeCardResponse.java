@@ -8,10 +8,9 @@ public record RecipeCardResponse(
 	String cookTimeText,
 	Integer servings,
 	String difficulty,
-	Double rating,
-	String category,
-	Integer likes,
-	Integer comments
+	Long likeCount,
+	Long commentsCount,
+	String category
 ) {
 
 }

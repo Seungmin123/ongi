@@ -91,11 +91,9 @@ public class RecipeService {
 			cookTimeText,
 			servings,
 			difficultyCode,
-			// TODO: rating, likes, comments
-			null,
-			recipe.getCategory().getName(),
-			null,
-			null
+			recipe.getLikeCount(),
+			recipe.getCommentsCount(),
+			recipe.getCategory().getName()
 		);
 	}
 
@@ -147,8 +145,8 @@ public class RecipeService {
 					cookTimeText,
 					recipe.getServing() == null ? null : recipe.getServing().intValue(),
 					recipe.getDifficulty() != null ? recipe.getDifficulty().getCode() : null,
-					// TODO recipe.getRating(),
-					null,
+					recipe.getLikeCount(),
+					recipe.getCommentsCount(),
 					recipeIngredients,
 					recipeSteps
 				));
@@ -172,7 +170,9 @@ public class RecipeService {
 			request.imageUrl(),
 			null,
 			null,
-			request.category()
+			request.category(),
+			0L,
+			0L
 		);
 
 		recipe = recipeAdapter.save(recipe);

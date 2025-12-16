@@ -62,6 +62,14 @@ public class RecipeEntity extends BaseTimeEntity {
 	@Column(name = "category")
 	private RecipeCategoryEnum category;
 
+	@ColumnDefault("0")
+	@Column(name = "like_count", nullable = false)
+	private Long likeCount;
+
+	@ColumnDefault("0")
+	@Column(name = "comment_count", nullable = false)
+	private Long commentCount;
+
 	@Builder
 	public RecipeEntity(
 		Long id,
@@ -74,7 +82,9 @@ public class RecipeEntity extends BaseTimeEntity {
 		String imageUrl,
 		String videoUrl,
 		String source,
-		RecipeCategoryEnum category
+		RecipeCategoryEnum category,
+		Long likeCount,
+		Long commentCount
 	) {
 		this.id = id;
 		this.authorId = authorId;
@@ -87,6 +97,8 @@ public class RecipeEntity extends BaseTimeEntity {
 		this.videoUrl = videoUrl;
 		this.source = source;
 		this.category = category;
+		this.likeCount = likeCount;
+		this.commentCount = commentCount;
 	}
 
 }
