@@ -2,6 +2,7 @@ package com.ongi.api.user.persistence;
 
 import com.ongi.user.domain.User;
 import com.ongi.user.domain.UserProfile;
+import com.ongi.user.domain.UserStats;
 
 public class UserMapper {
 
@@ -66,5 +67,20 @@ public class UserMapper {
 	public static UserProfile toDomain(UserProfileEntity entity) {
 		return UserProfile.create(entity.getId(), entity.getUserId(), entity.getDisplayName(), entity.getAllergens(), entity.getDietGoal(), entity.getDislikedIngredients(),
 			entity.getProfileImageUrl(), entity.getName(), entity.getPhoneNumber(), entity.getBirth(), entity.getZipCode(), entity.getAddress(), entity.getAddressDetail());
+	}
+
+	public static UserStatsEntity toEntity(UserStats userStats) {
+		return UserStatsEntity.builder()
+			.userId(userStats.getUserId())
+			.uploadedRecipeCount(userStats.getUploadedRecipeCount())
+			.savedRecipeCount(userStats.getSavedRecipeCount())
+			.myRecipeTotalViewCount(userStats.getMyRecipeTotalViewCount())
+			.myPostCount(userStats.getMyPostCount())
+			.myCommentCount(userStats.getMyCommentCount())
+			.build();
+	}
+
+	public static UserStats toDomain(UserStatsEntity entity) {
+		return UserStats.create(entity.getId(), entity.getUploadedRecipeCount(), entity.getSavedRecipeCount(), entity.getMyRecipeTotalViewCount(), entity.getMyPostCount(), entity.getMyCommentCount());
 	}
 }

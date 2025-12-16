@@ -2,10 +2,15 @@ package com.ongi.api.user.application;
 
 import com.ongi.api.user.persistence.MyPageQueryAdapter;
 import com.ongi.api.user.persistence.UserAdapter;
+import com.ongi.api.user.web.dto.MyPageBasicUpdateRequest;
+import com.ongi.api.user.web.dto.MyPagePersonalizationUpdateRequest;
 import com.ongi.api.user.web.dto.MyPageResponse;
 import com.ongi.api.user.web.dto.MyPageResponse.Basic;
 import com.ongi.api.user.web.dto.MyPageResponse.Personalization;
 import com.ongi.api.user.web.dto.MyPageResponse.Summary;
+import com.ongi.api.user.web.dto.MyPageStatsResponse;
+import com.ongi.api.user.web.dto.MyPageSummaryUpdateRequest;
+import com.ongi.user.domain.UserProfile;
 import com.ongi.user.domain.enums.MeInclude;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +23,8 @@ import tools.jackson.databind.ObjectMapper;
 @RequiredArgsConstructor
 @Service
 public class UserService {
+
+	private final FileService fileService;
 
 	private final UserAdapter userAdapter;
 
@@ -64,5 +71,64 @@ public class UserService {
 		} catch (Exception e) {
 			return List.of();
 		}
+	}
+
+	protected String writeList(List<String> list) {
+		if (list == null) return null;
+		try {
+			return objectMapper.writeValueAsString(list);
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public void myPageSummaryUpdate(Long userId, MyPageSummaryUpdateRequest request) {
+		// TODO Custom Exception
+		var userProfile = userAdapter.findUserProfileByUserId(userId).orElseThrow(() -> new IllegalStateException("User not found"));
+
+		if (request.displayName() != null) userProfile.setDisplayName(request.displayName().trim());
+
+		String finalProfileImageKey = null;
+		if (request.profileImageUploadToken() != null && request.profileImageObjectKey() != null) {
+			finalProfileImageKey = fileService.consumeAndPromoteProfileImage(
+				request.profileImageUploadToken(),  // UUID
+				request.profileImageObjectKey(),    // tmp objectKey
+				userId
+			);
+
+			userProfile.setProfileImageUrl(finalProfileImageKey);
+		}
+
+		userAdapter.save(userProfile);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public void myPageBasicUpdate(Long userId, MyPageBasicUpdateRequest request) {
+		var userProfile = userAdapter.findUserProfileByUserId(userId).orElseThrow(() -> new IllegalStateException("User not found"));
+
+		if (request.name() != null) userProfile.setName(request.name().trim());
+		if (request.birth() != null) userProfile.setBirth(request.birth());
+		if (request.zipCode() != null) userProfile.setZipCode(request.zipCode().trim());
+		if (request.address() != null) userProfile.setAddress(request.address().trim());
+		if (request.addressDetail() != null) userProfile.setAddressDetail(request.addressDetail().trim());
+
+		userAdapter.save(userProfile);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public void myPagePersonalizationUpdate(Long userId, MyPagePersonalizationUpdateRequest request) {
+		var userProfile = userAdapter.findUserProfileByUserId(userId).orElseThrow(() -> new IllegalStateException("User not found"));
+
+		userProfile.setAllergens(writeList(request.allergens()));
+		userProfile.setDietGoal(request.dietGoal());
+		userProfile.setDislikedIngredients(writeList(request.dislikedIngredients()));
+	}
+
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
+	public MyPageStatsResponse getMyPageStats(Long userId) {
+		var userStats = userAdapter.findUserStatsById(userId).orElseThrow(() -> new IllegalStateException("User not found"));
+		return new MyPageStatsResponse(userStats.getUploadedRecipeCount(), userStats.getSavedRecipeCount(),
+			userStats.getMyRecipeTotalViewCount(), userStats.getMyPostCount(), userStats.getMyCommentCount());
 	}
 }

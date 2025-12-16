@@ -2,8 +2,10 @@ package com.ongi.api.user.persistence;
 
 import com.ongi.api.user.persistence.repository.UserProfileRepository;
 import com.ongi.api.user.persistence.repository.UserRepository;
+import com.ongi.api.user.persistence.repository.UserStatsRepository;
 import com.ongi.user.domain.User;
 import com.ongi.user.domain.UserProfile;
+import com.ongi.user.domain.UserStats;
 import com.ongi.user.port.UserRepositoryPort;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,8 @@ public class UserAdapter implements UserRepositoryPort {
 	private final UserRepository userRepository;
 
 	private final UserProfileRepository userProfileRepository;
+
+	private final UserStatsRepository userStatsRepository;
 
 	@Override
 	public User save(User user) {
@@ -74,5 +78,19 @@ public class UserAdapter implements UserRepositoryPort {
 	@Override
 	public void updatePasswordHash(Long id, String hash) {
 		userRepository.updatePasswordHash(id, hash);
+	}
+
+	@Override
+	public UserStats save(UserStats userStats) {
+		UserStatsEntity entity = UserMapper.toEntity(userStats);
+		UserStatsEntity saved = userStatsRepository.save(entity);
+		return UserMapper.toDomain(saved);
+	}
+
+	@Override
+	public Optional<UserStats> findUserStatsById(Long id) {
+		return userStatsRepository
+			.findById(id)
+			.map(UserMapper::toDomain);
 	}
 }

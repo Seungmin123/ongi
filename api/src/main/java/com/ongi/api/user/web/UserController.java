@@ -9,10 +9,15 @@ import com.ongi.api.user.web.dto.EmailVerifyRequest;
 import com.ongi.api.user.web.dto.FindEmailRequest;
 import com.ongi.api.user.web.dto.MemberSignUpRequest;
 import com.ongi.api.user.web.dto.MemberLoginRequest;
+import com.ongi.api.user.web.dto.MyPageBasicUpdateRequest;
+import com.ongi.api.user.web.dto.MyPagePersonalizationUpdateRequest;
 import com.ongi.api.user.web.dto.MyPageResponse;
+import com.ongi.api.user.web.dto.MyPageStatsResponse;
+import com.ongi.api.user.web.dto.MyPageSummaryUpdateRequest;
 import com.ongi.api.user.web.dto.PasswordResetConfirmRequest;
 import com.ongi.api.user.web.dto.PasswordResetRequest;
 import com.ongi.user.domain.enums.MeInclude;
+import jakarta.validation.Valid;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -126,6 +131,12 @@ public class UserController {
 		return ApiResponse.ok();
 	}
 
+	/**
+	 * 마이 페이지 - 조회 (SUMMARY, BASIC, PERSONALIZATION 가능)
+	 * @param authentication
+	 * @param include
+	 * @return
+	 */
 	@GetMapping("/private/me")
 	public ApiResponse<MyPageResponse> me(
 		Authentication authentication,
@@ -140,24 +151,65 @@ public class UserController {
 		return ApiResponse.ok(userService.getMe(userId, includes));
 	}
 
+	/**
+	 * 마이 페이지 - 요약 수정
+	 * @param authentication
+	 * @param myPageSummaryUpdateRequest
+	 * @return
+	 */
 	@PatchMapping("/private/me/summary")
-	public ApiResponse<Void> updateSummary() {
+	public ApiResponse<Void> updateSummary(
+		Authentication authentication,
+		@RequestBody @Valid MyPageSummaryUpdateRequest myPageSummaryUpdateRequest
+	) {
+		Long userId = Long.parseLong(authentication.getPrincipal().toString());
+		userService.myPageSummaryUpdate(userId, myPageSummaryUpdateRequest);
 		return ApiResponse.ok();
 	}
 
+	/**
+	 * 마이 페이지 - 기본 정보 수정
+	 * @param authentication
+	 * @param myPageBasicUpdateRequest
+	 * @return
+	 */
 	@PatchMapping("/private/me/basic")
-	public ApiResponse<Void> updateBasic() {
+	public ApiResponse<Void> updateBasic(
+		Authentication authentication,
+		@RequestBody @Valid MyPageBasicUpdateRequest myPageBasicUpdateRequest
+	) {
+		Long userId = Long.parseLong(authentication.getPrincipal().toString());
+		userService.myPageBasicUpdate(userId, myPageBasicUpdateRequest);
 		return ApiResponse.ok();
 	}
 
+	/**
+	 * 마이 페이지 - 개인 정보 수정
+	 * @param authentication
+	 * @param myPagePersonalizationUpdateRequest
+	 * @return
+	 */
 	@PatchMapping("/private/me/personalization")
-	public ApiResponse<Void> updatePersonalization() {
+	public ApiResponse<Void> updatePersonalization(
+		Authentication authentication,
+		@RequestBody @Valid MyPagePersonalizationUpdateRequest myPagePersonalizationUpdateRequest
+	) {
+		Long userId = Long.parseLong(authentication.getPrincipal().toString());
+		userService.myPagePersonalizationUpdate(userId, myPagePersonalizationUpdateRequest);
 		return ApiResponse.ok();
 	}
 
+	/**
+	 * 마이 페이지 - 내 통계 조회
+	 * @param authentication
+	 * @return
+	 */
 	@GetMapping("/private/me/stats")
-	public ApiResponse<Void> meStats() {
-		return ApiResponse.ok();
+	public ApiResponse<MyPageStatsResponse> meStats(
+		Authentication authentication
+	) {
+		Long userId = Long.parseLong(authentication.getPrincipal().toString());
+		return ApiResponse.ok(userService.getMyPageStats(userId));
 	}
 
 	// TODO OAuth Naver

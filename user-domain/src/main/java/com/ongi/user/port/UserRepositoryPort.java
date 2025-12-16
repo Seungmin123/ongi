@@ -2,6 +2,7 @@ package com.ongi.user.port;
 
 import com.ongi.user.domain.User;
 import com.ongi.user.domain.UserProfile;
+import com.ongi.user.domain.UserStats;
 import java.util.Optional;
 
 public interface UserRepositoryPort {
@@ -23,4 +24,8 @@ public interface UserRepositoryPort {
 	Optional<UserProfile> findUserProfileByDisplayName(String displayName);
 
 	void updatePasswordHash(Long id, String hash);
+
+	UserStats save(UserStats userStats);
+
+	Optional<UserStats> findUserStatsById(Long id);
 }

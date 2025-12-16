@@ -8,7 +8,6 @@ public record MemberSignUpRequest(
 	String displayName,
 	UUID profileImageUploadToken,
 	String profileImageObjectKey,
-	String finalKey,
 	String signUpToken
 ) {
 }
