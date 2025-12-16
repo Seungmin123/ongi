@@ -2,7 +2,7 @@ package com.ongi.api.user.application;
 
 import com.ongi.api.common.web.dto.JwtTokens;
 import com.ongi.api.config.auth.JwtTokenProvider;
-import com.ongi.api.config.cache.RedisTemplate;
+import com.ongi.api.config.cache.UserRedisTemplate;
 import com.ongi.api.config.cache.store.EmailVerificationStore;
 import com.ongi.api.config.cache.store.SignUpTokenStore;
 import com.ongi.api.user.application.component.MailSender;
@@ -38,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
 
+	private final FileService fileService;
+
 	private final UserAdapter userAdapter;
 
 	private final PasswordEncoder passwordEncoder;
@@ -64,7 +66,7 @@ public class AuthService {
 
 	private static final Duration RESET_TTL = Duration.ofMinutes(15);
 
-	@Transactional
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
 	public void requestEmailVerification(EmailVerifyRequest req) {
 		String email = req.email();
 
@@ -73,7 +75,7 @@ public class AuthService {
 		}
 
 		String code = generate6DigitCode();
-		String codeHash = RedisTemplate.sha256(code);
+		String codeHash = UserRedisTemplate.sha256(code);
 
 		emailVerificationStore.putCodeHash(email, codeHash, EMAIL_CODE_TTL);
 		mailSender.sendEmailVerificationCode(email, code);
@@ -84,7 +86,7 @@ public class AuthService {
 		return String.format("%06d", n);
 	}
 
-	@Transactional
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
 	public SignUpTokenResponse confirmEmailVerification(EmailVerifyConfirmRequest req) {
 		String email = req.email();
 
@@ -104,7 +106,7 @@ public class AuthService {
 			throw new IllegalArgumentException("Too many attempts");
 		}
 
-		String inputHash = RedisTemplate.sha256(req.code());
+		String inputHash = UserRedisTemplate.sha256(req.code());
 		if (!storedHash.equals(inputHash)) {
 			throw new IllegalArgumentException("Invalid or expired code");
 		}
@@ -114,7 +116,7 @@ public class AuthService {
 
 		// signupToken 발급(원문은 클라에, 저장은 해시로)
 		String rawSignupToken = UUID.randomUUID().toString();
-		String tokenHash = RedisTemplate.sha256(rawSignupToken);
+		String tokenHash = UserRedisTemplate.sha256(rawSignupToken);
 
 		signUpTokenStore.put(tokenHash, email, SIGNUP_TOKEN_TTL);
 
@@ -129,7 +131,7 @@ public class AuthService {
 			throw new IllegalArgumentException("signupToken required");
 		}
 
-		String tokenHash = RedisTemplate.sha256(request.signUpToken());
+		String tokenHash = UserRedisTemplate.sha256(request.signUpToken());
 		String emailFromToken = signUpTokenStore.getEmail(tokenHash);
 
 		if (emailFromToken == null) {
@@ -156,15 +158,26 @@ public class AuthService {
 		);
 		user = userAdapter.save(user);
 
+		String finalProfileImageKey = null;
+		if (request.profileImageUploadToken() != null && request.profileImageObjectKey() != null) {
+			finalProfileImageKey = fileService.consumeAndPromoteProfileImage(
+				request.profileImageUploadToken(),  // UUID
+				request.profileImageObjectKey(),    // tmp objectKey
+				user.getId()
+			);
+		}
+
 		UserProfile userProfile = UserProfile.create(
 			user.getId(),
 			request.displayName(),
-			request.profileImageUrl()
+			finalProfileImageKey
 		);
+		userAdapter.save(userProfile);
+
 		userAdapter.save(userProfile);
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
     public JwtTokens login(MemberLoginRequest req) {
         User user = userAdapter.findUserByEmail(req.email())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
@@ -192,7 +205,7 @@ public class AuthService {
         return new JwtTokens(access, refresh);
     }
 
-	@Transactional
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
 	public JwtTokens refresh(String refreshToken) {
 		Jws<Claims> jws = jwtTokenProvider.parseRefresh(refreshToken);
 		Claims claims = jws.getBody();
@@ -238,7 +251,7 @@ public class AuthService {
 
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
 	public void findEmail(FindEmailRequest req) {
 		userAdapter.findUserProfileByDisplayName(req.displayName())
 			.ifPresent(user -> {
@@ -246,11 +259,11 @@ public class AuthService {
 			});
 	}
 
-	@Transactional
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
 	public void requestPasswordReset(PasswordResetRequest req) {
 		userAdapter.findUserByEmail(req.email()).ifPresent(user -> {
 			String rawToken = UUID.randomUUID().toString();
-			String tokenHash = RedisTemplate.sha256(rawToken);
+			String tokenHash = UserRedisTemplate.sha256(rawToken);
 
 			passwordResetTokenStore.put(tokenHash, String.valueOf(user.getId()), RESET_TTL);
 
@@ -260,9 +273,9 @@ public class AuthService {
 		});
 	}
 
-	@Transactional
+	@Transactional(transactionManager = "transactionManager")
 	public void confirmPasswordReset(PasswordResetConfirmRequest req) {
-		String tokenHash = RedisTemplate.sha256(req.token());
+		String tokenHash = UserRedisTemplate.sha256(req.token());
 		String userId = passwordResetTokenStore.getUserId(tokenHash);
 
 		if (userId == null) {

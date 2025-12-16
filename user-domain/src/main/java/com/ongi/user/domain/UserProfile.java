@@ -11,7 +11,7 @@ public class UserProfile {
 	// TODO List
 	private String allergens;
 
-	private Integer dietGoal;
+	private Double dietGoal;
 
 	// TODO List
 	private String dislikedIngredients;
@@ -35,7 +35,7 @@ public class UserProfile {
 		Long userId,
 		String displayName,
 		String allergens,
-		Integer dietGoal,
+		Double dietGoal,
 		String dislikedIngredients,
 		String profileImageUrl,
 		String name,
@@ -61,7 +61,7 @@ public class UserProfile {
 	}
 
 	public static UserProfile create(
-		Long id, Long userId, String displayName, String allergens, Integer dietGoal, String dislikedIngredients,
+		Long id, Long userId, String displayName, String allergens, Double dietGoal, String dislikedIngredients,
 		String profileImageUrl, String name, String phoneNumber, String birth, String zipCode, String address, String addressDetail
 	) {
 		return new UserProfile(id, userId, displayName, allergens, dietGoal, dislikedIngredients, profileImageUrl, name, phoneNumber, birth, zipCode, address, addressDetail);
@@ -105,11 +105,11 @@ public class UserProfile {
 		this.allergens = allergens;
 	}
 
-	public Integer getDietGoal() {
+	public Double getDietGoal() {
 		return dietGoal;
 	}
 
-	public void setDietGoal(Integer dietGoal) {
+	public void setDietGoal(Double dietGoal) {
 		this.dietGoal = dietGoal;
 	}
 

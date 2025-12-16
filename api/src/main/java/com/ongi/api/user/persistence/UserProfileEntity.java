@@ -34,7 +34,7 @@ public class UserProfileEntity extends BaseTimeEntity {
 	private String allergens;
 
 	@Column(name = "diet_goal")
-	private Integer dietGoal;
+	private Double dietGoal;
 
 	// TODO List
 	@Column(name = "disliked_ingredients")
@@ -67,7 +67,7 @@ public class UserProfileEntity extends BaseTimeEntity {
 		Long userId,
 		String displayName,
 		String allergens,
-		Integer dietGoal,
+		Double dietGoal,
 		String dislikedIngredients,
 		String profileImageUrl,
 		String name,

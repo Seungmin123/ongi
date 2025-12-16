@@ -1,11 +1,14 @@
 package com.ongi.api.user.web.dto;
 
+import java.util.UUID;
+
 public record MemberSignUpRequest(
 	String email,
 	String password,
 	String displayName,
-	String profileImageUrl,
+	UUID profileImageUploadToken,
+	String profileImageObjectKey,
+	String finalKey,
 	String signUpToken
 ) {
-
 }

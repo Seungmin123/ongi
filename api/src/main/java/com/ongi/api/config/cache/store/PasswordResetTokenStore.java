@@ -1,20 +1,15 @@
 package com.ongi.api.config.cache.store;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Duration;
-import java.util.HexFormat;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Component
 public class PasswordResetTokenStore {
 
 	private final StringRedisTemplate redis;
-
-	public PasswordResetTokenStore(StringRedisTemplate redis) {
-		this.redis = redis;
-	}
 
 	private String key(String tokenHash) {
 		return "prt:token:" + tokenHash;

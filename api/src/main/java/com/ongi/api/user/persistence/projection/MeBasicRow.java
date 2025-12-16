@@ -1,0 +1,9 @@
+package com.ongi.api.user.persistence.projection;
+
+public record MeBasicRow(
+	String name,
+	String birth,
+	String zipCode,
+	String address,
+	String addressDetail
+) {}

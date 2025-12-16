@@ -9,16 +9,22 @@ import com.ongi.api.user.web.dto.EmailVerifyRequest;
 import com.ongi.api.user.web.dto.FindEmailRequest;
 import com.ongi.api.user.web.dto.MemberSignUpRequest;
 import com.ongi.api.user.web.dto.MemberLoginRequest;
+import com.ongi.api.user.web.dto.MyPageResponse;
 import com.ongi.api.user.web.dto.PasswordResetConfirmRequest;
 import com.ongi.api.user.web.dto.PasswordResetRequest;
-import com.ongi.user.domain.enums.PresignedTypeEnum;
+import com.ongi.user.domain.enums.MeInclude;
+import java.util.EnumSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -29,20 +35,6 @@ public class UserController {
 	private final UserService userService;
 
 	private final AuthService authService;
-
-	// TODO 이미지 업로드 기능 구현
-	@GetMapping("/public/image/pre-signed/{imageType}")
-	public ApiResponse<Void> imagePreSigned(
-		@PathVariable String imageType
-	) {
-		PresignedTypeEnum presignedTypeEnum = PresignedTypeEnum.from(imageType);
-		if(presignedTypeEnum == null) {
-			throw new IllegalArgumentException("Invalid image type: " + imageType);
-		}
-		return ApiResponse.ok();
-	}
-
-	// TODO 회원가입 이메일 인증
 
 	/**
 	 * 이메일 회원가입 - 이메일 인증 요청
@@ -134,11 +126,39 @@ public class UserController {
 		return ApiResponse.ok();
 	}
 
-	// TODO Email 발송
+	@GetMapping("/private/me")
+	public ApiResponse<MyPageResponse> me(
+		Authentication authentication,
+		@RequestParam Set<String> include
+	) {
+		Long userId = (Long) authentication.getPrincipal();
+		Set<MeInclude> includes = include.stream()
+			.map(String::toUpperCase)
+			.map(MeInclude::valueOf)
+			.collect(Collectors.toCollection(() -> EnumSet.noneOf(MeInclude.class)));
 
-	// TODO 아이디 찾기
+		return ApiResponse.ok(userService.getMe(userId, includes));
+	}
 
-	// TODO 비밀번호 재설정
+	@PatchMapping("/private/me/summary")
+	public ApiResponse<Void> updateSummary() {
+		return ApiResponse.ok();
+	}
+
+	@PatchMapping("/private/me/basic")
+	public ApiResponse<Void> updateBasic() {
+		return ApiResponse.ok();
+	}
+
+	@PatchMapping("/private/me/personalization")
+	public ApiResponse<Void> updatePersonalization() {
+		return ApiResponse.ok();
+	}
+
+	@GetMapping("/private/me/stats")
+	public ApiResponse<Void> meStats() {
+		return ApiResponse.ok();
+	}
 
 	// TODO OAuth Naver
 

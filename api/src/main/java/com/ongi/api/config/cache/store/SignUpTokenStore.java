@@ -1,17 +1,15 @@
 package com.ongi.api.config.cache.store;
 
 import java.time.Duration;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Component
 public class SignUpTokenStore {
 
 	private final StringRedisTemplate redis;
-
-	public SignUpTokenStore(StringRedisTemplate redis) {
-		this.redis = redis;
-	}
 
 	private String tokenKey(String tokenHash) { return "su:token:" + tokenHash; }
 

@@ -58,6 +58,13 @@ public class UserAdapter implements UserRepositoryPort {
 	}
 
 	@Override
+	public Optional<UserProfile> findUserProfileByUserId(Long id) {
+		return userProfileRepository
+			.findByUserId(id)
+			.map(UserMapper::toDomain);
+	}
+
+	@Override
 	public Optional<UserProfile> findUserProfileByDisplayName(String displayName) {
 		return userProfileRepository
 			.findByDisplayName(displayName)

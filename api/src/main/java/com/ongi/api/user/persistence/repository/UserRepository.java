@@ -16,4 +16,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	@Modifying
 	@Query("update UserEntity u set u.passwordHash = :hash where u.id = :id")
 	int updatePasswordHash(@Param("id") Long id, @Param("hash") String hash);
+
+	@Query("select u.email from UserEntity u where u.id = :userId")
+	String findEmailById(@Param("userId") Long userId);
 }
