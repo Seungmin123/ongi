@@ -7,11 +7,12 @@ import com.ongi.api.recipe.persistence.RecipeDetailMapper;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
-import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
+import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
 import com.ongi.api.recipe.web.dto.RecipeIngredientCreateRequest;
 import com.ongi.api.recipe.web.dto.RecipeIngredientResponse;
 import com.ongi.api.recipe.web.dto.RecipeStepCreateRequest;
 import com.ongi.api.recipe.web.dto.RecipeStepsResponse;
+import com.ongi.api.recipe.web.dto.RecipeUserFlags;
 import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.RecipeIngredient;
 import com.ongi.ingredients.domain.enums.IngredientCategoryEnum;
@@ -22,6 +23,7 @@ import com.ongi.recipe.domain.search.RecipeSearchCondition;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -122,7 +124,7 @@ public class RecipeService {
 		readOnly = true,
 		transactionManager = "transactionManager"
 	)
-	public ApiResponse<RecipeDetailResponse> getRecipeDetail(Long recipeId) throws NotFoundException {
+	public RecipeDetailBaseResponse getRecipeDetail(Long recipeId) throws NotFoundException {
 		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(NotFoundException::new);
 		List<RecipeIngredientResponse> recipeIngredients =
 			ingredientAdapter.findRecipeIngredientByRecipeId(recipeId).stream()
@@ -137,19 +139,28 @@ public class RecipeService {
 		Integer cookTime = recipe.getCookingTimeMin();
 		String cookTimeText = formatCookTime(cookTime);
 
-		return ApiResponse.ok(
-				new RecipeDetailResponse(
-					recipe.getImageUrl(),
-					recipe.getTitle(),
-					cookTime,
-					cookTimeText,
-					recipe.getServing() == null ? null : recipe.getServing().intValue(),
-					recipe.getDifficulty() != null ? recipe.getDifficulty().getCode() : null,
-					recipe.getLikeCount(),
-					recipe.getCommentsCount(),
-					recipeIngredients,
-					recipeSteps
-				));
+		return new RecipeDetailBaseResponse(
+			recipe.getImageUrl(),
+			recipe.getTitle(),
+			cookTime,
+			cookTimeText,
+			recipe.getServing() == null ? null : recipe.getServing().intValue(),
+			recipe.getDifficulty() != null ? recipe.getDifficulty().getCode() : null,
+			recipe.getLikeCount(),
+			recipe.getCommentsCount(),
+			recipeIngredients,
+			recipeSteps);
+	}
+
+	@Transactional(readOnly = true, transactionManager = "transactionManager")
+	public RecipeUserFlags getFlags(Long recipeId, @Nullable Long userId) {
+		if (userId == null) return new RecipeUserFlags(false, false);
+
+		// TODO 좋아요, 저장 개발 시 바꿀 것
+		//boolean liked = recipeLikeRepository.existsByUserIdAndRecipeId(userId, recipeId);
+		//boolean saved = recipeBookmarkRepository.existsByUserIdAndRecipeId(userId, recipeId);
+		//return new RecipeUserFlags(liked, saved);
+		return new RecipeUserFlags(false, false);
 	}
 
 	@CacheEvict(

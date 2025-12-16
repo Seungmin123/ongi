@@ -1,5 +1,6 @@
 package com.ongi.api.config.auth;
 
+import com.ongi.api.common.web.dto.AuthPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,11 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			// Access 토큰만 검증 (accessSecret)
 			var jws = jwtTokenProvider.parseAccess(token);
-			String userId = jws.getBody().getSubject();
+
+			var principal = new AuthPrincipal(Long.parseLong(jws.getBody().getSubject()));
 
 			var authorities = jwtTokenProvider.toAuthoritiesFromAccessToken(token);
 
-			var auth = new UsernamePasswordAuthenticationToken(userId, null, authorities);
+			var auth = new UsernamePasswordAuthenticationToken(principal, null, authorities);
 			auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
 			SecurityContextHolder.getContext().setAuthentication(auth);

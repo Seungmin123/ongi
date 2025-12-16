@@ -1,6 +1,7 @@
 package com.ongi.api.user.web;
 
 import com.ongi.api.common.web.dto.ApiResponse;
+import com.ongi.api.common.web.dto.AuthPrincipal;
 import com.ongi.api.common.web.dto.JwtTokens;
 import com.ongi.api.user.application.AuthService;
 import com.ongi.api.user.application.UserService;
@@ -22,7 +23,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -133,16 +134,16 @@ public class UserController {
 
 	/**
 	 * 마이 페이지 - 조회 (SUMMARY, BASIC, PERSONALIZATION 가능)
-	 * @param authentication
+	 * @param authPrincipal
 	 * @param include
 	 * @return
 	 */
 	@GetMapping("/private/me")
 	public ApiResponse<MyPageResponse> me(
-		Authentication authentication,
+		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@RequestParam Set<String> include
 	) {
-		Long userId = Long.parseLong(authentication.getPrincipal().toString());
+		Long userId = authPrincipal.userId();
 		Set<MeInclude> includes = include.stream()
 			.map(String::toUpperCase)
 			.map(MeInclude::valueOf)
@@ -153,62 +154,62 @@ public class UserController {
 
 	/**
 	 * 마이 페이지 - 요약 수정
-	 * @param authentication
+	 * @param authPrincipal
 	 * @param myPageSummaryUpdateRequest
 	 * @return
 	 */
 	@PatchMapping("/private/me/summary")
 	public ApiResponse<Void> updateSummary(
-		Authentication authentication,
+		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@RequestBody @Valid MyPageSummaryUpdateRequest myPageSummaryUpdateRequest
 	) {
-		Long userId = Long.parseLong(authentication.getPrincipal().toString());
+		Long userId = authPrincipal.userId();
 		userService.myPageSummaryUpdate(userId, myPageSummaryUpdateRequest);
 		return ApiResponse.ok();
 	}
 
 	/**
 	 * 마이 페이지 - 기본 정보 수정
-	 * @param authentication
+	 * @param authPrincipal
 	 * @param myPageBasicUpdateRequest
 	 * @return
 	 */
 	@PatchMapping("/private/me/basic")
 	public ApiResponse<Void> updateBasic(
-		Authentication authentication,
+		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@RequestBody @Valid MyPageBasicUpdateRequest myPageBasicUpdateRequest
 	) {
-		Long userId = Long.parseLong(authentication.getPrincipal().toString());
+		Long userId = authPrincipal.userId();
 		userService.myPageBasicUpdate(userId, myPageBasicUpdateRequest);
 		return ApiResponse.ok();
 	}
 
 	/**
 	 * 마이 페이지 - 개인 정보 수정
-	 * @param authentication
+	 * @param authPrincipal
 	 * @param myPagePersonalizationUpdateRequest
 	 * @return
 	 */
 	@PatchMapping("/private/me/personalization")
 	public ApiResponse<Void> updatePersonalization(
-		Authentication authentication,
+		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@RequestBody @Valid MyPagePersonalizationUpdateRequest myPagePersonalizationUpdateRequest
 	) {
-		Long userId = Long.parseLong(authentication.getPrincipal().toString());
+		Long userId = authPrincipal.userId();
 		userService.myPagePersonalizationUpdate(userId, myPagePersonalizationUpdateRequest);
 		return ApiResponse.ok();
 	}
 
 	/**
 	 * 마이 페이지 - 내 통계 조회
-	 * @param authentication
+	 * @param authPrincipal
 	 * @return
 	 */
 	@GetMapping("/private/me/stats")
 	public ApiResponse<MyPageStatsResponse> meStats(
-		Authentication authentication
+		@AuthenticationPrincipal AuthPrincipal authPrincipal
 	) {
-		Long userId = Long.parseLong(authentication.getPrincipal().toString());
+		Long userId = authPrincipal.userId();
 		return ApiResponse.ok(userService.getMyPageStats(userId));
 	}
 
