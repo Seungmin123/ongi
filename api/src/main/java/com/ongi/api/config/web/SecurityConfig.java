@@ -1,5 +1,6 @@
 package com.ongi.api.config.web;
 
+import com.ongi.api.config.auth.JwtAuthenticationFilter;
 import com.ongi.api.config.auth.RestAuthHandlers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 
@@ -17,6 +19,8 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
+
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	// TODO 수정
 	@Bean
@@ -40,7 +44,8 @@ public class SecurityConfig {
 				.requestMatchers("/recipe/private/**", "/recipe/private/**", "/file/private/**")
 				.authenticated()
 				.anyRequest().authenticated()
-			);
+			)
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}

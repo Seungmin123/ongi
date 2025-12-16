@@ -131,7 +131,7 @@ public class UserController {
 		Authentication authentication,
 		@RequestParam Set<String> include
 	) {
-		Long userId = (Long) authentication.getPrincipal();
+		Long userId = Long.parseLong(authentication.getPrincipal().toString());
 		Set<MeInclude> includes = include.stream()
 			.map(String::toUpperCase)
 			.map(MeInclude::valueOf)
