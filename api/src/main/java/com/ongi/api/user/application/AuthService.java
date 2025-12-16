@@ -173,8 +173,6 @@ public class AuthService {
 			finalProfileImageKey
 		);
 		userAdapter.save(userProfile);
-
-		userAdapter.save(userProfile);
 	}
 
 	@Transactional(transactionManager = "transactionManager", readOnly = true)

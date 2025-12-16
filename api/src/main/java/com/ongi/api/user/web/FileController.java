@@ -1,5 +1,6 @@
 package com.ongi.api.user.web;
 
+import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.user.application.FileService;
 import com.ongi.api.user.web.dto.ConfirmRequest;
 import com.ongi.api.user.web.dto.ConfirmResponse;
@@ -27,13 +28,13 @@ public class FileController {
 	private final FileService fileService;
 
 	@PostMapping("/public/presign")
-	public PresignResponse presign(@RequestBody @Valid PresignRequest req) {
-		return fileService.createProfileImagePresign(req.contentType(), req.contentLength(), req.fileName());
+	public ApiResponse<PresignResponse> presign(@RequestBody @Valid PresignRequest req) {
+		return ApiResponse.ok(fileService.createProfileImagePresign(req.contentType(), req.contentLength(), req.fileName()));
 	}
 
 	@PostMapping("/public/confirm")
-	public ConfirmResponse confirm(@RequestBody @Valid ConfirmRequest req) {
-		return fileService.confirmUploaded(req.uploadToken(), req.objectKey());
+	public ApiResponse<ConfirmResponse> confirm(@RequestBody @Valid ConfirmRequest req) {
+		return ApiResponse.ok(fileService.confirmUploaded(req.uploadToken(), req.objectKey()));
 	}
 
 	// TODO S3 전 임시 Presigned Upload

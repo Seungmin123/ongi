@@ -53,7 +53,7 @@ public class FileService {
 	}
 
 	// TODO Custom Exception
-	@Transactional
+	@Transactional(transactionManager = "transactionManager")
 	public ConfirmResponse confirmUploaded(UUID token, String objectKey) {
 		String tokenHash = UserRedisTemplate.sha256(token.toString());
 		UploadMeta meta = uploadSessionStore.getMeta(tokenHash);
@@ -78,7 +78,7 @@ public class FileService {
 	}
 
 	// TODO Custom Exception
-	@Transactional
+	@Transactional(transactionManager = "transactionManager")
 	public String consumeAndPromoteProfileImage(UUID token, String objectKey, long userId) {
 		String tokenHash = UserRedisTemplate.sha256(token.toString());
 
