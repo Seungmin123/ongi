@@ -9,10 +9,10 @@ public class OutboxPublishRouter {
 
 		return switch (type) {
 			case RECIPE_LIKED, RECIPE_UNLIKED -> new PublishPlan(List.of(
-				new PublishTarget(
-					"recipe-like-events",
-					payload.get("recipeId").asString()
-				),
+//				new PublishTarget(
+//					"recipe-like-events",
+//					payload.get("recipeId").asString()
+//				),
 				new PublishTarget(
 					"user-action-events",
 					payload.get("userId").asString()
