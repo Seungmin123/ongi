@@ -66,12 +66,7 @@ public class RecipeController {
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@PathVariable Long recipeId
 	) throws Exception {
-
-		// TODO user ID 기반 동작 추가
-
-		RecipeDetailBaseResponse detail = recipeService.getRecipeDetail(recipeId);
-		RecipeUserFlags flags = recipeService.getFlags(recipeId, authPrincipal.userId());
-		return ApiResponse.ok(new RecipeDetailResponse(detail, flags.liked(), flags.saved()));
+		return ApiResponse.ok(recipeEventFacade.view(recipeId, authPrincipal.userId()));
 	}
 
 	/**

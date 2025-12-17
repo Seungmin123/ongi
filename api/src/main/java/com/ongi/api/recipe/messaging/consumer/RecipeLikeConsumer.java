@@ -15,7 +15,16 @@ public class RecipeLikeConsumer {
 //		topics = "recipe-like-events",
 //		groupId = "recipe-stats-updater"
 //	)
-	public void onMessage(String message, Acknowledgment ack) throws Exception {
+	public void onLikeMessage(String message, Acknowledgment ack) throws Exception {
+		recipeStatsUpdater.handle(message);
+		ack.acknowledge(); // DB 처리 성공 후 커밋
+	}
+
+//	@KafkaListener(
+//		topics = "recipe-view-events",
+//		groupId = "recipe-stats-updater"
+//	)
+	public void onViewMessage(String message, Acknowledgment ack) throws Exception {
 		recipeStatsUpdater.handle(message);
 		ack.acknowledge(); // DB 처리 성공 후 커밋
 	}

@@ -31,6 +31,7 @@ public class RecipeStatsUpdater {
 		switch (e.eventType()) {
 			//case "RECIPE_LIKED" -> recipeStatsRepository.incrementLikedCount(e.recipeId(), 1);
 			//case "RECIPE_UNLIKED" -> recipeStatsRepository.incrementLikedCount(e.recipeId(), -1);
+			//case "RECIPE_VIEWED" -> recipeStatsRepository.incrementLikedCount(e.recipeId(), -1);
 
 			default -> {
 				System.out.println(e.eventId() +  " : " + e.eventType() + " : " + e.recipeId() + " : " + e.userId());

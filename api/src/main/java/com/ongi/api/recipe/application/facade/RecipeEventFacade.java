@@ -5,7 +5,10 @@ import com.ongi.api.common.persistence.enums.OutBoxAggregateTypeEnum;
 import com.ongi.api.common.persistence.enums.OutBoxEventTypeEnum;
 import com.ongi.api.recipe.application.RecipeService;
 import com.ongi.api.recipe.web.dto.LikeResponse;
+import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
+import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
 import com.ongi.api.recipe.web.dto.RecipeLikePayload;
+import com.ongi.api.recipe.web.dto.RecipeUserFlags;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,21 @@ public class RecipeEventFacade {
 	private final OutBoxService outBoxService;
 
 	private final ObjectMapper objectMapper;
+
+	@Transactional(transactionManager = "transactionManager")
+	public RecipeDetailResponse view(long recipeId, Long userId) throws Exception {
+		RecipeDetailBaseResponse detail = recipeService.getRecipeDetail(recipeId);
+		RecipeUserFlags flags = recipeService.getFlags(recipeId, userId);
+
+		if(userId != null) {
+			UUID eventId = UUID.randomUUID();
+			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_VIEW;
+			var payload = new RecipeLikePayload(eventId, recipeId, userId, eventType.getCode(), LocalDateTime.now());
+			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
+		}
+
+		return new RecipeDetailResponse(detail, flags.liked(), flags.saved());
+	}
 
 	@Transactional(transactionManager = "transactionManager")
 	public LikeResponse like(long recipeId, long userId) {
