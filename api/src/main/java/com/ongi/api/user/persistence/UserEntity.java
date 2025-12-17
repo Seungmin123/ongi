@@ -34,11 +34,11 @@ public class UserEntity extends BaseTimeEntity {
 	private String passwordHash;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "type", nullable = false)
+	@Column(name = "type", nullable = false, length = 50)
 	private UserTypeEnum type;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "tier", nullable = false)
+	@Column(name = "tier", nullable = false, length = 50)
 	private UserTier tier;
 
 	@Builder

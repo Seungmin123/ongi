@@ -27,10 +27,6 @@ public class Recipe {
 
 	private RecipeCategoryEnum category;
 
-	private Long likeCount;
-
-	private Long commentsCount;
-
 	private Recipe(
 		Long id,
 		Long authorId,
@@ -42,9 +38,7 @@ public class Recipe {
 		String imageUrl,
 		String videoUrl,
 		String source,
-		RecipeCategoryEnum category,
-		Long likeCount,
-		Long commentsCount
+		RecipeCategoryEnum category
 	) {
 		this.id = id;
 		this.authorId = authorId;
@@ -57,16 +51,13 @@ public class Recipe {
 		this.videoUrl = videoUrl;
 		this.source = source;
 		this.category = category;
-		this.likeCount = likeCount;
-		this.commentsCount = commentsCount;
 	}
 
 	public static Recipe create(
 		Long id, Long authorId, String title, String description, Double serving, Integer cookingTimeMin,
-		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source, RecipeCategoryEnum category,
-		Long likeCount, Long commentsCount
+		RecipeDifficultyEnum difficulty, String imageUrl, String videoUrl, String source, RecipeCategoryEnum category
 	) {
-		return new Recipe(id, authorId, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source, category, likeCount, commentsCount);
+		return new Recipe(id, authorId, title, description, serving, cookingTimeMin, difficulty, imageUrl, videoUrl, source, category);
 	}
 
 	public Long getId() {
@@ -157,19 +148,4 @@ public class Recipe {
 		this.category = category;
 	}
 
-	public Long getLikeCount() {
-		return likeCount;
-	}
-
-	public void setLikeCount(Long likeCount) {
-		this.likeCount = likeCount;
-	}
-
-	public Long getCommentsCount() {
-		return commentsCount;
-	}
-
-	public void setCommentsCount(Long commentsCount) {
-		this.commentsCount = commentsCount;
-	}
 }

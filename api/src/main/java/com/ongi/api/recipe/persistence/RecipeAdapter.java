@@ -3,10 +3,12 @@ package com.ongi.api.recipe.persistence;
 import com.ongi.api.ingredients.persistence.QRecipeIngredientEntity;
 import com.ongi.api.recipe.persistence.repository.RecipeLikeRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeRepository;
+import com.ongi.api.recipe.persistence.repository.RecipeStatsRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeStepsRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeTagsRepository;
 import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.RecipeLike;
+import com.ongi.recipe.domain.RecipeStats;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
@@ -35,6 +37,8 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	private final RecipeTagsRepository recipeTagsRepository;
 
 	private final RecipeLikeRepository recipeLikeRepository;
+
+	private final RecipeStatsRepository recipeStatsRepository;
 
 	@Override
 	public Recipe save(Recipe recipe) {
@@ -206,6 +210,28 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	@Override
 	public void deleteRecipeLikeByRecipeIdAndUserId(Long recipeId, Long userId) {
 		recipeLikeRepository.deleteById(new RecipeLikeId(recipeId, userId));
+	}
+
+	@Override
+	public RecipeStats save(RecipeStats domain) {
+		RecipeStatsEntity entity = RecipeMapper.toEntity(domain);
+		RecipeStatsEntity saved = recipeStatsRepository.save(entity);
+		return RecipeMapper.toDomain(saved);
+	}
+
+	@Override
+	public Optional<RecipeStats> findRecipeStatsByRecipeId(Long recipeId) {
+		return recipeStatsRepository
+			.findById(recipeId)
+			.map(RecipeMapper::toDomain);
+	}
+
+	@Override
+	public List<RecipeStats> findRecipeStatsByRecipeIds(List<Long> recipeIds) {
+		return recipeStatsRepository.findAllById(recipeIds)
+			.stream()
+			.map(RecipeMapper::toDomain)
+			.toList();
 	}
 
 

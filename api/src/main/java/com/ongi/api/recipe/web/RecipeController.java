@@ -2,8 +2,8 @@ package com.ongi.api.recipe.web;
 
 import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.common.web.dto.AuthPrincipal;
-import com.ongi.api.config.aspect.CurrentToken;
 import com.ongi.api.recipe.application.RecipeService;
+import com.ongi.api.recipe.application.facade.RecipeEventFacade;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.LikeResponse;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecipeController {
 
 	private final RecipeService recipeService;
+
+	private final RecipeEventFacade recipeEventFacade;
 
 	/**
 	 * 레시피 목록 조회 API
@@ -141,8 +143,7 @@ public class RecipeController {
 		@AuthenticationPrincipal AuthPrincipal authPrincipal
 	) throws Exception {
 		long userId = authPrincipal.userId();
-		long likeCount = recipeService.like(recipeId, userId);
-		return ApiResponse.ok(new LikeResponse(true, likeCount));
+		return ApiResponse.ok(recipeEventFacade.like(recipeId, userId));
 	}
 
 	/**
@@ -158,8 +159,7 @@ public class RecipeController {
 		@AuthenticationPrincipal AuthPrincipal authPrincipal
 	) throws Exception {
 		long userId = authPrincipal.userId();
-		long likeCount = recipeService.unlike(recipeId, userId);
-		return ApiResponse.ok(new LikeResponse(false, likeCount));
+		return ApiResponse.ok(recipeEventFacade.unlike(recipeId, userId));
 	}
 
 

@@ -28,23 +28,23 @@ public class UserStatsEntity extends BaseTimeEntity {
 	private Long id;
 
 	@ColumnDefault("0")
-	@Column(name = "uploaded_recipe_count", nullable = false)
+	@Column(name = "uploaded_recipe_count", nullable = false, comment = "내가 업로드한 레시피의 수")
 	private Long uploadedRecipeCount;
 
 	@ColumnDefault("0")
-	@Column(name = "saved_recipe_count", nullable = false)
+	@Column(name = "saved_recipe_count", nullable = false, comment = "내가 저장한 레시피의 수")
 	private Long savedRecipeCount;
 
 	@ColumnDefault("0")
-	@Column(name = "my_recipe_total_view_count", nullable = false)
+	@Column(name = "my_recipe_total_view_count", nullable = false, comment = "내가 업로드한 레시피 총 뷰")
 	private Long myRecipeTotalViewCount;
 
 	@ColumnDefault("0")
-	@Column(name = "my_post_count", nullable = false)
+	@Column(name = "my_post_count", nullable = false, comment = "커뮤니티 게시글")
 	private Long myPostCount;
 
 	@ColumnDefault("0")
-	@Column(name = "my_comment_count", nullable = false)
+	@Column(name = "my_comment_count", nullable = false, comment = "커뮤니티 댓글")
 	private Long myCommentCount;
 
 	@Builder

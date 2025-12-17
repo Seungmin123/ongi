@@ -7,7 +7,9 @@ import lombok.Getter;
 @Getter
 public enum OutBoxEventStatusEnum {
 
+
 	PENDING("PENDING"),
+	PROCESSING("PROCESSING"),
 	SENDING("SENDING"),
 	FAILED("FAILED"),
 	SUCCESS("SUCCESS");

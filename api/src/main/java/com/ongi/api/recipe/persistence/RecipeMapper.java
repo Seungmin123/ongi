@@ -2,6 +2,7 @@ package com.ongi.api.recipe.persistence;
 
 import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.RecipeLike;
+import com.ongi.recipe.domain.RecipeStats;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
 
@@ -20,8 +21,6 @@ public class RecipeMapper {
 				.videoUrl(recipe.getVideoUrl())
 				.source(recipe.getSource())
 				.category(recipe.getCategory())
-				.likeCount(recipe.getLikeCount())
-				.commentCount(recipe.getCommentsCount())
 				.build();
 		} else {
 			return RecipeEntity.builder()
@@ -36,15 +35,13 @@ public class RecipeMapper {
 				.videoUrl(recipe.getVideoUrl())
 				.source(recipe.getSource())
 				.category(recipe.getCategory())
-				.likeCount(recipe.getLikeCount())
-				.commentCount(recipe.getCommentsCount())
 				.build();
 		}
 	}
 
 	public static Recipe toDomain(RecipeEntity entity) {
 		return Recipe.create(entity.getId(), entity.getAuthorId(), entity.getTitle(), entity.getDescription(), entity.getServing(), entity.getCookingTimeMin(), entity.getDifficulty(), entity.getImageUrl(),
-			entity.getVideoUrl(), entity.getSource(), entity.getCategory(), entity.getLikeCount(), entity.getCommentCount());
+			entity.getVideoUrl(), entity.getSource(), entity.getCategory());
 	}
 
 	public static RecipeStepsEntity toEntity(RecipeSteps steps) {
@@ -110,5 +107,18 @@ public class RecipeMapper {
 
 	public static RecipeLike toDomain(RecipeLikeEntity entity) {
 		return RecipeLike.create(entity.getRecipeId(), entity.getUserId());
+	}
+
+	public static RecipeStatsEntity toEntity(RecipeStats domain) {
+		return RecipeStatsEntity.builder()
+			.recipeId(domain.getRecipeId())
+			.likeCount(domain.getLikeCount())
+			.commentCount(domain.getCommentCount())
+			.viewCount(domain.getViewCount())
+			.build();
+	}
+
+	public static RecipeStats toDomain(RecipeStatsEntity entity) {
+		return RecipeStats.create(entity.getRecipeId(), entity.getLikeCount(), entity.getCommentCount(), entity.getViewCount());
 	}
 }

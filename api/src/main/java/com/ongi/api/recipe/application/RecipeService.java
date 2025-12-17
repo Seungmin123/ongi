@@ -5,7 +5,7 @@ import com.ongi.api.ingredients.persistence.IngredientAdapter;
 import com.ongi.api.recipe.persistence.RecipeAdapter;
 import com.ongi.api.recipe.persistence.RecipeDetailMapper;
 import com.ongi.api.recipe.persistence.repository.RecipeLikeRepository;
-import com.ongi.api.recipe.persistence.repository.RecipeRepository;
+import com.ongi.api.recipe.persistence.repository.RecipeStatsRepository;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
@@ -19,13 +19,14 @@ import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.RecipeIngredient;
 import com.ongi.ingredients.domain.enums.IngredientCategoryEnum;
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeStats;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -45,7 +46,7 @@ public class RecipeService {
 
 	private final JPAQueryFactory queryFactory;
 
-	private final RecipeRepository recipeRepository;
+	private final RecipeStatsRepository recipeStatsRepository;
 
 	private final RecipeLikeRepository recipeLikeRepository;
 
@@ -68,16 +69,26 @@ public class RecipeService {
 		int size = cursorPageRequest.resolvedSize();
 		PageSortOptionEnum sort = cursorPageRequest.resolveSort();
 
+		// TODO RecipeStats 추가함 해결 필요.
 		List<Recipe> recipes = recipeAdapter.search(condition, cursor, size, sort);
-		List<RecipeCardResponse> recipeCardResponses =
-			recipes.stream()
-				.map(this::toRecipeCardResponse)
-				.toList();
+		if (recipes.isEmpty()) {
+			return ApiResponse.ok(List.of());
+		}
+
+		List<Long> recipeIds = recipes.stream().map(Recipe::getId).toList();
+
+		Map<Long, RecipeStats> statsMap =
+			recipeAdapter.findRecipeStatsByRecipeIds(recipeIds).stream()
+				.collect(java.util.stream.Collectors.toMap(RecipeStats::getRecipeId, s -> s));
+
+		List<RecipeCardResponse> recipeCardResponses = recipes.stream()
+			.map(r -> toRecipeCardResponse(r, statsMap.get(r.getId())))
+			.toList();
 
 		return ApiResponse.ok(recipeCardResponses);
 	}
 
-	private RecipeCardResponse toRecipeCardResponse(Recipe recipe) {
+	private RecipeCardResponse toRecipeCardResponse(Recipe recipe, RecipeStats stats) {
 		String cookTimeText = formatCookTime(recipe.getCookingTimeMin());
 
 		Integer servings = null;
@@ -99,8 +110,8 @@ public class RecipeService {
 			cookTimeText,
 			servings,
 			difficultyCode,
-			recipe.getLikeCount(),
-			recipe.getCommentsCount(),
+			stats.getLikeCount(),
+			stats.getCommentCount(),
 			recipe.getCategory().getName()
 		);
 	}
@@ -142,6 +153,8 @@ public class RecipeService {
 				.map(RecipeDetailMapper::toStepsResponse)
 				.toList();
 
+		RecipeStats recipeStats = recipeAdapter.findRecipeStatsByRecipeId(recipeId).orElseThrow(NotFoundException::new);
+
 		Integer cookTime = recipe.getCookingTimeMin();
 		String cookTimeText = formatCookTime(cookTime);
 
@@ -152,14 +165,14 @@ public class RecipeService {
 			cookTimeText,
 			recipe.getServing() == null ? null : recipe.getServing().intValue(),
 			recipe.getDifficulty() != null ? recipe.getDifficulty().getCode() : null,
-			recipe.getLikeCount(),
-			recipe.getCommentsCount(),
+			recipeStats.getLikeCount(),
+			recipeStats.getCommentCount(),
 			recipeIngredients,
 			recipeSteps);
 	}
 
 	@Transactional(readOnly = true, transactionManager = "transactionManager")
-	public RecipeUserFlags getFlags(Long recipeId, @Nullable Long userId) {
+	public RecipeUserFlags getFlags(Long recipeId, Long userId) {
 		if (userId == null) return new RecipeUserFlags(false, false);
 
 		// TODO 좋아요, 저장 개발 시 바꿀 것
@@ -187,12 +200,13 @@ public class RecipeService {
 			request.imageUrl(),
 			null,
 			null,
-			request.category(),
-			0L,
-			0L
+			request.category()
 		);
 
 		recipe = recipeAdapter.save(recipe);
+
+		RecipeStats recipeStats = RecipeStats.create(recipe.getId(), 0L, 0L, 0L);
+		recipeAdapter.save(recipeStats);
 
 		if(!CollectionUtils.isEmpty(request.ingredients())) {
 			saveAllRecipeIngredients(recipe.getId(), request.ingredients());
@@ -307,24 +321,30 @@ public class RecipeService {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public long like(long recipeId, long userId) {
+	public boolean like(long recipeId, long userId) {
 		boolean inserted = recipeLikeRepository.insertIfNotExists(recipeId, userId);
 
 		if (inserted) {
-			recipeRepository.incrementLikeCount(recipeId, 1);
+			recipeStatsRepository.incrementLikeCount(recipeId, 1);
 		}
 
-		return recipeRepository.findLikeCount(recipeId);
+		return inserted;
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public long unlike(long recipeId, long userId) {
+	public boolean unlike(long recipeId, long userId) {
 		int deleted = recipeLikeRepository.deleteByRecipeIdAndUserId(recipeId, userId);
 
 		if (deleted == 1) {
-			recipeRepository.incrementLikeCount(recipeId, -1);
+			recipeStatsRepository.incrementLikeCount(recipeId, -1);
+			return true;
 		}
 
-		return recipeRepository.findLikeCount(recipeId);
+		return false;
+	}
+
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
+	public long getRecipeLikeCount(long recipeId) {
+		return recipeStatsRepository.findLikeCount(recipeId);
 	}
 }

@@ -33,7 +33,7 @@ public class IngredientEntity extends BaseTimeEntity {
 	private String code;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "category", nullable = false)
+	@Column(name = "category", nullable = false, length = 100)
 	private IngredientCategoryEnum category;
 
 	@Column(name = "calories_kcal", nullable = false)

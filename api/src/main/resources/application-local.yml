@@ -52,22 +52,30 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       acks: all
-      retries: 3
-      batch-size: 16384        # 16KB
+      batch-size: 65536        # 64KB
       linger-ms: 10            # 소량 트래픽이면 5~10ms 정도로 batch 효과
       buffer-memory: 33554432  # 32MB
-      transaction-id-prefix: ongi-tx-
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        retries: 2147483647
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 30000
+        compression.type: zstd
+      #transaction-id-prefix: ongi-tx-
     consumer:
       bootstrap-servers: localhost:9092
-      group-id: sample-group
+      group-id: user-stats-updater
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
       enable-auto-commit: false  # 수동 커밋 추천 (성능·정합성 제어 용이)
-      isolation-level: read_committed
     listener:
       type: single
       ack-mode: manual           # 수동 ack (enable-auto-commit=false와 맞춰서)
+  outbox:
+    publisher:
+      fixed-delay-ms: 30000
 #logging:
 #  level:
 #    io.opentelemetry: DEBUG        # OTel SDK/Export
