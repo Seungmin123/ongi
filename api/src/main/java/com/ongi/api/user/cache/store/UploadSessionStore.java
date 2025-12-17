@@ -1,4 +1,4 @@
-package com.ongi.api.config.cache.store.user;
+package com.ongi.api.user.cache.store;
 
 import com.ongi.api.common.web.dto.UploadMeta;
 import java.time.Duration;

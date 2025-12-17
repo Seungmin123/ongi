@@ -1,4 +1,4 @@
-package com.ongi.api.config.cache;
+package com.ongi.api.user.cache;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
