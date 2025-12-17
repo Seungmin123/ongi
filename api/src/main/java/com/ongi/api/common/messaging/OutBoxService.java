@@ -1,4 +1,4 @@
-package com.ongi.api.common.application;
+package com.ongi.api.common.messaging;
 
 import com.ongi.api.common.persistence.entity.OutBoxEventEntity;
 import com.ongi.api.common.persistence.entity.repository.OutBoxEventRepository;

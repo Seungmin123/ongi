@@ -1,4 +1,4 @@
-package com.ongi.api.common.application.publisher;
+package com.ongi.api.common.messaging.publisher;
 
 import com.ongi.api.common.persistence.entity.OutBoxEventEntity;
 import com.ongi.api.common.persistence.entity.repository.OutBoxEventRepository;
@@ -7,12 +7,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor

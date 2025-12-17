@@ -1,6 +1,6 @@
 package com.ongi.api.recipe.application.facade;
 
-import com.ongi.api.common.application.OutBoxService;
+import com.ongi.api.common.messaging.OutBoxService;
 import com.ongi.api.common.persistence.enums.OutBoxAggregateTypeEnum;
 import com.ongi.api.common.persistence.enums.OutBoxEventTypeEnum;
 import com.ongi.api.recipe.application.RecipeService;

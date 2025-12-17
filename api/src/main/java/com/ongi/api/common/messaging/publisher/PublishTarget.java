@@ -1,3 +1,3 @@
-package com.ongi.api.common.application.publisher;
+package com.ongi.api.common.messaging.publisher;
 
 public record PublishTarget(String topic, String key) {}

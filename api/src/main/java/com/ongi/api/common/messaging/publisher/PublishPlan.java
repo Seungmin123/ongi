@@ -1,4 +1,4 @@
-package com.ongi.api.common.application.publisher;
+package com.ongi.api.common.messaging.publisher;
 
 import java.util.List;
 
