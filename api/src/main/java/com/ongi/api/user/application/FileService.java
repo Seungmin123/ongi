@@ -2,7 +2,7 @@ package com.ongi.api.user.application;
 
 import com.ongi.api.common.web.dto.UploadMeta;
 import com.ongi.api.config.cache.UserRedisTemplate;
-import com.ongi.api.config.cache.store.UploadSessionStore;
+import com.ongi.api.config.cache.store.user.UploadSessionStore;
 import com.ongi.api.user.application.component.FileUploader;
 import com.ongi.api.user.web.dto.ConfirmResponse;
 import com.ongi.api.user.web.dto.PresignResponse;

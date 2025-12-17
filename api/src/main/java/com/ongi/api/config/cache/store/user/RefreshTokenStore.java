@@ -1,4 +1,4 @@
-package com.ongi.api.config.cache.store;
+package com.ongi.api.config.cache.store.user;
 
 import java.time.Duration;
 import java.util.Set;
