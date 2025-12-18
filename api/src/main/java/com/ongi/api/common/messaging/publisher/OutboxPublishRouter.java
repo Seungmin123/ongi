@@ -38,6 +38,27 @@ public class OutboxPublishRouter {
 			));
 
 			case RECIPE_UPDATED -> new PublishPlan(List.of());
+
+			case RECIPE_COMMENT_CREATED -> new PublishPlan(List.of(
+				new PublishTarget(
+					"user-action-events",
+					payload.get("userId").asString()
+				)
+			));
+
+			case RECIPE_COMMENT_UPDATED -> new PublishPlan(List.of(
+				new PublishTarget(
+					"user-action-events",
+					payload.get("userId").asString()
+				)
+			));
+
+			case RECIPE_COMMENT_DELETED -> new PublishPlan(List.of(
+				new PublishTarget(
+					"user-action-events",
+					payload.get("userId").asString()
+				)
+			));
 		};
 	}
 }

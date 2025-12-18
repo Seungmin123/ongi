@@ -6,6 +6,7 @@ import com.ongi.api.recipe.persistence.RecipeAdapter;
 import com.ongi.api.recipe.persistence.RecipeDetailMapper;
 import com.ongi.api.recipe.persistence.repository.RecipeLikeRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeStatsRepository;
+import com.ongi.api.recipe.web.dto.CommentCreateRequest;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
@@ -19,9 +20,11 @@ import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.RecipeIngredient;
 import com.ongi.ingredients.domain.enums.IngredientCategoryEnum;
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeComment;
 import com.ongi.recipe.domain.RecipeStats;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
+import com.ongi.recipe.domain.enums.RecipeCommentStatus;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
@@ -347,5 +350,64 @@ public class RecipeService {
 	@Transactional(transactionManager = "transactionManager", readOnly = true)
 	public long getRecipeLikeCount(long recipeId) {
 		return recipeStatsRepository.findLikeCount(recipeId);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public Long createRecipeComment(long recipeId, long userId, CommentCreateRequest req) {
+		// 1) 레시피 존재 검증
+		if (!recipeAdapter.existsRecipeById(recipeId)) {
+			throw new IllegalArgumentException("recipe not found: " + recipeId);
+		}
+
+		// 2) 엔티티 생성 (대댓글 정책)
+		RecipeComment comment;
+		if (req.parentId() == null) {
+			comment = recipeAdapter.createRootComment(recipeId, userId, req.content());
+		} else {
+			if(!recipeAdapter.existsRecipeCommentById(req.parentId())) {
+				throw new IllegalArgumentException("parent not found: " + req.parentId());
+			}
+			comment = recipeAdapter.createReplyComment(recipeId, userId, req.content(), req.parentId());
+		}
+
+		// 3) 카운트 즉시 반영 (upsert + atomic)
+		recipeStatsRepository.upsertIncCommentCount(recipeId, +1);
+
+		return comment.getId();
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public boolean updateRecipeComment(long recipeId, long commentId, long userId, String content) {
+		RecipeComment comment = recipeAdapter
+			.findRecipeCommentByIdAndRecipeIdAndStatus(commentId, recipeId, RecipeCommentStatus.ACTIVE)
+			.orElseThrow(() -> new IllegalArgumentException("comment not found"));
+
+		if (!comment.getUserId().equals(userId)) {
+			throw new SecurityException("forbidden");
+		}
+
+		recipeAdapter.updateRecipeCommentContent(comment, content);
+
+		return true;
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public boolean deleteRecipeComment(long recipeId, long commentId, long userId) {
+		RecipeComment comment = recipeAdapter
+			.findRecipeCommentByIdAndRecipeId(commentId, recipeId)
+			.orElseThrow(() -> new IllegalArgumentException("comment not found"));
+
+		if (!comment.getUserId().equals(userId)) {
+			throw new SecurityException("forbidden");
+		}
+
+		recipeStatsRepository.upsertIncCommentCount(recipeId, -1);
+
+		return recipeAdapter.deleteRecipeCommentSoft(comment);
+	}
+
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
+	public long getRecipeCommentCount(long recipeId) {
+		return recipeStatsRepository.findCommentCount(recipeId);
 	}
 }

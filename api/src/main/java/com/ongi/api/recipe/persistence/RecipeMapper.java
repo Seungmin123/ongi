@@ -1,6 +1,7 @@
 package com.ongi.api.recipe.persistence;
 
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeComment;
 import com.ongi.recipe.domain.RecipeLike;
 import com.ongi.recipe.domain.RecipeStats;
 import com.ongi.recipe.domain.RecipeSteps;
@@ -120,5 +121,23 @@ public class RecipeMapper {
 
 	public static RecipeStats toDomain(RecipeStatsEntity entity) {
 		return RecipeStats.create(entity.getRecipeId(), entity.getLikeCount(), entity.getCommentCount(), entity.getViewCount());
+	}
+
+	public static RecipeCommentEntity toEntity(RecipeComment domain) {
+		return RecipeCommentEntity.builder()
+			.id(domain.getId())
+			.recipeId(domain.getRecipeId())
+			.userId(domain.getUserId())
+			.status(domain.getStatus())
+			.depth(domain.getDepth())
+			.content(domain.getContent())
+			.parentId(domain.getParentId())
+			.build();
+	}
+
+	public static RecipeComment toDomain(RecipeCommentEntity entity) {
+		return RecipeComment.create(entity.getId(), entity.getRecipeId(), entity.getUserId(),
+			entity.getContent(), entity.getStatus(), entity.getParentId(), entity.getDepth(), entity.getDeletedAt(),
+			entity.getVersion());
 	}
 }

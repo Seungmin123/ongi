@@ -1,17 +1,20 @@
 package com.ongi.api.recipe.persistence;
 
 import com.ongi.api.ingredients.persistence.QRecipeIngredientEntity;
+import com.ongi.api.recipe.persistence.repository.RecipeCommentRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeLikeRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeStatsRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeStepsRepository;
 import com.ongi.api.recipe.persistence.repository.RecipeTagsRepository;
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeComment;
 import com.ongi.recipe.domain.RecipeLike;
 import com.ongi.recipe.domain.RecipeStats;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
+import com.ongi.recipe.domain.enums.RecipeCommentStatus;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
 import com.ongi.recipe.port.RecipeRepositoryPort;
 import com.querydsl.core.BooleanBuilder;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
+// TODO Port 이거저거 너무 많이 들어있어서 사이즈가 너무 큼. 각 UseCase 별로 분리
 public class RecipeAdapter implements RecipeRepositoryPort {
 
 	private final JPAQueryFactory queryFactory;
@@ -40,6 +44,8 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 
 	private final RecipeStatsRepository recipeStatsRepository;
 
+	private final RecipeCommentRepository recipeCommentRepository;
+
 	@Override
 	public Recipe save(Recipe recipe) {
 		RecipeEntity entity = RecipeMapper.toEntity(recipe);
@@ -52,6 +58,11 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 		return recipeRepository
 			.findById(id)
 			.map(RecipeMapper::toDomain);
+	}
+
+	@Override
+	public boolean existsRecipeById(Long id) {
+		return recipeRepository.existsById(id);
 	}
 
 	@Override
@@ -232,6 +243,62 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 			.stream()
 			.map(RecipeMapper::toDomain)
 			.toList();
+	}
+
+	@Override
+	public RecipeComment save(RecipeComment domain) {
+		RecipeCommentEntity entity = RecipeMapper.toEntity(domain);
+		RecipeCommentEntity saved = recipeCommentRepository.save(entity);
+		return RecipeMapper.toDomain(saved);
+	}
+
+	@Override
+	public boolean existsRecipeCommentById(Long id) {
+		return recipeCommentRepository.existsById(id);
+	}
+
+	@Override
+	public Optional<RecipeComment> findRecipeCommentByIdAndRecipeId(Long id,
+		Long recipeId) {
+		return recipeCommentRepository
+			.findByIdAndRecipeId(id, recipeId)
+			.map(RecipeMapper::toDomain);
+	}
+
+	@Override
+	public Optional<RecipeComment> findRecipeCommentByIdAndRecipeIdAndStatus(Long id, Long recipeId,
+		RecipeCommentStatus status) {
+		return recipeCommentRepository
+			.findByIdAndRecipeIdAndStatus(id, recipeId, status)
+			.map(RecipeMapper::toDomain);
+	}
+
+	@Override
+	public RecipeComment createRootComment(Long recipeId, Long userId, String content) {
+		RecipeCommentEntity entity = RecipeCommentEntity.createRoot(recipeId, userId, content);
+		RecipeCommentEntity saved = recipeCommentRepository.save(entity);
+		return RecipeMapper.toDomain(saved);
+	}
+
+	@Override
+	public RecipeComment createReplyComment(Long recipeId, Long userId, String content, Long parentId) {
+		RecipeCommentEntity entity = RecipeCommentEntity.createReply(recipeId, userId, content, parentId);
+		RecipeCommentEntity saved = recipeCommentRepository.save(entity);
+		return RecipeMapper.toDomain(saved);
+	}
+
+	@Override
+	public RecipeComment updateRecipeCommentContent(RecipeComment domain, String content) {
+		RecipeCommentEntity entity = RecipeMapper.toEntity(domain);
+		entity.updateContent(content);
+		RecipeCommentEntity saved = recipeCommentRepository.save(entity);
+		return RecipeMapper.toDomain(saved);
+	}
+
+	@Override
+	public boolean deleteRecipeCommentSoft(RecipeComment domain) {
+		RecipeCommentEntity entity = RecipeMapper.toEntity(domain);
+		return entity.deleteSoft();
 	}
 
 

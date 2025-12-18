@@ -4,16 +4,20 @@ import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.common.web.dto.AuthPrincipal;
 import com.ongi.api.recipe.application.RecipeService;
 import com.ongi.api.recipe.application.facade.RecipeEventFacade;
+import com.ongi.api.recipe.web.dto.CommentCreateRequest;
+import com.ongi.api.recipe.web.dto.CommentCreateResponse;
+import com.ongi.api.recipe.web.dto.CommentDeleteResponse;
+import com.ongi.api.recipe.web.dto.CommentUpdateRequest;
+import com.ongi.api.recipe.web.dto.CommentUpdateResponse;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.LikeResponse;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
-import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
 import com.ongi.api.recipe.web.dto.RecipeSearchRequest;
-import com.ongi.api.recipe.web.dto.RecipeUserFlags;
 import com.ongi.recipe.domain.search.RecipeSearch;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -156,6 +161,37 @@ public class RecipeController {
 	) throws Exception {
 		long userId = authPrincipal.userId();
 		return ApiResponse.ok(recipeEventFacade.unlike(recipeId, userId));
+	}
+
+	@PostMapping("/private/v1/recipes/{recipeId}/comments")
+	public ApiResponse<CommentCreateResponse> create(
+		@AuthenticationPrincipal AuthPrincipal auth,
+		@PathVariable long recipeId,
+		@RequestBody @Valid CommentCreateRequest req
+	) {
+		long userId = auth.userId();
+		return ApiResponse.ok(recipeEventFacade.createRecipeComment(recipeId, userId, req));
+	}
+
+	@PatchMapping("/private/v1/recipes/{recipeId}/comments/{commentId}")
+	public ApiResponse<CommentUpdateResponse> update(
+		@AuthenticationPrincipal AuthPrincipal auth,
+		@PathVariable long recipeId,
+		@PathVariable long commentId,
+		@RequestBody @Valid CommentUpdateRequest req
+	) {
+		long userId = auth.userId();
+		return ApiResponse.ok(recipeEventFacade.updateRecipeComment(recipeId, userId, commentId, req));
+	}
+
+	@DeleteMapping("/private/v1/recipes/{recipeId}/comments/{commentId}")
+	public ApiResponse<CommentDeleteResponse> delete(
+		@AuthenticationPrincipal AuthPrincipal auth,
+		@PathVariable long recipeId,
+		@PathVariable long commentId
+	) {
+		long userId = auth.userId();
+		return ApiResponse.ok(recipeEventFacade.deleteRecipeComment(recipeId, userId, commentId));
 	}
 
 

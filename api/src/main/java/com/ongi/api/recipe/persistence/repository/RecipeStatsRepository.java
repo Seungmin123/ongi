@@ -31,13 +31,20 @@ public interface RecipeStatsRepository extends JpaRepository<RecipeStatsEntity, 
     """)
 	long findLikeCount(@Param("recipeId") long recipeId);
 
-	@Modifying
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query(value = """
-        update recipe_stats
-        set like_count = like_count + :delta
-        where recipe_id = :recipeId
-        """, nativeQuery = true)
-	int incrementLikedCount(@Param("recipeId") long recipeId, @Param("delta") long delta);
+	insert into recipe_stats (recipe_id, comment_count, like_count, view_count, created_at, modified_at)
+	values (:recipeId, :delta, 0, 0, now(), now())
+	on duplicate key update
+	  comment_count = greatest(comment_count + :delta, 0),
+	  modified_at = now()
+	""", nativeQuery = true)
+	int upsertIncCommentCount(@Param("recipeId") long recipeId, @Param("delta") long delta);
+
+	@Query("""
+      select r.commentCount from RecipeStatsEntity r where r.recipeId = :recipeId
+    """)
+	long findCommentCount(@Param("recipeId") long recipeId);
 
 	/*@Modifying
 	@Query(value = """
