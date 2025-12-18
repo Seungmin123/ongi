@@ -144,9 +144,9 @@ public class RecipeService {
 		readOnly = true,
 		transactionManager = "transactionManager"
 	)
-	public RecipeDetailBaseResponse getRecipeDetail(Long recipeId) throws NotFoundException {
+	public RecipeDetailBaseResponse getRecipeDetail(Long recipeId) {
 		// TODO Ingredient N+1
-		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(NotFoundException::new);
+		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(() -> new IllegalStateException("Recipe not found"));
 		List<RecipeIngredientResponse> recipeIngredients =
 			ingredientAdapter.findRecipeIngredientByRecipeId(recipeId).stream()
 				.map(RecipeDetailMapper::toIngredientResponse)
@@ -157,7 +157,7 @@ public class RecipeService {
 				.map(RecipeDetailMapper::toStepsResponse)
 				.toList();
 
-		RecipeStats recipeStats = recipeAdapter.findRecipeStatsByRecipeId(recipeId).orElseThrow(NotFoundException::new);
+		RecipeStats recipeStats = recipeAdapter.findRecipeStatsByRecipeId(recipeId).orElseThrow(() -> new IllegalStateException("Recipe Stats not found"));
 
 		Integer cookTime = recipe.getCookingTimeMin();
 		String cookTimeText = formatCookTime(cookTime);
@@ -191,7 +191,7 @@ public class RecipeService {
 		allEntries = true
 	)
 	@Transactional(transactionManager = "transactionManager")
-	public void createRecipe(Long userId, RecipeUpsertRequest request) throws NotFoundException {
+	public void createRecipe(Long userId, RecipeUpsertRequest request) {
 		Recipe recipe = Recipe.create(
 			null,
 			userId,
@@ -220,14 +220,14 @@ public class RecipeService {
 		}
 	}
 
-	private void saveAllRecipeIngredients(Long recipeId, List<RecipeIngredientCreateRequest> ingredients) throws NotFoundException {
+	private void saveAllRecipeIngredients(Long recipeId, List<RecipeIngredientCreateRequest> ingredients) {
 		List<RecipeIngredient> domains = new ArrayList<>();
 		for (int i = 0; i < ingredients.size(); i++) {
 			RecipeIngredientCreateRequest requestIngredient = ingredients.get(i);
 
 			Ingredient ingredient =
 				(requestIngredient.ingredientId() != null )
-					? ingredientAdapter.findIngredientById(requestIngredient.ingredientId()).orElseThrow(NotFoundException::new)
+					? ingredientAdapter.findIngredientById(requestIngredient.ingredientId()).orElseThrow(() -> new IllegalStateException("Ingredient not found"))
 					: ingredientAdapter.findLikeOrCreateIngredient(requestIngredient.name(), IngredientCategoryEnum.UNKNOWN, 0.0, 0.0, 0.0, 0.0);
 
 			RecipeIngredient domain = RecipeIngredient.create(
@@ -245,7 +245,7 @@ public class RecipeService {
 		ingredientAdapter.saveAllRecipeIngredients(domains);
 	}
 
-	private void saveAllRecipeSteps(Long recipeId, List<RecipeStepCreateRequest> steps) throws NotFoundException {
+	private void saveAllRecipeSteps(Long recipeId, List<RecipeStepCreateRequest> steps) {
 		List<RecipeSteps> domains = new ArrayList<>();
 		for(int i = 0; i < steps.size(); i++) {
 			RecipeStepCreateRequest domain = steps.get(i);
@@ -264,8 +264,8 @@ public class RecipeService {
 		@CacheEvict(cacheNames = "recipeList", allEntries = true)
 	})
 	@Transactional(transactionManager = "transactionManager")
-	public void updateRecipe(Long userId, RecipeUpsertRequest request) throws NotFoundException {
-		Recipe recipe = recipeAdapter.findRecipeById(request.recipeId()).orElseThrow(NotFoundException::new);
+	public void updateRecipe(Long userId, RecipeUpsertRequest request) {
+		Recipe recipe = recipeAdapter.findRecipeById(request.recipeId()).orElseThrow(() -> new IllegalStateException("Recipe not found"));
 
 		if (!recipe.getAuthorId().equals(userId)) {
 			throw new SecurityException("forbidden");
@@ -317,15 +317,17 @@ public class RecipeService {
 		@CacheEvict(cacheNames = "recipeList", allEntries = true)
 	})
 	@Transactional(transactionManager = "transactionManager")
-	public void deleteRecipe(long userId, long recipeId) throws NotFoundException {
-		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(NotFoundException::new);
+	public void deleteRecipe(long userId, long recipeId) {
+		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(() -> new IllegalStateException("Recipe not found"));
 		if (!recipe.getAuthorId().equals(userId)) {
 			throw new SecurityException("forbidden");
 		}
-
 		ingredientAdapter.deleteRecipeIngredientByRecipeId(recipeId);
 		recipeAdapter.deleteRecipeStepsByRecipeId(recipeId);
 		recipeAdapter.deleteRecipeById(recipeId);
+
+		// TODO Likes, Saves, Comments, Tags 모두 삭제 필요.
+
 	}
 
 	@Transactional(transactionManager = "transactionManager")
@@ -405,9 +407,13 @@ public class RecipeService {
 			throw new SecurityException("forbidden");
 		}
 
-		recipeStatsRepository.upsertIncCommentCount(recipeId, -1);
+		boolean deleted = recipeAdapter.deleteRecipeCommentSoft(comment);
 
-		return recipeAdapter.deleteRecipeCommentSoft(comment);
+		if(deleted) {
+			recipeStatsRepository.upsertIncCommentCount(recipeId, -1);
+		}
+
+		return deleted;
 	}
 
 	@Transactional(transactionManager = "transactionManager", readOnly = true)

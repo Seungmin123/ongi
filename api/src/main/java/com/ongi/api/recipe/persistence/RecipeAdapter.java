@@ -102,7 +102,7 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 
 	@Override
 	public void deleteRecipeStepsByRecipeId(Long recipeId) {
-		recipeStepsRepository.deleteById(recipeId);
+		recipeStepsRepository.deleteAllById(recipeId);
 	}
 
 	@Override

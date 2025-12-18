@@ -9,4 +9,6 @@ public interface RecipeStepsRepository extends JpaRepository<RecipeStepsEntity, 
 	List<RecipeStepsEntity> findRecipeStepsByRecipeId(Long id);
 
 	void deleteByRecipeId(Long id);
+
+	void deleteAllById(Long id);
 }
