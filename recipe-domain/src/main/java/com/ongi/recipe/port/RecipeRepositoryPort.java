@@ -42,10 +42,6 @@ public interface RecipeRepositoryPort {
 
 	RecipeLike save(RecipeLike recipeLike);
 
-	Optional<RecipeLike> findRecipeLikeByRecipeIdAndUserId(Long recipeId, Long userId);
-
-	void deleteRecipeLikeByRecipeIdAndUserId(Long recipeId, Long userId);
-
 	RecipeStats save(RecipeStats recipeStats);
 
 	Optional<RecipeStats> findRecipeStatsByRecipeId(Long recipeId);
@@ -60,9 +56,9 @@ public interface RecipeRepositoryPort {
 
 	Optional<RecipeComment> findRecipeCommentByIdAndRecipeIdAndStatus(Long id, Long recipeId, RecipeCommentStatus status);
 
-	RecipeComment createRootComment(Long recipeId, Long userId, String content);
+	RecipeComment createRootComment(Long userId, Long recipeId, String content);
 
-	RecipeComment createReplyComment(Long recipeId, Long userId, String content, Long parentId);
+	RecipeComment createReplyComment(Long userId, Long recipeId, String content, Long parentId);
 
 	RecipeComment updateRecipeCommentContent(RecipeComment domain, String content);
 

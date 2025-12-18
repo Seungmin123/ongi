@@ -49,7 +49,7 @@ public class RecipeController {
 	 * @return
 	 * @throws Exception
 	 */
-	@GetMapping("/public/v1/recipe/list")
+	@GetMapping("/public/recipe/list")
 	public ApiResponse<List<RecipeCardResponse>> getRecipes(
 		@ModelAttribute CursorPageRequest cursorPageRequest,
 		@ModelAttribute RecipeSearchRequest searchRequest
@@ -66,13 +66,13 @@ public class RecipeController {
 	 * @return
 	 * @throws Exception
 	 */
-	@GetMapping("/public/v1/recipe/{recipeId}")
+	@GetMapping("/public/recipe/{recipeId}")
 	public ApiResponse<RecipeDetailResponse> getRecipeDetail(
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@PathVariable Long recipeId
 	) throws Exception {
 		Long userId = (authPrincipal == null) ? null : authPrincipal.userId();
-		return ApiResponse.ok(recipeEventFacade.view(recipeId, userId));
+		return ApiResponse.ok(recipeEventFacade.view(userId, recipeId));
 	}
 
 	/**
@@ -81,13 +81,15 @@ public class RecipeController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping("/private/v1/recipe")
+	@PostMapping("/private/recipe")
 	public ApiResponse<Void> createRecipe(
+		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@ModelAttribute RecipeUpsertRequest recipeUpsertRequest
 	) throws Exception {
 		// TODO 확인할 것 - 등록한 레시피 기반으로 유사 레시피 추천?
 		// TODO Kafka User Event 발행?
-		recipeService.createRecipe(recipeUpsertRequest);
+		long userId = authPrincipal.userId();
+		recipeService.createRecipe(userId, recipeUpsertRequest);
 		return ApiResponse.ok();
 	}
 
@@ -98,16 +100,14 @@ public class RecipeController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PatchMapping("/private/v1/recipe")
+	@PatchMapping("/private/recipe")
 	public ApiResponse<Void> updateRecipe(
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@ModelAttribute RecipeUpsertRequest request
 	) throws Exception {
 		// TODO Kafka User Event 발행?
-
-		// TODO userId 와 Recipe UserId 검증
-
-		recipeService.updateRecipe(request);
+		long userId = authPrincipal.userId();
+		recipeService.updateRecipe(userId, request);
 		return ApiResponse.ok();
 	}
 
@@ -118,16 +118,14 @@ public class RecipeController {
 	 * @return
 	 * @throws Exception
 	 */
-	@DeleteMapping("/private/v1/recipe/{recipeId}")
+	@DeleteMapping("/private/recipe/{recipeId}")
 	public ApiResponse<Void> deleteRecipe(
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@PathVariable Long recipeId
 	) throws Exception {
-		// TODO userId 와 Recipe UserId 검증
-
 		// TODO Kafka User Event 발행?
-
-		recipeService.deleteRecipe(recipeId);
+		long userId = authPrincipal.userId();
+		recipeService.deleteRecipe(userId, recipeId);
 		return ApiResponse.ok();
 	}
 
@@ -144,7 +142,7 @@ public class RecipeController {
 		@AuthenticationPrincipal AuthPrincipal authPrincipal
 	) throws Exception {
 		long userId = authPrincipal.userId();
-		return ApiResponse.ok(recipeEventFacade.like(recipeId, userId));
+		return ApiResponse.ok(recipeEventFacade.like(userId, recipeId));
 	}
 
 	/**
@@ -160,20 +158,20 @@ public class RecipeController {
 		@AuthenticationPrincipal AuthPrincipal authPrincipal
 	) throws Exception {
 		long userId = authPrincipal.userId();
-		return ApiResponse.ok(recipeEventFacade.unlike(recipeId, userId));
+		return ApiResponse.ok(recipeEventFacade.unlike(userId, recipeId));
 	}
 
-	@PostMapping("/private/v1/recipes/{recipeId}/comments")
+	@PostMapping("/private/{recipeId}/comment")
 	public ApiResponse<CommentCreateResponse> create(
 		@AuthenticationPrincipal AuthPrincipal auth,
 		@PathVariable long recipeId,
 		@RequestBody @Valid CommentCreateRequest req
 	) {
 		long userId = auth.userId();
-		return ApiResponse.ok(recipeEventFacade.createRecipeComment(recipeId, userId, req));
+		return ApiResponse.ok(recipeEventFacade.createRecipeComment(userId, recipeId, req));
 	}
 
-	@PatchMapping("/private/v1/recipes/{recipeId}/comments/{commentId}")
+	@PatchMapping("/private/{recipeId}/comment/{commentId}")
 	public ApiResponse<CommentUpdateResponse> update(
 		@AuthenticationPrincipal AuthPrincipal auth,
 		@PathVariable long recipeId,
@@ -181,17 +179,17 @@ public class RecipeController {
 		@RequestBody @Valid CommentUpdateRequest req
 	) {
 		long userId = auth.userId();
-		return ApiResponse.ok(recipeEventFacade.updateRecipeComment(recipeId, userId, commentId, req));
+		return ApiResponse.ok(recipeEventFacade.updateRecipeComment(userId, recipeId, commentId, req));
 	}
 
-	@DeleteMapping("/private/v1/recipes/{recipeId}/comments/{commentId}")
+	@DeleteMapping("/private/{recipeId}/comment/{commentId}")
 	public ApiResponse<CommentDeleteResponse> delete(
 		@AuthenticationPrincipal AuthPrincipal auth,
 		@PathVariable long recipeId,
 		@PathVariable long commentId
 	) {
 		long userId = auth.userId();
-		return ApiResponse.ok(recipeEventFacade.deleteRecipeComment(recipeId, userId, commentId));
+		return ApiResponse.ok(recipeEventFacade.deleteRecipeComment(userId, recipeId, commentId));
 	}
 
 

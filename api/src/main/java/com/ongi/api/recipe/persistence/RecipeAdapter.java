@@ -212,18 +212,6 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	}
 
 	@Override
-	public Optional<RecipeLike> findRecipeLikeByRecipeIdAndUserId(Long recipeId, Long userId) {
-		return recipeLikeRepository
-			.findById(new RecipeLikeId(recipeId, userId))
-			.map(RecipeMapper::toDomain);
-	}
-
-	@Override
-	public void deleteRecipeLikeByRecipeIdAndUserId(Long recipeId, Long userId) {
-		recipeLikeRepository.deleteById(new RecipeLikeId(recipeId, userId));
-	}
-
-	@Override
 	public RecipeStats save(RecipeStats domain) {
 		RecipeStatsEntity entity = RecipeMapper.toEntity(domain);
 		RecipeStatsEntity saved = recipeStatsRepository.save(entity);
@@ -274,15 +262,15 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	}
 
 	@Override
-	public RecipeComment createRootComment(Long recipeId, Long userId, String content) {
-		RecipeCommentEntity entity = RecipeCommentEntity.createRoot(recipeId, userId, content);
+	public RecipeComment createRootComment(Long userId, Long recipeId, String content) {
+		RecipeCommentEntity entity = RecipeCommentEntity.createRoot(userId, recipeId, content);
 		RecipeCommentEntity saved = recipeCommentRepository.save(entity);
 		return RecipeMapper.toDomain(saved);
 	}
 
 	@Override
-	public RecipeComment createReplyComment(Long recipeId, Long userId, String content, Long parentId) {
-		RecipeCommentEntity entity = RecipeCommentEntity.createReply(recipeId, userId, content, parentId);
+	public RecipeComment createReplyComment(Long userId, Long recipeId, String content, Long parentId) {
+		RecipeCommentEntity entity = RecipeCommentEntity.createReply(userId, recipeId, content, parentId);
 		RecipeCommentEntity saved = recipeCommentRepository.save(entity);
 		return RecipeMapper.toDomain(saved);
 	}
@@ -298,7 +286,12 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	@Override
 	public boolean deleteRecipeCommentSoft(RecipeComment domain) {
 		RecipeCommentEntity entity = RecipeMapper.toEntity(domain);
-		return entity.deleteSoft();
+		if(entity.deleteSoft()) {
+			recipeCommentRepository.save(entity);
+			return true;
+		}
+
+		return false;
 	}
 
 

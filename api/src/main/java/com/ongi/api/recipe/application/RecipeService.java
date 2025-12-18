@@ -176,7 +176,7 @@ public class RecipeService {
 	}
 
 	@Transactional(readOnly = true, transactionManager = "transactionManager")
-	public RecipeUserFlags getFlags(Long recipeId, Long userId) {
+	public RecipeUserFlags getFlags(Long userId, Long recipeId) {
 		if (userId == null) return new RecipeUserFlags(false, false);
 
 		// TODO 좋아요, 저장 개발 시 바꿀 것
@@ -190,12 +190,11 @@ public class RecipeService {
 		cacheNames = "recipeList",
 		allEntries = true
 	)
-	// TODO 추후 이벤트 발행 시 TransactionManager -> KafkaTM으로 바꿔야할 수도 있음.
 	@Transactional(transactionManager = "transactionManager")
-	public void createRecipe(RecipeUpsertRequest request) throws NotFoundException {
+	public void createRecipe(Long userId, RecipeUpsertRequest request) throws NotFoundException {
 		Recipe recipe = Recipe.create(
 			null,
-			request.userId(),
+			userId,
 			request.title(),
 			request.description(),
 			request.serving(),
@@ -265,11 +264,11 @@ public class RecipeService {
 		@CacheEvict(cacheNames = "recipeList", allEntries = true)
 	})
 	@Transactional(transactionManager = "transactionManager")
-	public void updateRecipe(RecipeUpsertRequest request) throws NotFoundException {
+	public void updateRecipe(Long userId, RecipeUpsertRequest request) throws NotFoundException {
 		Recipe recipe = recipeAdapter.findRecipeById(request.recipeId()).orElseThrow(NotFoundException::new);
 
-		if(request.userId() != null) {
-			recipe.setAuthorId(request.userId());
+		if (!recipe.getAuthorId().equals(userId)) {
+			throw new SecurityException("forbidden");
 		}
 
 		if(request.title() != null) {
@@ -318,15 +317,20 @@ public class RecipeService {
 		@CacheEvict(cacheNames = "recipeList", allEntries = true)
 	})
 	@Transactional(transactionManager = "transactionManager")
-	public void deleteRecipe(Long recipeId) {
+	public void deleteRecipe(long userId, long recipeId) throws NotFoundException {
+		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(NotFoundException::new);
+		if (!recipe.getAuthorId().equals(userId)) {
+			throw new SecurityException("forbidden");
+		}
+
 		ingredientAdapter.deleteRecipeIngredientByRecipeId(recipeId);
 		recipeAdapter.deleteRecipeStepsByRecipeId(recipeId);
 		recipeAdapter.deleteRecipeById(recipeId);
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public boolean like(long recipeId, long userId) {
-		boolean inserted = recipeLikeRepository.insertIfNotExists(recipeId, userId);
+	public boolean like(long userId, long recipeId) {
+		boolean inserted = recipeLikeRepository.insertIfNotExists(userId, recipeId);
 
 		if (inserted) {
 			recipeStatsRepository.incrementLikeCount(recipeId, 1);
@@ -336,8 +340,8 @@ public class RecipeService {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public boolean unlike(long recipeId, long userId) {
-		int deleted = recipeLikeRepository.deleteByRecipeIdAndUserId(recipeId, userId);
+	public boolean unlike(long userId, long recipeId) {
+		int deleted = recipeLikeRepository.deleteByRecipeIdAndUserId(userId, recipeId);
 
 		if (deleted == 1) {
 			recipeStatsRepository.incrementLikeCount(recipeId, -1);
@@ -353,7 +357,7 @@ public class RecipeService {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public Long createRecipeComment(long recipeId, long userId, CommentCreateRequest req) {
+	public Long createRecipeComment(long userId, long recipeId, CommentCreateRequest req) {
 		// 1) 레시피 존재 검증
 		if (!recipeAdapter.existsRecipeById(recipeId)) {
 			throw new IllegalArgumentException("recipe not found: " + recipeId);
@@ -362,12 +366,12 @@ public class RecipeService {
 		// 2) 엔티티 생성 (대댓글 정책)
 		RecipeComment comment;
 		if (req.parentId() == null) {
-			comment = recipeAdapter.createRootComment(recipeId, userId, req.content());
+			comment = recipeAdapter.createRootComment(userId, recipeId, req.content());
 		} else {
 			if(!recipeAdapter.existsRecipeCommentById(req.parentId())) {
 				throw new IllegalArgumentException("parent not found: " + req.parentId());
 			}
-			comment = recipeAdapter.createReplyComment(recipeId, userId, req.content(), req.parentId());
+			comment = recipeAdapter.createReplyComment(userId, recipeId, req.content(), req.parentId());
 		}
 
 		// 3) 카운트 즉시 반영 (upsert + atomic)
@@ -377,7 +381,7 @@ public class RecipeService {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public boolean updateRecipeComment(long recipeId, long commentId, long userId, String content) {
+	public boolean updateRecipeComment(long userId, long recipeId, long commentId, String content) {
 		RecipeComment comment = recipeAdapter
 			.findRecipeCommentByIdAndRecipeIdAndStatus(commentId, recipeId, RecipeCommentStatus.ACTIVE)
 			.orElseThrow(() -> new IllegalArgumentException("comment not found"));
@@ -392,7 +396,7 @@ public class RecipeService {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public boolean deleteRecipeComment(long recipeId, long commentId, long userId) {
+	public boolean deleteRecipeComment(long userId, long recipeId, long commentId) {
 		RecipeComment comment = recipeAdapter
 			.findRecipeCommentByIdAndRecipeId(commentId, recipeId)
 			.orElseThrow(() -> new IllegalArgumentException("comment not found"));

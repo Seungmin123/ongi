@@ -13,23 +13,22 @@ public interface RecipeLikeRepository extends JpaRepository<RecipeLikeEntity, Re
 	@Modifying
 	@Query(
 		value = """
-      insert ignore into recipe_like (recipe_id, user_id)
-      values (:recipeId, :userId)
+      insert ignore into recipe_like (user_id, recipe_id)
+      values (:userId, :recipeId)
       """,
 		nativeQuery = true
 	)
-	int insert(@Param("recipeId") long recipeId, @Param("userId") long userId);
+	int insert(@Param("userId") long userId, @Param("recipeId") long recipeId);
 
-	default boolean insertIfNotExists(long recipeId, long userId) {
-		return insert(recipeId, userId) == 1;
+	default boolean insertIfNotExists(long userId, long recipeId) {
+		return insert(userId, recipeId) == 1;
 	}
 
 	@Modifying
 	@Query("""
       delete from RecipeLikeEntity rl
-      where rl.id.recipeId = :recipeId and rl.id.userId = :userId
+      where rl.id.userId = :userId and rl.id.recipeId = :recipeId
     """)
-	int deleteByRecipeIdAndUserId(@Param("recipeId") long recipeId,
-		@Param("userId") long userId);
+	int deleteByRecipeIdAndUserId(@Param("userId") long userId, @Param("recipeId") long recipeId);
 
 }

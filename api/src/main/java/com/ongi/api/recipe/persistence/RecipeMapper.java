@@ -107,7 +107,7 @@ public class RecipeMapper {
 	}
 
 	public static RecipeLike toDomain(RecipeLikeEntity entity) {
-		return RecipeLike.create(entity.getRecipeId(), entity.getUserId());
+		return RecipeLike.create(entity.getUserId(), entity.getRecipeId());
 	}
 
 	public static RecipeStatsEntity toEntity(RecipeStats domain) {
@@ -132,11 +132,13 @@ public class RecipeMapper {
 			.depth(domain.getDepth())
 			.content(domain.getContent())
 			.parentId(domain.getParentId())
+			.deletedAt(domain.getDeletedAt())
+			.version(domain.getVersion())
 			.build();
 	}
 
 	public static RecipeComment toDomain(RecipeCommentEntity entity) {
-		return RecipeComment.create(entity.getId(), entity.getRecipeId(), entity.getUserId(),
+		return RecipeComment.create(entity.getId(),  entity.getUserId(), entity.getRecipeId(),
 			entity.getContent(), entity.getStatus(), entity.getParentId(), entity.getDepth(), entity.getDeletedAt(),
 			entity.getVersion());
 	}

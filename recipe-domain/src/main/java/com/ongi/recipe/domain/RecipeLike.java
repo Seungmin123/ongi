@@ -2,17 +2,17 @@ package com.ongi.recipe.domain;
 
 public class RecipeLike {
 
-	private Long recipeId;
-
 	private Long userId;
 
-	private RecipeLike(Long recipeId, Long userId) {
-		this.recipeId = recipeId;
+	private Long recipeId;
+
+	private RecipeLike(Long userId, Long recipeId) {
 		this.userId = userId;
+		this.recipeId = recipeId;
 	}
 
-	public static RecipeLike create(Long recipeId, Long userId) {
-		return new RecipeLike(recipeId, userId);
+	public static RecipeLike create(Long userId, Long recipeId) {
+		return new RecipeLike(userId, recipeId);
 	}
 
 	public Long getRecipeId() {

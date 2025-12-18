@@ -23,7 +23,7 @@ public class RecipeComment {
 
 	private Long version;
 
-	private RecipeComment(Long id, Long recipeId, Long userId, String content,
+	private RecipeComment(Long id, Long userId, Long recipeId, String content,
 		RecipeCommentStatus status, Long parentId, int depth, LocalDateTime deletedAt,
 		Long version) {
 		this.id = id;
@@ -38,11 +38,11 @@ public class RecipeComment {
 	}
 
 	public static RecipeComment create(
-		Long id, Long recipeId, Long userId, String content,
+		Long id, Long userId, Long recipeId, String content,
 		RecipeCommentStatus status, Long parentId, int depth, LocalDateTime deletedAt,
 		Long version
 	) {
-		return new RecipeComment(id, recipeId, userId, content, status, parentId, depth, deletedAt, version);
+		return new RecipeComment(id, userId, recipeId, content, status, parentId, depth, deletedAt, version);
 	}
 
 	public Long getId() {

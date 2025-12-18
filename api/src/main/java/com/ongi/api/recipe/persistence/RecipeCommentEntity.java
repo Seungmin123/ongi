@@ -50,7 +50,7 @@ public class RecipeCommentEntity extends BaseTimeEntity {
 	private Long version;
 
 	@Builder
-	public RecipeCommentEntity(Long id, Long recipeId, Long userId, String content, Long parentId, int depth, RecipeCommentStatus status) {
+	public RecipeCommentEntity(Long id, Long userId, Long recipeId, String content, Long parentId, int depth, RecipeCommentStatus status, LocalDateTime deletedAt, Long version) {
 		this.id = id;
 		this.recipeId = recipeId;
 		this.userId = userId;
@@ -58,9 +58,11 @@ public class RecipeCommentEntity extends BaseTimeEntity {
 		this.parentId = parentId;
 		this.depth = depth;
 		this.status = status;
+		this.deletedAt = deletedAt;
+		this.version = version;
 	}
 
-	private RecipeCommentEntity(Long recipeId, Long userId, String content, Long parentId, int depth) {
+	private RecipeCommentEntity(Long userId, Long recipeId, String content, Long parentId, int depth) {
 		this.recipeId = recipeId;
 		this.userId = userId;
 		this.content = content;
@@ -69,12 +71,12 @@ public class RecipeCommentEntity extends BaseTimeEntity {
 		this.status = RecipeCommentStatus.ACTIVE;
 	}
 
-	public static RecipeCommentEntity createRoot(Long recipeId, Long userId, String content) {
-		return new RecipeCommentEntity(recipeId, userId, content, null, 0);
+	public static RecipeCommentEntity createRoot(Long userId, Long recipeId, String content) {
+		return new RecipeCommentEntity(userId, recipeId, content, null, 0);
 	}
 
-	public static RecipeCommentEntity createReply(Long recipeId, Long userId, String content, Long parentId) {
-		return new RecipeCommentEntity(recipeId, userId, content, parentId, 1);
+	public static RecipeCommentEntity createReply(Long userId, Long recipeId, String content, Long parentId) {
+		return new RecipeCommentEntity(userId, recipeId, content, parentId, 1);
 	}
 
 	public void updateContent(String content) {

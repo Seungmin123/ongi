@@ -33,9 +33,9 @@ public class RecipeEventFacade {
 	private final RecipeViewCounter recipeViewCounter;
 
 	@Transactional(transactionManager = "transactionManager")
-	public RecipeDetailResponse view(long recipeId, Long userId) throws Exception {
+	public RecipeDetailResponse view(Long userId, long recipeId) throws Exception {
 		RecipeDetailBaseResponse detail = recipeService.getRecipeDetail(recipeId);
-		RecipeUserFlags flags = recipeService.getFlags(recipeId, userId);
+		RecipeUserFlags flags = recipeService.getFlags(userId, recipeId);
 
 		// View Incr
 		recipeViewCounter.incr(recipeId);
@@ -43,7 +43,7 @@ public class RecipeEventFacade {
 		if(userId != null) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_VIEW;
-			var payload = new RecipeLikePayload(eventId, recipeId, userId, eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipeLikePayload(eventId, userId, recipeId, eventType.getCode(), LocalDateTime.now());
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 
@@ -51,13 +51,13 @@ public class RecipeEventFacade {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public LikeResponse like(long recipeId, long userId) {
-		boolean inserted = recipeService.like(recipeId, userId);
+	public LikeResponse like(long userId, long recipeId) {
+		boolean inserted = recipeService.like(userId, recipeId);
 
 		if(inserted) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_LIKED;
-			var payload = new RecipeLikePayload(eventId, recipeId, userId, eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipeLikePayload(eventId, userId, recipeId, eventType.getCode(), LocalDateTime.now());
 
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
@@ -67,13 +67,13 @@ public class RecipeEventFacade {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public LikeResponse unlike(long recipeId, long userId) {
-		boolean deleted = recipeService.unlike(recipeId, userId);
+	public LikeResponse unlike(long userId, long recipeId) {
+		boolean deleted = recipeService.unlike(userId, recipeId);
 
 		if (deleted) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_UNLIKED;
-			var payload = new RecipeLikePayload(eventId, recipeId, userId, eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipeLikePayload(eventId, userId, recipeId, eventType.getCode(), LocalDateTime.now());
 
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
@@ -83,13 +83,13 @@ public class RecipeEventFacade {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public CommentCreateResponse createRecipeComment(long recipeId, long userId, CommentCreateRequest req) {
-		Long commentId = recipeService.createRecipeComment(recipeId, userId, req);
+	public CommentCreateResponse createRecipeComment(long userId, long recipeId, CommentCreateRequest req) {
+		Long commentId = recipeService.createRecipeComment(userId, recipeId, req);
 
 		if(commentId != null) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_COMMENT_CREATED;
-			var payload = new RecipeCommentEventPayload(eventId, recipeId, commentId, userId, eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipeCommentEventPayload(eventId, userId, recipeId, commentId, eventType.getCode(), LocalDateTime.now());
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 
@@ -98,13 +98,13 @@ public class RecipeEventFacade {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public CommentUpdateResponse updateRecipeComment(long recipeId, long commentId, long userId, CommentUpdateRequest req) {
-		boolean updated = recipeService.updateRecipeComment(recipeId, commentId, userId, req.content());
+	public CommentUpdateResponse updateRecipeComment(long userId, long recipeId, long commentId, CommentUpdateRequest req) {
+		boolean updated = recipeService.updateRecipeComment(userId, recipeId, commentId, req.content());
 
 		if(updated) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_COMMENT_UPDATED;
-			var payload = new RecipeCommentEventPayload(eventId, recipeId, commentId, userId, eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipeCommentEventPayload(eventId, userId, recipeId, commentId, eventType.getCode(), LocalDateTime.now());
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 
@@ -112,13 +112,13 @@ public class RecipeEventFacade {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public CommentDeleteResponse deleteRecipeComment(long recipeId, long commentId, long userId) {
-		boolean deleted = recipeService.deleteRecipeComment(recipeId, commentId, userId);
+	public CommentDeleteResponse deleteRecipeComment(long userId, long recipeId, long commentId) {
+		boolean deleted = recipeService.deleteRecipeComment(userId, recipeId, commentId);
 
 		if (deleted) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_COMMENT_DELETED;
-			var payload = new RecipeCommentEventPayload(eventId, recipeId, commentId, userId, eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipeCommentEventPayload(eventId, userId, recipeId, commentId, eventType.getCode(), LocalDateTime.now());
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 

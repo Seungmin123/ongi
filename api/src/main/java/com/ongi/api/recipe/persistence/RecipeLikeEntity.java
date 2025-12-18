@@ -35,8 +35,8 @@ public class RecipeLikeEntity extends BaseTimeEntity {
 	private RecipeLikeId id;
 
 	@Builder
-	public RecipeLikeEntity(Long recipeId, Long userId) {
-		this.id = new RecipeLikeId(recipeId, userId);
+	public RecipeLikeEntity(Long userId, Long recipeId) {
+		this.id = new RecipeLikeId(userId, recipeId);
 	}
 
 	public Long getRecipeId() {

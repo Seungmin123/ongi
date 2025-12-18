@@ -5,9 +5,9 @@ import java.util.UUID;
 
 public record RecipeCommentEventPayload(
 	UUID eventId,
+	long userId,
 	long recipeId,
 	long commentId,
-	long userId,
 	String eventType,
 	LocalDateTime occurredAt
 ) {

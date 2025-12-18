@@ -5,8 +5,8 @@ import java.util.UUID;
 
 public record RecipeLikePayload(
 	UUID eventId,
-	long recipeId,
 	long userId,
+	long recipeId,
 	String eventType,
 	LocalDateTime occurredAt
 ) {

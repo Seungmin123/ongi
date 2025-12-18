@@ -5,7 +5,6 @@ import com.ongi.recipe.domain.enums.RecipeDifficultyEnum;
 import java.util.List;
 
 public record RecipeUpsertRequest(
-	Long userId,
 	Long recipeId,
 	String title,
 	String description,
