@@ -161,6 +161,13 @@ public class RecipeController {
 		return ApiResponse.ok(recipeEventFacade.unlike(userId, recipeId));
 	}
 
+	/**
+	 * 레시피 댓글 등록
+	 * @param auth
+	 * @param recipeId
+	 * @param req
+	 * @return
+	 */
 	@PostMapping("/private/{recipeId}/comment")
 	public ApiResponse<CommentCreateResponse> create(
 		@AuthenticationPrincipal AuthPrincipal auth,
@@ -171,6 +178,14 @@ public class RecipeController {
 		return ApiResponse.ok(recipeEventFacade.createRecipeComment(userId, recipeId, req));
 	}
 
+	/**
+	 * 레시피 댓글 수정
+	 * @param auth
+	 * @param recipeId
+	 * @param commentId
+	 * @param req
+	 * @return
+	 */
 	@PatchMapping("/private/{recipeId}/comment/{commentId}")
 	public ApiResponse<CommentUpdateResponse> update(
 		@AuthenticationPrincipal AuthPrincipal auth,
@@ -182,6 +197,13 @@ public class RecipeController {
 		return ApiResponse.ok(recipeEventFacade.updateRecipeComment(userId, recipeId, commentId, req));
 	}
 
+	/**
+	 * 레시피 댓글 삭제(Soft)
+	 * @param auth
+	 * @param recipeId
+	 * @param commentId
+	 * @return
+	 */
 	@DeleteMapping("/private/{recipeId}/comment/{commentId}")
 	public ApiResponse<CommentDeleteResponse> delete(
 		@AuthenticationPrincipal AuthPrincipal auth,
@@ -191,6 +213,8 @@ public class RecipeController {
 		long userId = auth.userId();
 		return ApiResponse.ok(recipeEventFacade.deleteRecipeComment(userId, recipeId, commentId));
 	}
+
+
 
 
 	// TODO 오늘의 추천 레시피 ?

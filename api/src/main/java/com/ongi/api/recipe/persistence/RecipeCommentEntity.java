@@ -90,8 +90,8 @@ public class RecipeCommentEntity extends BaseTimeEntity {
 		if (this.status != RecipeCommentStatus.ACTIVE) return false;
 		this.status = RecipeCommentStatus.DELETED;
 		this.deletedAt = LocalDateTime.now();
-		// 정책: 삭제 시 content를 null로 할지, "삭제된 댓글"로 둘지 결정
-		this.content = "삭제된 댓글";
+		// 정책: 삭제 시 상태 값만 바꾸고 내려줄 때 상태에 따라 삭제된 댓글로 변경
+		// this.content = "삭제된 댓글";
 		return true;
 	}
 }
