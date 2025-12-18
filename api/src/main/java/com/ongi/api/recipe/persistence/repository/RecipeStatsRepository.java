@@ -11,6 +11,14 @@ public interface RecipeStatsRepository extends JpaRepository<RecipeStatsEntity, 
 
 	@Modifying
 	@Query("""
+        update RecipeStatsEntity s
+        set s.viewCount = s.viewCount + :delta
+        where s.recipeId = :recipeId
+    """)
+	void incrementViewCount(@Param("recipeId") long recipeId, @Param("delta") long delta);
+
+	@Modifying
+	@Query("""
       update RecipeStatsEntity r
       set r.likeCount = r.likeCount + :delta
       where r.recipeId = :recipeId

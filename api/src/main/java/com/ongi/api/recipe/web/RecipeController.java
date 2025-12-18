@@ -66,7 +66,8 @@ public class RecipeController {
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@PathVariable Long recipeId
 	) throws Exception {
-		return ApiResponse.ok(recipeEventFacade.view(recipeId, authPrincipal.userId()));
+		Long userId = (authPrincipal == null) ? null : authPrincipal.userId();
+		return ApiResponse.ok(recipeEventFacade.view(recipeId, userId));
 	}
 
 	/**

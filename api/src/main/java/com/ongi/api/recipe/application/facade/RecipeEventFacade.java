@@ -4,6 +4,7 @@ import com.ongi.api.common.messaging.OutBoxService;
 import com.ongi.api.common.persistence.enums.OutBoxAggregateTypeEnum;
 import com.ongi.api.common.persistence.enums.OutBoxEventTypeEnum;
 import com.ongi.api.recipe.application.RecipeService;
+import com.ongi.api.recipe.application.cache.RecipeViewCounter;
 import com.ongi.api.recipe.web.dto.LikeResponse;
 import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
@@ -14,7 +15,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +24,15 @@ public class RecipeEventFacade {
 
 	private final OutBoxService outBoxService;
 
-	private final ObjectMapper objectMapper;
+	private final RecipeViewCounter recipeViewCounter;
 
 	@Transactional(transactionManager = "transactionManager")
 	public RecipeDetailResponse view(long recipeId, Long userId) throws Exception {
 		RecipeDetailBaseResponse detail = recipeService.getRecipeDetail(recipeId);
 		RecipeUserFlags flags = recipeService.getFlags(recipeId, userId);
+
+		// View Incr
+		recipeViewCounter.incr(recipeId);
 
 		if(userId != null) {
 			UUID eventId = UUID.randomUUID();

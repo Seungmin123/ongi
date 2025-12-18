@@ -135,13 +135,14 @@ public class RecipeService {
 	@Cacheable(
 		cacheNames = "recipeDetail",
 		key = "#recipeId",
-		unless = "#result == null || #result.data == null"
+		unless = "#result == null"
 	)
 	@Transactional(
 		readOnly = true,
 		transactionManager = "transactionManager"
 	)
 	public RecipeDetailBaseResponse getRecipeDetail(Long recipeId) throws NotFoundException {
+		// TODO Ingredient N+1
 		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(NotFoundException::new);
 		List<RecipeIngredientResponse> recipeIngredients =
 			ingredientAdapter.findRecipeIngredientByRecipeId(recipeId).stream()
