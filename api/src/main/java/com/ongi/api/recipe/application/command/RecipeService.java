@@ -2,6 +2,7 @@ package com.ongi.api.recipe.application.command;
 
 import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.ingredients.persistence.IngredientAdapter;
+import com.ongi.api.recipe.adapter.out.cache.RecipeCacheReader;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeAdapter;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeDetailMapper;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
@@ -37,6 +38,8 @@ import org.springframework.util.CollectionUtils;
 @RequiredArgsConstructor
 @Service
 public class RecipeService {
+
+	private final RecipeCacheReader recipeCacheReader;
 
 	private final RecipeAdapter recipeAdapter;
 
@@ -125,27 +128,11 @@ public class RecipeService {
 		return hours + "시간 " + remain + "분";
 	}
 
-	@Cacheable(
-		cacheNames = "recipeDetail",
-		key = "#recipeId",
-		unless = "#result == null"
-	)
-	@Transactional(
-		readOnly = true,
-		transactionManager = "transactionManager"
-	)
+	@Transactional(readOnly = true, transactionManager = "transactionManager")
 	public RecipeDetailBaseResponse getRecipeDetail(Long recipeId) {
-		// TODO Ingredient N+1
-		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(() -> new IllegalStateException("Recipe not found"));
-		List<RecipeIngredientResponse> recipeIngredients =
-			ingredientAdapter.findRecipeIngredientByRecipeId(recipeId).stream()
-				.map(RecipeDetailMapper::toIngredientResponse)
-				.toList();
-
-		List<RecipeStepsResponse> recipeSteps =
-			recipeAdapter.findRecipeStepsByRecipeId(recipeId).stream()
-				.map(RecipeDetailMapper::toStepsResponse)
-				.toList();
+		Recipe recipe = recipeCacheReader.getRecipeById(recipeId);
+		List<RecipeIngredientResponse> recipeIngredients = recipeCacheReader.getRecipeIngredients(recipeId);
+		List<RecipeStepsResponse> recipeSteps = recipeCacheReader.getRecipeSteps(recipeId);
 
 		RecipeStats recipeStats = recipeAdapter.findRecipeStatsByRecipeId(recipeId).orElseThrow(() -> new IllegalStateException("Recipe Stats not found"));
 

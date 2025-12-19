@@ -57,7 +57,7 @@ public class CacheManagerConfig {
 	public CacheManager LocalCacheManager() {
 		return new ConcurrentMapCacheManager(
 			"userCache", "shortLived", "longLived", "content"
-			, "recipeList", "recipeDetail"
+			, "recipeList", "recipeDetail", "recipeIngredient", "recipeSteps"
 		);
 	}
 
@@ -89,6 +89,8 @@ public class CacheManagerConfig {
 
 		m.put("recipeList", Duration.ofMinutes(5));
 		m.put("recipeDetail", Duration.ofMinutes(5));
+		m.put("recipeIngredient", Duration.ofMinutes(5));
+		m.put("recipeSteps", Duration.ofMinutes(5));
 		return m;
 	}
 
