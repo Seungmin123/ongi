@@ -38,6 +38,7 @@ services:
     container_name: dev-kafka
     ports:
       - "9092:9092"
+      - "29092:29092"
       - "9093:9093"
       # JMX exporter metrics port
       - "9404:9404"
@@ -77,8 +78,8 @@ services:
       - "9308:9308"
     restart: unless-stopped
     depends_on:
-      kafka:
-        condition: service_healthy
+      - kafka
+
     networks:
       - dev-net
 

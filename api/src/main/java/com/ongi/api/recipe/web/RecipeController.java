@@ -2,16 +2,19 @@ package com.ongi.api.recipe.web;
 
 import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.common.web.dto.AuthPrincipal;
-import com.ongi.api.recipe.application.RecipeService;
+import com.ongi.api.recipe.application.command.RecipeService;
 import com.ongi.api.recipe.application.facade.RecipeEventFacade;
+import com.ongi.api.recipe.application.query.RecipeQueryService;
 import com.ongi.api.recipe.web.dto.CommentCreateRequest;
 import com.ongi.api.recipe.web.dto.CommentCreateResponse;
 import com.ongi.api.recipe.web.dto.CommentDeleteResponse;
+import com.ongi.api.recipe.web.dto.CommentPageRequest;
 import com.ongi.api.recipe.web.dto.CommentUpdateRequest;
 import com.ongi.api.recipe.web.dto.CommentUpdateResponse;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.LikeResponse;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
+import com.ongi.api.recipe.web.dto.RecipeCommentItem;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
 import com.ongi.api.recipe.web.dto.RecipeSearchRequest;
@@ -20,6 +23,9 @@ import com.ongi.recipe.domain.search.RecipeSearchCondition;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +36,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -38,6 +45,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class RecipeController {
 
 	private final RecipeService recipeService;
+
+	private final RecipeQueryService recipeQueryService;
 
 	private final RecipeEventFacade recipeEventFacade;
 
@@ -212,6 +221,15 @@ public class RecipeController {
 	) {
 		long userId = auth.userId();
 		return ApiResponse.ok(recipeEventFacade.deleteRecipeComment(userId, recipeId, commentId));
+	}
+
+	@GetMapping("/private/{recipeId}/comment")
+	public ApiResponse<Page<RecipeCommentItem>> getComments(
+		@PathVariable Long recipeId,
+		@ModelAttribute CommentPageRequest req
+	) {
+		Pageable pageable = PageRequest.of(req.page(), req.size());
+		return ApiResponse.ok(recipeQueryService.getComments(recipeId, pageable, req.resolveSort()));
 	}
 
 

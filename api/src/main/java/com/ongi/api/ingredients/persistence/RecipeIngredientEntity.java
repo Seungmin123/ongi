@@ -1,7 +1,6 @@
 package com.ongi.api.ingredients.persistence;
 
 import com.ongi.api.common.persistence.entity.BaseTimeEntity;
-import com.ongi.api.recipe.persistence.RecipeEntity;
 import com.ongi.ingredients.domain.enums.RecipeIngredientUnitEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

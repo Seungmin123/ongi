@@ -7,7 +7,9 @@ import com.ongi.user.domain.User;
 import com.ongi.user.domain.UserProfile;
 import com.ongi.user.domain.UserStats;
 import com.ongi.user.port.UserRepositoryPort;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +35,14 @@ public class UserAdapter implements UserRepositoryPort {
 		return userRepository
 			.findById(id)
 			.map(UserMapper::toDomain);
+	}
+
+	@Override
+	public List<User> findUsersByIdIn(Set<Long> ids) {
+		return userRepository
+			.findAllById(ids).stream()
+			.map(UserMapper::toDomain)
+			.toList();
 	}
 
 	@Override
@@ -73,6 +83,14 @@ public class UserAdapter implements UserRepositoryPort {
 		return userProfileRepository
 			.findByDisplayName(displayName)
 			.map(UserMapper::toDomain);
+	}
+
+	@Override
+	public List<UserProfile> findUserProfilesByIdIn(Set<Long> ids) {
+		return userProfileRepository
+			.findAllById(ids).stream()
+			.map(UserMapper::toDomain)
+			.toList();
 	}
 
 	@Override

@@ -3,8 +3,9 @@ package com.ongi.api.recipe.application.facade;
 import com.ongi.api.common.messaging.OutBoxService;
 import com.ongi.api.common.persistence.enums.OutBoxAggregateTypeEnum;
 import com.ongi.api.common.persistence.enums.OutBoxEventTypeEnum;
-import com.ongi.api.recipe.application.RecipeService;
-import com.ongi.api.recipe.application.cache.RecipeViewCounter;
+import com.ongi.api.recipe.application.command.RecipeService;
+import com.ongi.api.recipe.adapter.out.cache.RecipeViewCounter;
+import com.ongi.api.recipe.application.query.RecipeQueryService;
 import com.ongi.api.recipe.web.dto.CommentCreateRequest;
 import com.ongi.api.recipe.web.dto.CommentCreateResponse;
 import com.ongi.api.recipe.web.dto.CommentDeleteResponse;
@@ -27,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecipeEventFacade {
 
 	private final RecipeService recipeService;
+
+	private final RecipeQueryService recipeQueryService;
 
 	private final OutBoxService outBoxService;
 
@@ -52,7 +55,7 @@ public class RecipeEventFacade {
 
 	@Transactional(transactionManager = "transactionManager")
 	public LikeResponse like(long userId, long recipeId) {
-		boolean inserted = recipeService.like(userId, recipeId);
+		boolean inserted = recipeQueryService.like(userId, recipeId);
 
 		if(inserted) {
 			UUID eventId = UUID.randomUUID();
@@ -62,13 +65,13 @@ public class RecipeEventFacade {
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 
-		long likeCount = recipeService.getRecipeLikeCount(recipeId);
+		long likeCount = recipeQueryService.getRecipeLikeCount(recipeId);
 		return new LikeResponse(true, likeCount);
 	}
 
 	@Transactional(transactionManager = "transactionManager")
 	public LikeResponse unlike(long userId, long recipeId) {
-		boolean deleted = recipeService.unlike(userId, recipeId);
+		boolean deleted = recipeQueryService.unlike(userId, recipeId);
 
 		if (deleted) {
 			UUID eventId = UUID.randomUUID();
@@ -78,13 +81,13 @@ public class RecipeEventFacade {
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 
-		long likeCount = recipeService.getRecipeLikeCount(recipeId);
+		long likeCount = recipeQueryService.getRecipeLikeCount(recipeId);
 		return new LikeResponse(false, likeCount);
 	}
 
 	@Transactional(transactionManager = "transactionManager")
 	public CommentCreateResponse createRecipeComment(long userId, long recipeId, CommentCreateRequest req) {
-		Long commentId = recipeService.createRecipeComment(userId, recipeId, req);
+		Long commentId = recipeQueryService.createRecipeComment(userId, recipeId, req);
 
 		if(commentId != null) {
 			UUID eventId = UUID.randomUUID();
@@ -93,7 +96,7 @@ public class RecipeEventFacade {
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 
-		Long commentCount = recipeService.getRecipeCommentCount(recipeId);
+		Long commentCount = recipeQueryService.getRecipeCommentCount(recipeId);
 		return new CommentCreateResponse(commentId, recipeId, commentCount);
 	}
 
@@ -113,7 +116,7 @@ public class RecipeEventFacade {
 
 	@Transactional(transactionManager = "transactionManager")
 	public CommentDeleteResponse deleteRecipeComment(long userId, long recipeId, long commentId) {
-		boolean deleted = recipeService.deleteRecipeComment(userId, recipeId, commentId);
+		boolean deleted = recipeQueryService.deleteRecipeComment(userId, recipeId, commentId);
 
 		if (deleted) {
 			UUID eventId = UUID.randomUUID();
@@ -122,7 +125,7 @@ public class RecipeEventFacade {
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 
-		Long commentCount = recipeService.getRecipeCommentCount(recipeId);
+		Long commentCount = recipeQueryService.getRecipeCommentCount(recipeId);
 		return new CommentDeleteResponse(commentId, recipeId, commentCount);
 	}
 }
