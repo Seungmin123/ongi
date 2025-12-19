@@ -197,7 +197,7 @@ public class RecipeService {
 
 		recipe = recipeAdapter.save(recipe);
 
-		RecipeStats recipeStats = RecipeStats.create(recipe.getId(), 0L, 0L, 0L);
+		RecipeStats recipeStats = RecipeStats.create(recipe.getId(), 0L, 0L, 0L, 0L);
 		recipeAdapter.save(recipeStats);
 
 		if(!CollectionUtils.isEmpty(request.ingredients())) {

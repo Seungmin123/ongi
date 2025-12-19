@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 @Embeddable
-public class RecipeLikeId implements Serializable {
+public class RecipeBookmarkId implements Serializable {
 
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
@@ -16,10 +16,10 @@ public class RecipeLikeId implements Serializable {
 	@Column(name = "recipe_id", nullable = false)
 	private Long recipeId;
 
-	protected RecipeLikeId() {
+	protected RecipeBookmarkId() {
 	}
 
-	public RecipeLikeId(Long userId, Long recipeId) {
+	public RecipeBookmarkId(Long userId, Long recipeId) {
 		this.userId = userId;
 		this.recipeId = recipeId;
 	}
@@ -27,8 +27,8 @@ public class RecipeLikeId implements Serializable {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof RecipeLikeId)) return false;
-		RecipeLikeId that = (RecipeLikeId) o;
+		if (!(o instanceof RecipeBookmarkId)) return false;
+		RecipeBookmarkId that = (RecipeBookmarkId) o;
 		return Objects.equals(userId, that.userId)
 			&& Objects.equals(recipeId, that.recipeId);
 	}

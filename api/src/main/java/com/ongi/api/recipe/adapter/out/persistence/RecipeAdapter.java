@@ -1,6 +1,7 @@
 package com.ongi.api.recipe.adapter.out.persistence;
 
 import com.ongi.api.ingredients.persistence.QRecipeIngredientEntity;
+import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeBookmarkRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeCommentRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeLikeRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeRepository;
@@ -8,6 +9,7 @@ import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeStatsReposit
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeStepsRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeTagsRepository;
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeBookmark;
 import com.ongi.recipe.domain.RecipeComment;
 import com.ongi.recipe.domain.RecipeLike;
 import com.ongi.recipe.domain.RecipeStats;
@@ -41,6 +43,8 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	private final RecipeTagsRepository recipeTagsRepository;
 
 	private final RecipeLikeRepository recipeLikeRepository;
+
+	private final RecipeBookmarkRepository recipeBookmarkRepository;
 
 	private final RecipeStatsRepository recipeStatsRepository;
 
@@ -208,6 +212,13 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	public RecipeLike save(RecipeLike recipeLike) {
 		RecipeLikeEntity entity = RecipeMapper.toEntity(recipeLike);
 		RecipeLikeEntity saved = recipeLikeRepository.save(entity);
+		return RecipeMapper.toDomain(saved);
+	}
+
+	@Override
+	public RecipeBookmark save(RecipeBookmark recipeLike) {
+		RecipeBookmarkEntity entity = RecipeMapper.toEntity(recipeLike);
+		RecipeBookmarkEntity saved = recipeBookmarkRepository.save(entity);
 		return RecipeMapper.toDomain(saved);
 	}
 

@@ -42,6 +42,10 @@ public class RecipeStatsEntity extends BaseTimeEntity {
 	private Long commentCount;
 
 	@ColumnDefault("0")
+	@Column(name = "bookmark_count", nullable = false)
+	private Long bookmarkCount;
+
+	@ColumnDefault("0")
 	@Column(name = "view_count", nullable = false)
 	private Long viewCount;
 
@@ -50,11 +54,13 @@ public class RecipeStatsEntity extends BaseTimeEntity {
 		Long recipeId,
 		Long likeCount,
 		Long commentCount,
+		Long bookmarkCount,
 		Long viewCount
 	) {
 		this.recipeId = recipeId;
 		this.likeCount = likeCount;
 		this.commentCount = commentCount;
+		this.bookmarkCount = bookmarkCount;
 		this.viewCount = viewCount;
 	}
 

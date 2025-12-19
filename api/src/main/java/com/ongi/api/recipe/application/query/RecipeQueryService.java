@@ -1,6 +1,7 @@
 package com.ongi.api.recipe.application.query;
 
 import com.ongi.api.recipe.adapter.out.persistence.RecipeAdapter;
+import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeBookmarkRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeLikeRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeStatsRepository;
 import com.ongi.api.recipe.application.assembler.RecipeCommentAssembler;
@@ -30,6 +31,8 @@ public class RecipeQueryService {
 
 	private final RecipeLikeRepository recipeLikeRepository;
 
+	private final RecipeBookmarkRepository recipeBookmarkRepository;
+
 	@Transactional(transactionManager = "transactionManager")
 	public boolean like(long userId, long recipeId) {
 		boolean inserted = recipeLikeRepository.insertIfNotExists(userId, recipeId);
@@ -56,6 +59,34 @@ public class RecipeQueryService {
 	@Transactional(transactionManager = "transactionManager", readOnly = true)
 	public long getRecipeLikeCount(long recipeId) {
 		return recipeStatsRepository.findLikeCount(recipeId);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public boolean bookmark(long userId, long recipeId) {
+		boolean inserted = recipeBookmarkRepository.insertIfNotExists(userId, recipeId);
+
+		if (inserted) {
+			recipeStatsRepository.incrementBookmarkCount(recipeId, 1);
+		}
+
+		return inserted;
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public boolean unbookmark(long userId, long recipeId) {
+		int deleted = recipeBookmarkRepository.deleteByRecipeIdAndUserId(userId, recipeId);
+
+		if (deleted == 1) {
+			recipeStatsRepository.incrementBookmarkCount(recipeId, -1);
+			return true;
+		}
+
+		return false;
+	}
+
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
+	public long getRecipeBookmarkCount(long recipeId) {
+		return recipeStatsRepository.findBookmarkCount(recipeId);
 	}
 
 	@Transactional(transactionManager = "transactionManager")

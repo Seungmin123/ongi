@@ -1,6 +1,7 @@
 package com.ongi.recipe.port;
 
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeBookmark;
 import com.ongi.recipe.domain.RecipeComment;
 import com.ongi.recipe.domain.RecipeLike;
 import com.ongi.recipe.domain.RecipeStats;
@@ -41,6 +42,8 @@ public interface RecipeRepositoryPort {
 	List<Recipe> search(RecipeSearchCondition condition, Long cursor, Integer size, PageSortOptionEnum sort);
 
 	RecipeLike save(RecipeLike recipeLike);
+
+	RecipeBookmark save(RecipeBookmark recipeLike);
 
 	RecipeStats save(RecipeStats recipeStats);
 

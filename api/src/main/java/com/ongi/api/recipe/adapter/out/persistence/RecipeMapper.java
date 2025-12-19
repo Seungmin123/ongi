@@ -1,6 +1,7 @@
 package com.ongi.api.recipe.adapter.out.persistence;
 
 import com.ongi.recipe.domain.Recipe;
+import com.ongi.recipe.domain.RecipeBookmark;
 import com.ongi.recipe.domain.RecipeComment;
 import com.ongi.recipe.domain.RecipeLike;
 import com.ongi.recipe.domain.RecipeStats;
@@ -110,17 +111,29 @@ public class RecipeMapper {
 		return RecipeLike.create(entity.getUserId(), entity.getRecipeId());
 	}
 
+	public static RecipeBookmarkEntity toEntity(RecipeBookmark domain) {
+		return RecipeBookmarkEntity.builder()
+			.recipeId(domain.getRecipeId())
+			.userId(domain.getUserId())
+			.build();
+	}
+
+	public static RecipeBookmark toDomain(RecipeBookmarkEntity entity) {
+		return RecipeBookmark.create(entity.getUserId(), entity.getRecipeId());
+	}
+
 	public static RecipeStatsEntity toEntity(RecipeStats domain) {
 		return RecipeStatsEntity.builder()
 			.recipeId(domain.getRecipeId())
 			.likeCount(domain.getLikeCount())
 			.commentCount(domain.getCommentCount())
+			.bookmarkCount(domain.getBookmarkCount())
 			.viewCount(domain.getViewCount())
 			.build();
 	}
 
 	public static RecipeStats toDomain(RecipeStatsEntity entity) {
-		return RecipeStats.create(entity.getRecipeId(), entity.getLikeCount(), entity.getCommentCount(), entity.getViewCount());
+		return RecipeStats.create(entity.getRecipeId(), entity.getLikeCount(), entity.getCommentCount(), entity.getBookmarkCount(), entity.getViewCount());
 	}
 
 	public static RecipeCommentEntity toEntity(RecipeComment domain) {

@@ -5,6 +5,7 @@ import com.ongi.api.common.web.dto.AuthPrincipal;
 import com.ongi.api.recipe.application.command.RecipeService;
 import com.ongi.api.recipe.application.facade.RecipeEventFacade;
 import com.ongi.api.recipe.application.query.RecipeQueryService;
+import com.ongi.api.recipe.web.dto.BookmarkResponse;
 import com.ongi.api.recipe.web.dto.CommentCreateRequest;
 import com.ongi.api.recipe.web.dto.CommentCreateResponse;
 import com.ongi.api.recipe.web.dto.CommentDeleteResponse;
@@ -168,6 +169,38 @@ public class RecipeController {
 	) throws Exception {
 		long userId = authPrincipal.userId();
 		return ApiResponse.ok(recipeEventFacade.unlike(userId, recipeId));
+	}
+
+	/**
+	 * 북마크 등록
+	 * @param recipeId
+	 * @param authPrincipal
+	 * @return
+	 * @throws Exception
+	 */
+	@PutMapping("/private/{recipeId}/bookmark")
+	public ApiResponse<BookmarkResponse> bookmark(
+		@PathVariable Long recipeId,
+		@AuthenticationPrincipal AuthPrincipal authPrincipal
+	) throws Exception {
+		long userId = authPrincipal.userId();
+		return ApiResponse.ok(recipeEventFacade.bookmark(userId, recipeId));
+	}
+
+	/**
+	 * 북마크 삭제
+	 * @param recipeId
+	 * @param authPrincipal
+	 * @return
+	 * @throws Exception
+	 */
+	@DeleteMapping("/private/{recipeId}/bookmark")
+	public ApiResponse<BookmarkResponse> unbookmark(
+		@PathVariable Long recipeId,
+		@AuthenticationPrincipal AuthPrincipal authPrincipal
+	) throws Exception {
+		long userId = authPrincipal.userId();
+		return ApiResponse.ok(recipeEventFacade.unbookmark(userId, recipeId));
 	}
 
 	/**

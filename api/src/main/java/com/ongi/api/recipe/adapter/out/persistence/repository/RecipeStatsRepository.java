@@ -30,6 +30,20 @@ public interface RecipeStatsRepository extends JpaRepository<RecipeStatsEntity, 
     """)
 	long findLikeCount(@Param("recipeId") long recipeId);
 
+	@Modifying
+	@Query("""
+      update RecipeStatsEntity r
+      set r.bookmarkCount = r.bookmarkCount + :delta
+      where r.recipeId = :recipeId
+    """)
+	void incrementBookmarkCount(@Param("recipeId") long recipeId,
+		@Param("delta") long delta);
+
+	@Query("""
+      select r.bookmarkCount from RecipeStatsEntity r where r.recipeId = :recipeId
+    """)
+	long findBookmarkCount(@Param("recipeId") long recipeId);
+
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query(value = """
 	insert into recipe_stats (recipe_id, comment_count, like_count, view_count, created_at, modified_at)

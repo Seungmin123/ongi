@@ -6,12 +6,14 @@ import com.ongi.api.common.persistence.enums.OutBoxEventTypeEnum;
 import com.ongi.api.recipe.application.command.RecipeService;
 import com.ongi.api.recipe.adapter.out.cache.RecipeViewCounter;
 import com.ongi.api.recipe.application.query.RecipeQueryService;
+import com.ongi.api.recipe.web.dto.BookmarkResponse;
 import com.ongi.api.recipe.web.dto.CommentCreateRequest;
 import com.ongi.api.recipe.web.dto.CommentCreateResponse;
 import com.ongi.api.recipe.web.dto.CommentDeleteResponse;
 import com.ongi.api.recipe.web.dto.CommentUpdateRequest;
 import com.ongi.api.recipe.web.dto.CommentUpdateResponse;
 import com.ongi.api.recipe.web.dto.LikeResponse;
+import com.ongi.api.recipe.web.dto.RecipeBookmarkPayload;
 import com.ongi.api.recipe.web.dto.RecipeCommentEventPayload;
 import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
@@ -83,6 +85,38 @@ public class RecipeEventFacade {
 
 		long likeCount = recipeQueryService.getRecipeLikeCount(recipeId);
 		return new LikeResponse(false, likeCount);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public BookmarkResponse bookmark(long userId, long recipeId) {
+		boolean inserted = recipeQueryService.bookmark(userId, recipeId);
+
+		if(inserted) {
+			UUID eventId = UUID.randomUUID();
+			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_BOOKMARKED;
+			var payload = new RecipeBookmarkPayload(eventId, userId, recipeId, eventType.getCode(), LocalDateTime.now());
+
+			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
+		}
+
+		long bookmarkCount = recipeQueryService.getRecipeBookmarkCount(recipeId);
+		return new BookmarkResponse(true, bookmarkCount);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public BookmarkResponse unbookmark(long userId, long recipeId) {
+		boolean deleted = recipeQueryService.unbookmark(userId, recipeId);
+
+		if (deleted) {
+			UUID eventId = UUID.randomUUID();
+			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_UNBOOKMARKED;
+			var payload = new RecipeLikePayload(eventId, userId, recipeId, eventType.getCode(), LocalDateTime.now());
+
+			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
+		}
+
+		long bookmarkCount = recipeQueryService.getRecipeBookmarkCount(recipeId);
+		return new BookmarkResponse(false, bookmarkCount);
 	}
 
 	@Transactional(transactionManager = "transactionManager")
