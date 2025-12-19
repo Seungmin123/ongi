@@ -265,12 +265,13 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	public RecipeComment createRootComment(Long userId, Long recipeId, String content) {
 		RecipeCommentEntity entity = RecipeCommentEntity.createRoot(userId, recipeId, content);
 		RecipeCommentEntity saved = recipeCommentRepository.save(entity);
+		saved.attachRootId(saved.getId());
 		return RecipeMapper.toDomain(saved);
 	}
 
 	@Override
-	public RecipeComment createReplyComment(Long userId, Long recipeId, String content, Long parentId) {
-		RecipeCommentEntity entity = RecipeCommentEntity.createReply(userId, recipeId, content, parentId);
+	public RecipeComment createReplyComment(Long userId, Long recipeId, String content, Long rootId, Long parentId, int depth) {
+		RecipeCommentEntity entity = RecipeCommentEntity.createReply(userId, recipeId, content, rootId, parentId, depth);
 		RecipeCommentEntity saved = recipeCommentRepository.save(entity);
 		return RecipeMapper.toDomain(saved);
 	}

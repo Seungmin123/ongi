@@ -58,7 +58,7 @@ public interface RecipeRepositoryPort {
 
 	RecipeComment createRootComment(Long userId, Long recipeId, String content);
 
-	RecipeComment createReplyComment(Long userId, Long recipeId, String content, Long parentId);
+	RecipeComment createReplyComment(Long userId, Long recipeId, String content, Long rootId, Long parentId, int depth);
 
 	RecipeComment updateRecipeCommentContent(RecipeComment domain, String content);
 

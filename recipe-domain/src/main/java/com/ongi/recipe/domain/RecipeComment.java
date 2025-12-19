@@ -15,6 +15,8 @@ public class RecipeComment {
 
 	private RecipeCommentStatus status;
 
+	private long rootId;
+
 	private Long parentId;
 
 	private int depth;
@@ -24,13 +26,14 @@ public class RecipeComment {
 	private Long version;
 
 	private RecipeComment(Long id, Long userId, Long recipeId, String content,
-		RecipeCommentStatus status, Long parentId, int depth, LocalDateTime deletedAt,
+		RecipeCommentStatus status, long rootId, Long parentId, int depth, LocalDateTime deletedAt,
 		Long version) {
 		this.id = id;
 		this.recipeId = recipeId;
 		this.userId = userId;
 		this.content = content;
 		this.status = status;
+		this.rootId = rootId;
 		this.parentId = parentId;
 		this.depth = depth;
 		this.deletedAt = deletedAt;
@@ -39,10 +42,10 @@ public class RecipeComment {
 
 	public static RecipeComment create(
 		Long id, Long userId, Long recipeId, String content,
-		RecipeCommentStatus status, Long parentId, int depth, LocalDateTime deletedAt,
+		RecipeCommentStatus status, Long rootId, Long parentId, int depth, LocalDateTime deletedAt,
 		Long version
 	) {
-		return new RecipeComment(id, userId, recipeId, content, status, parentId, depth, deletedAt, version);
+		return new RecipeComment(id, userId, recipeId, content, status, rootId, parentId, depth, deletedAt, version);
 	}
 
 	public Long getId() {
@@ -83,6 +86,14 @@ public class RecipeComment {
 
 	public void setStatus(RecipeCommentStatus status) {
 		this.status = status;
+	}
+
+	public long getRootId() {
+		return rootId;
+	}
+
+	public void setRootId(long rootId) {
+		this.rootId = rootId;
 	}
 
 	public Long getParentId() {

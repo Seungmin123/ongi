@@ -370,10 +370,18 @@ public class RecipeService {
 		if (req.parentId() == null) {
 			comment = recipeAdapter.createRootComment(userId, recipeId, req.content());
 		} else {
-			if(!recipeAdapter.existsRecipeCommentById(req.parentId())) {
-				throw new IllegalArgumentException("parent not found: " + req.parentId());
+			RecipeComment parent = recipeAdapter
+				.findRecipeCommentByIdAndRecipeId(req.parentId(), recipeId)
+				.orElseThrow(() -> new IllegalArgumentException("parent not found"));
+
+			if (parent.getStatus() != RecipeCommentStatus.ACTIVE) {
+				throw new IllegalStateException("parent deleted");
 			}
-			comment = recipeAdapter.createReplyComment(userId, recipeId, req.content(), req.parentId());
+
+			long rootId = parent.getRootId();
+			int depth = parent.getDepth() + 1;
+
+			comment = recipeAdapter.createReplyComment(userId, recipeId, req.content(), rootId, req.parentId(), depth);
 		}
 
 		// 3) 카운트 즉시 반영 (upsert + atomic)

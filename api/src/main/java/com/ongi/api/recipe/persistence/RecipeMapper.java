@@ -131,6 +131,7 @@ public class RecipeMapper {
 			.status(domain.getStatus())
 			.depth(domain.getDepth())
 			.content(domain.getContent())
+			.rootId(domain.getRootId())
 			.parentId(domain.getParentId())
 			.deletedAt(domain.getDeletedAt())
 			.version(domain.getVersion())
@@ -139,7 +140,7 @@ public class RecipeMapper {
 
 	public static RecipeComment toDomain(RecipeCommentEntity entity) {
 		return RecipeComment.create(entity.getId(),  entity.getUserId(), entity.getRecipeId(),
-			entity.getContent(), entity.getStatus(), entity.getParentId(), entity.getDepth(), entity.getDeletedAt(),
+			entity.getContent(), entity.getStatus(), entity.getRootId(), entity.getParentId(), entity.getDepth(), entity.getDeletedAt(),
 			entity.getVersion());
 	}
 }

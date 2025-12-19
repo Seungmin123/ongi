@@ -12,9 +12,9 @@ import lombok.*;
 @Table(
 	name = "recipe_comment",
 	indexes = {
-		@Index(name = "idx_recipe_comment_recipe_id_id", columnList = "recipe_id, recipe_comment_id"),
-		@Index(name = "idx_recipe_comment_user_id_id", columnList = "user_id, recipe_comment_id"),
-		@Index(name = "idx_recipe_comment_parent_id_id", columnList = "parent_id, recipe_comment_id")
+		@Index(name = "idx_rc_recipe_root_created_id", columnList = "recipe_id, root_id, created_at, recipe_comment_id"),
+		@Index(name = "idx_rc_parent_id", columnList = "parent_id, recipe_comment_id"),
+		@Index(name = "idx_rc_user_id_id", columnList = "user_id, recipe_comment_id")
 	}
 )
 public class RecipeCommentEntity extends BaseTimeEntity {
@@ -37,6 +37,9 @@ public class RecipeCommentEntity extends BaseTimeEntity {
 	@Column(name = "status", length = 30, nullable = false)
 	private RecipeCommentStatus status;
 
+	@Column(name = "root_id", nullable = false)
+	private Long rootId;
+
 	@Column(name = "parent_id")
 	private Long parentId;
 
@@ -50,11 +53,12 @@ public class RecipeCommentEntity extends BaseTimeEntity {
 	private Long version;
 
 	@Builder
-	public RecipeCommentEntity(Long id, Long userId, Long recipeId, String content, Long parentId, int depth, RecipeCommentStatus status, LocalDateTime deletedAt, Long version) {
+	public RecipeCommentEntity(Long id, Long userId, Long recipeId, String content, Long rootId, Long parentId, int depth, RecipeCommentStatus status, LocalDateTime deletedAt, Long version) {
 		this.id = id;
 		this.recipeId = recipeId;
 		this.userId = userId;
 		this.content = content;
+		this.rootId = rootId;
 		this.parentId = parentId;
 		this.depth = depth;
 		this.status = status;
@@ -62,21 +66,26 @@ public class RecipeCommentEntity extends BaseTimeEntity {
 		this.version = version;
 	}
 
-	private RecipeCommentEntity(Long userId, Long recipeId, String content, Long parentId, int depth) {
+	private RecipeCommentEntity(Long userId, Long recipeId, String content, Long rootId, Long parentId, int depth) {
 		this.recipeId = recipeId;
 		this.userId = userId;
 		this.content = content;
+		this.rootId = rootId;
 		this.parentId = parentId;
 		this.depth = depth;
 		this.status = RecipeCommentStatus.ACTIVE;
 	}
 
 	public static RecipeCommentEntity createRoot(Long userId, Long recipeId, String content) {
-		return new RecipeCommentEntity(userId, recipeId, content, null, 0);
+		return new RecipeCommentEntity(userId, recipeId, content, 0L, null, 0);
 	}
 
-	public static RecipeCommentEntity createReply(Long userId, Long recipeId, String content, Long parentId) {
-		return new RecipeCommentEntity(userId, recipeId, content, parentId, 1);
+	public static RecipeCommentEntity createReply(Long userId, Long recipeId, String content, Long rootId, Long parentId, int depth) {
+		return new RecipeCommentEntity(userId, recipeId, content, rootId, parentId, depth);
+	}
+
+	public void attachRootId(long rootId) {
+		this.rootId = rootId;
 	}
 
 	public void updateContent(String content) {
