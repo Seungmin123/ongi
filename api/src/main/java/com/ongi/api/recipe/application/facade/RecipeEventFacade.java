@@ -18,7 +18,7 @@ import com.ongi.api.recipe.web.dto.RecipeCommentEventPayload;
 import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
 import com.ongi.api.recipe.web.dto.RecipeLikePayload;
-import com.ongi.api.recipe.web.dto.RecipeUserFlags;
+import com.ongi.recipe.domain.RecipeUserFlags;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

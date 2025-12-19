@@ -12,7 +12,7 @@ import com.ongi.api.recipe.web.dto.RecipeIngredientCreateRequest;
 import com.ongi.api.recipe.web.dto.RecipeIngredientResponse;
 import com.ongi.api.recipe.web.dto.RecipeStepCreateRequest;
 import com.ongi.api.recipe.web.dto.RecipeStepsResponse;
-import com.ongi.api.recipe.web.dto.RecipeUserFlags;
+import com.ongi.recipe.domain.RecipeUserFlags;
 import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.RecipeIngredient;
 import com.ongi.ingredients.domain.enums.IngredientCategoryEnum;
@@ -104,6 +104,7 @@ public class RecipeService {
 			difficultyCode,
 			stats.getLikeCount(),
 			stats.getCommentCount(),
+			stats.getBookmarkCount(),
 			recipe.getCategory().getName()
 		);
 	}
@@ -160,6 +161,7 @@ public class RecipeService {
 			recipe.getDifficulty() != null ? recipe.getDifficulty().getCode() : null,
 			recipeStats.getLikeCount(),
 			recipeStats.getCommentCount(),
+			recipeStats.getBookmarkCount(),
 			recipeIngredients,
 			recipeSteps);
 	}
@@ -167,12 +169,7 @@ public class RecipeService {
 	@Transactional(readOnly = true, transactionManager = "transactionManager")
 	public RecipeUserFlags getFlags(Long userId, Long recipeId) {
 		if (userId == null) return new RecipeUserFlags(false, false);
-
-		// TODO 좋아요, 저장 개발 시 바꿀 것
-		//boolean liked = recipeLikeRepository.existsByUserIdAndRecipeId(userId, recipeId);
-		//boolean saved = recipeBookmarkRepository.existsByUserIdAndRecipeId(userId, recipeId);
-		//return new RecipeUserFlags(liked, saved);
-		return new RecipeUserFlags(false, false);
+		return recipeAdapter.getFlags(userId, recipeId);
 	}
 
 	@CacheEvict(

@@ -11,6 +11,7 @@ public record RecipeDetailBaseResponse(
 	String difficulty,
 	Long likeCount,
 	Long commentCount,
+	Long bookmarkCount,
 
 	List<RecipeIngredientResponse> ingredients,
 	List<RecipeStepsResponse> recipeSteps

@@ -1,4 +1,4 @@
-package com.ongi.api.recipe.web.dto;
+package com.ongi.recipe.domain;
 
 public record RecipeUserFlags(
 	boolean liked,

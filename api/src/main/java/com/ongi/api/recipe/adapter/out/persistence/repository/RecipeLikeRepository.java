@@ -31,4 +31,6 @@ public interface RecipeLikeRepository extends JpaRepository<RecipeLikeEntity, Re
     """)
 	int deleteByRecipeIdAndUserId(@Param("userId") long userId, @Param("recipeId") long recipeId);
 
+	boolean existsByUserIdAndRecipeId(long userId, long recipeId);
+
 }

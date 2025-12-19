@@ -15,6 +15,7 @@ import com.ongi.recipe.domain.RecipeLike;
 import com.ongi.recipe.domain.RecipeStats;
 import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.RecipeTags;
+import com.ongi.recipe.domain.RecipeUserFlags;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
 import com.ongi.recipe.domain.enums.RecipeCommentStatus;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
@@ -220,6 +221,13 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 		RecipeBookmarkEntity entity = RecipeMapper.toEntity(recipeLike);
 		RecipeBookmarkEntity saved = recipeBookmarkRepository.save(entity);
 		return RecipeMapper.toDomain(saved);
+	}
+
+	@Override
+	public RecipeUserFlags getFlags(Long userId, Long recipeId) {
+		boolean liked = recipeLikeRepository.existsByUserIdAndRecipeId(userId, recipeId);
+		boolean saved = recipeBookmarkRepository.existsByUserIdAndRecipeId(userId, recipeId);
+		return new RecipeUserFlags(liked, saved);
 	}
 
 	@Override

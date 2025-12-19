@@ -10,6 +10,7 @@ public record RecipeCardResponse(
 	String difficulty,
 	Long likeCount,
 	Long commentsCount,
+	Long bookmarkCount,
 	String category
 ) {
 
