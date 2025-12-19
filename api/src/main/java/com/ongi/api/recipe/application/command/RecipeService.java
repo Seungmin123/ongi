@@ -5,6 +5,7 @@ import com.ongi.api.ingredients.persistence.IngredientAdapter;
 import com.ongi.api.recipe.adapter.out.cache.RecipeCacheReader;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeAdapter;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeDetailMapper;
+import com.ongi.api.recipe.messaging.consumer.RecipeCacheVersionResolver;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
@@ -40,6 +41,8 @@ import org.springframework.util.CollectionUtils;
 public class RecipeService {
 
 	private final RecipeCacheReader recipeCacheReader;
+
+	private final RecipeCacheVersionResolver recipeCacheVersionResolver;
 
 	private final RecipeAdapter recipeAdapter;
 
@@ -130,9 +133,10 @@ public class RecipeService {
 
 	@Transactional(readOnly = true, transactionManager = "transactionManager")
 	public RecipeDetailBaseResponse getRecipeDetail(Long recipeId) {
-		Recipe recipe = recipeCacheReader.getRecipeById(recipeId);
-		List<RecipeIngredientResponse> recipeIngredients = recipeCacheReader.getRecipeIngredients(recipeId);
-		List<RecipeStepsResponse> recipeSteps = recipeCacheReader.getRecipeSteps(recipeId);
+		int ver = recipeCacheVersionResolver.getOrInit(recipeId);
+		Recipe recipe = recipeCacheReader.getRecipeById(recipeId, ver);
+		List<RecipeIngredientResponse> recipeIngredients = recipeCacheReader.getRecipeIngredients(recipeId, ver);
+		List<RecipeStepsResponse> recipeSteps = recipeCacheReader.getRecipeSteps(recipeId, ver);
 
 		RecipeStats recipeStats = recipeAdapter.findRecipeStatsByRecipeId(recipeId).orElseThrow(() -> new IllegalStateException("Recipe Stats not found"));
 
@@ -164,7 +168,7 @@ public class RecipeService {
 		allEntries = true
 	)
 	@Transactional(transactionManager = "transactionManager")
-	public void createRecipe(Long userId, RecipeUpsertRequest request) {
+	public Recipe createRecipe(Long userId, RecipeUpsertRequest request) {
 		Recipe recipe = Recipe.create(
 			null,
 			userId,
@@ -191,6 +195,8 @@ public class RecipeService {
 		if(!CollectionUtils.isEmpty(request.steps())) {
 			saveAllRecipeSteps(recipe.getId(), request.steps());
 		}
+
+		return recipe;
 	}
 
 	private void saveAllRecipeIngredients(Long recipeId, List<RecipeIngredientCreateRequest> ingredients) {
@@ -237,7 +243,7 @@ public class RecipeService {
 		@CacheEvict(cacheNames = "recipeList", allEntries = true)
 	})
 	@Transactional(transactionManager = "transactionManager")
-	public void updateRecipe(Long userId, RecipeUpsertRequest request) {
+	public Recipe updateRecipe(Long userId, RecipeUpsertRequest request) {
 		Recipe recipe = recipeAdapter.findRecipeById(request.recipeId()).orElseThrow(() -> new IllegalStateException("Recipe not found"));
 
 		if (!recipe.getAuthorId().equals(userId)) {
@@ -282,7 +288,7 @@ public class RecipeService {
 			saveAllRecipeSteps(recipe.getId(), request.steps());
 		}
 
-		recipeAdapter.save(recipe);
+		return recipeAdapter.save(recipe);
 	}
 
 	@Caching(evict = {
@@ -290,7 +296,7 @@ public class RecipeService {
 		@CacheEvict(cacheNames = "recipeList", allEntries = true)
 	})
 	@Transactional(transactionManager = "transactionManager")
-	public void deleteRecipe(long userId, long recipeId) {
+	public boolean deleteRecipe(long userId, long recipeId) {
 		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(() -> new IllegalStateException("Recipe not found"));
 		if (!recipe.getAuthorId().equals(userId)) {
 			throw new SecurityException("forbidden");
@@ -300,6 +306,8 @@ public class RecipeService {
 		recipeAdapter.deleteRecipeById(recipeId);
 
 		// TODO Likes, Saves, Comments, Tags 모두 삭제 필요.
+
+		return true;
 
 	}
 

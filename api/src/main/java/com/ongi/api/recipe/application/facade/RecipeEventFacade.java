@@ -18,6 +18,9 @@ import com.ongi.api.recipe.web.dto.RecipeCommentEventPayload;
 import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
 import com.ongi.api.recipe.web.dto.RecipeLikePayload;
+import com.ongi.api.recipe.web.dto.RecipePayload;
+import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
+import com.ongi.recipe.domain.Recipe;
 import com.ongi.recipe.domain.RecipeUserFlags;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -36,6 +39,42 @@ public class RecipeEventFacade {
 	private final OutBoxService outBoxService;
 
 	private final RecipeViewCounter recipeViewCounter;
+
+	@Transactional(transactionManager = "transactionManager")
+	public void createRecipe(long userId, RecipeUpsertRequest recipeUpsertRequest) throws Exception {
+		Recipe recipe = recipeService.createRecipe(userId, recipeUpsertRequest);
+
+		if(recipe != null) {
+			UUID eventId = UUID.randomUUID();
+			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_CREATED;
+			var payload = new RecipePayload(eventId, userId, recipe.getId(), eventType.getCode(), LocalDateTime.now());
+			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipe.getId(), eventType, payload);
+		}
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public void updateRecipe(long userId, RecipeUpsertRequest recipeUpsertRequest) throws Exception {
+		Recipe recipe = recipeService.updateRecipe(userId, recipeUpsertRequest);
+
+		if(recipe != null) {
+			UUID eventId = UUID.randomUUID();
+			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_UPDATED;
+			var payload = new RecipePayload(eventId, userId, recipe.getId(), eventType.getCode(), LocalDateTime.now());
+			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipe.getId(), eventType, payload);
+		}
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public void deleteRecipe(long userId, long recipeId) throws Exception {
+		boolean deleted = recipeService.deleteRecipe(userId, recipeId);
+
+		if(deleted) {
+			UUID eventId = UUID.randomUUID();
+			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_DELETED;
+			var payload = new RecipePayload(eventId, userId, recipeId, eventType.getCode(), LocalDateTime.now());
+			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
+		}
+	}
 
 	@Transactional(transactionManager = "transactionManager")
 	public RecipeDetailResponse view(Long userId, long recipeId) throws Exception {

@@ -97,9 +97,8 @@ public class RecipeController {
 		@ModelAttribute RecipeUpsertRequest recipeUpsertRequest
 	) throws Exception {
 		// TODO 확인할 것 - 등록한 레시피 기반으로 유사 레시피 추천?
-		// TODO Kafka User Event 발행?
 		long userId = authPrincipal.userId();
-		recipeService.createRecipe(userId, recipeUpsertRequest);
+		recipeEventFacade.createRecipe(userId, recipeUpsertRequest);
 		return ApiResponse.ok();
 	}
 
@@ -115,9 +114,8 @@ public class RecipeController {
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@ModelAttribute RecipeUpsertRequest request
 	) throws Exception {
-		// TODO Kafka User Event 발행?
 		long userId = authPrincipal.userId();
-		recipeService.updateRecipe(userId, request);
+		recipeEventFacade.updateRecipe(userId, request);
 		return ApiResponse.ok();
 	}
 
@@ -133,9 +131,8 @@ public class RecipeController {
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@PathVariable Long recipeId
 	) throws Exception {
-		// TODO Kafka User Event 발행?
 		long userId = authPrincipal.userId();
-		recipeService.deleteRecipe(userId, recipeId);
+		recipeEventFacade.deleteRecipe(userId, recipeId);
 		return ApiResponse.ok();
 	}
 

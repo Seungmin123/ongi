@@ -2,7 +2,7 @@ package com.ongi.api.recipe.messaging.consumer;
 
 import java.time.LocalDateTime;
 
-public record RecipeLikeEvent(
+public record RecipeEvent(
 	String eventId,
 	long userId,
 	long recipeId,

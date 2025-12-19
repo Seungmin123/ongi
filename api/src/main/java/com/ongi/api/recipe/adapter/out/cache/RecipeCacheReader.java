@@ -22,25 +22,25 @@ public class RecipeCacheReader {
 
 	@Cacheable(
 		cacheNames = "recipeDetail",
-		key = "'recipe:' + #recipeId + ':detail'"
+		key = "'recipe:' + #recipeId + ':detail:' + #ver"
 	)
 	@Transactional(
 		readOnly = true,
 		transactionManager = "transactionManager"
 	)
-	public Recipe getRecipeById(Long recipeId) {
+	public Recipe getRecipeById(Long recipeId, int ver) {
 		return recipeAdapter.findRecipeById(recipeId).orElseThrow(() -> new IllegalStateException("Recipe not found"));
 	}
 
 	@Cacheable(
 		cacheNames = "recipeIngredient",
-		key = "'recipe:' + #recipeId + ':ingredients'"
+		key = "'recipe:' + #recipeId + ':ingredients:' + #ver"
 	)
 	@Transactional(
 		readOnly = true,
 		transactionManager = "transactionManager"
 	)
-	public List<RecipeIngredientResponse> getRecipeIngredients(Long recipeId) {
+	public List<RecipeIngredientResponse> getRecipeIngredients(Long recipeId, int ver) {
 		return ingredientAdapter.findRecipeIngredientByRecipeId(recipeId).stream()
 			.map(RecipeDetailMapper::toIngredientResponse)
 			.toList();
@@ -48,13 +48,13 @@ public class RecipeCacheReader {
 
 	@Cacheable(
 		cacheNames = "recipeSteps",
-		key = "'recipe:' + #recipeId + ':steps'"
+		key = "'recipe:' + #recipeId + ':steps:' + #ver"
 	)
 	@Transactional(
 		readOnly = true,
 		transactionManager = "transactionManager"
 	)
-	public List<RecipeStepsResponse> getRecipeSteps(Long recipeId) {
+	public List<RecipeStepsResponse> getRecipeSteps(Long recipeId, int ver) {
 		return recipeAdapter.findRecipeStepsByRecipeId(recipeId).stream()
 			.map(RecipeDetailMapper::toStepsResponse)
 			.toList();
