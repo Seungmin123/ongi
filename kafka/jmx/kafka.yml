@@ -1,0 +1,127 @@
+startDelaySeconds: 0
+ssl: false
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+
+# whitelist는 다시 켜도 됩니다. (이제 공백 허용 패턴으로 매칭 가능)
+whitelistObjectNames:
+  - "kafka.network:*"
+  - "kafka.server:*"
+  - "kafka.log:*"
+  - "kafka.cluster:*"
+  - "kafka.controller:*"
+  - "kafka.coordinator.group:*"
+  - "kafka.coordinator.transaction:*"
+  - "org.apache.kafka.server:*"
+
+rules:
+  # ---------------------------------------------------------------------------
+  # kafka.network - RequestMetrics
+  # canonical: kafka.network<type=RequestMetrics, name=..., request=... [, error=...]><>Attr
+  # ---------------------------------------------------------------------------
+
+  - pattern: 'kafka\.network<type=RequestMetrics,\s*name=RequestsPerSec,\s*request=([^,>]+)><>Count'
+    name: kafka_request_total
+    labels:
+      request: "$1"
+
+  - pattern: 'kafka\.network<type=RequestMetrics,\s*name=RequestsPerSec,\s*request=([^,>]+)><>OneMinuteRate'
+    name: kafka_request_rate_1m
+    labels:
+      request: "$1"
+
+  # Latency quantiles (p50/p95/p99 ...)
+  - pattern: 'kafka\.network<type=RequestMetrics,\s*name=(LocalTimeMs|RemoteTimeMs|TotalTimeMs|RequestQueueTimeMs|ResponseQueueTimeMs|ThrottleTimeMs),\s*request=([^,>]+)><>p(\d+)'
+    name: kafka_request_$1_ms
+    labels:
+      request: "$2"
+      quantile: "p$3"
+
+  # ErrorsPerSec (error label)
+  - pattern: 'kafka\.network<type=RequestMetrics,\s*name=ErrorsPerSec,\s*request=([^,>]+),\s*error=([^,>]+)><>Count'
+    name: kafka_request_errors_total
+    labels:
+      request: "$1"
+      error: "$2"
+
+  - pattern: 'kafka\.network<type=RequestMetrics,\s*name=ErrorsPerSec,\s*request=([^,>]+),\s*error=([^,>]+)><>OneMinuteRate'
+    name: kafka_request_errors_rate_1m
+    labels:
+      request: "$1"
+      error: "$2"
+
+  # ---------------------------------------------------------------------------
+  # kafka.network - Processor / SocketServer / Acceptor
+  # ---------------------------------------------------------------------------
+
+  - pattern: 'kafka\.network<type=Processor,\s*name=IdlePercent,\s*networkProcessor=(\d+)><>Value'
+    name: kafka_network_processor_idle_percent
+    labels:
+      network_processor: "$1"
+
+  - pattern: 'kafka\.network<type=SocketServer,\s*name=NetworkProcessorAvgIdlePercent><>Value'
+    name: kafka_network_processor_avg_idle_percent
+
+  - pattern: 'kafka\.network<type=SocketServer,\s*name=MemoryPoolAvailable><>Value'
+    name: kafka_socketserver_memory_pool_available_bytes
+
+  - pattern: 'kafka\.network<type=SocketServer,\s*name=MemoryPoolUsed><>Value'
+    name: kafka_socketserver_memory_pool_used_bytes
+
+  - pattern: 'kafka\.network<type=Acceptor,\s*name=AcceptorBlockedPercent,\s*listener=([^,>]+)><>Count'
+    name: kafka_acceptor_blocked_percent_total
+    labels:
+      listener: "$1"
+
+  # ---------------------------------------------------------------------------
+  # kafka.server - BrokerTopicMetrics / ReplicaManager / RequestHandler
+  # canonical example from your dump has no spaces in the mbeans list,
+  # but exporter canonical does use spaces. So we accept \s*.
+  # ---------------------------------------------------------------------------
+
+  - pattern: 'kafka\.server<type=ReplicaManager,\s*name=UnderReplicatedPartitions><>Value'
+    name: kafka_under_replicated_partitions
+
+  - pattern: 'kafka\.server<type=ReplicaManager,\s*name=AtMinIsrPartitionCount><>Value'
+    name: kafka_at_min_isr_partition_count
+
+  - pattern: 'kafka\.server<type=ReplicaManager,\s*name=(IsrExpandsPerSec|IsrShrinksPerSec)><>Count'
+    name: kafka_replica_manager_$1_total
+
+  - pattern: 'kafka\.server<type=ReplicaManager,\s*name=(IsrExpandsPerSec|IsrShrinksPerSec)><>OneMinuteRate'
+    name: kafka_replica_manager_$1_rate_1m
+
+  - pattern: 'kafka\.server<type=KafkaRequestHandlerPool,\s*name=RequestHandlerAvgIdlePercent><>Value'
+    name: kafka_request_handler_avg_idle_percent
+
+  # Broker-wide throughput
+  - pattern: 'kafka\.server<type=BrokerTopicMetrics,\s*name=(BytesInPerSec|BytesOutPerSec|BytesRejectedPerSec|MessagesInPerSec|FailedFetchRequestsPerSec|FailedProduceRequestsPerSec)><>Count'
+    name: kafka_broker_$1_total
+
+  - pattern: 'kafka\.server<type=BrokerTopicMetrics,\s*name=(BytesInPerSec|BytesOutPerSec|BytesRejectedPerSec|MessagesInPerSec|FailedFetchRequestsPerSec|FailedProduceRequestsPerSec)><>OneMinuteRate'
+    name: kafka_broker_$1_rate_1m
+
+  # Topic-level (optional but useful in dev)
+  - pattern: 'kafka\.server<type=BrokerTopicMetrics,\s*name=(BytesInPerSec|BytesOutPerSec|MessagesInPerSec),\s*topic=([^,>]+)><>OneMinuteRate'
+    name: kafka_topic_$1_rate_1m
+    labels:
+      topic: "$2"
+
+  # ---------------------------------------------------------------------------
+  # controller / coordinator
+  # ---------------------------------------------------------------------------
+
+  - pattern: 'kafka\.controller<type=KafkaController,\s*name=ActiveControllerCount><>Value'
+    name: kafka_active_controller
+
+  - pattern: 'kafka\.controller<type=KafkaController,\s*name=OfflinePartitionsCount><>Value'
+    name: kafka_offline_partitions
+
+  - pattern: 'kafka\.coordinator\.group<type=GroupCoordinator,\s*name=NumGroups><>Value'
+    name: kafka_group_coordinator_num_groups
+
+  - pattern: 'kafka\.coordinator\.group<type=GroupCoordinator,\s*name=NumOffsets><>Value'
+    name: kafka_group_coordinator_num_offsets
+
+  - pattern: 'kafka\.coordinator\.transaction<type=TransactionCoordinator,\s*name=NumTransactions><>Value'
+    name: kafka_transaction_coordinator_num_transactions

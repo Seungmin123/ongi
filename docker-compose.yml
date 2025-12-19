@@ -20,32 +20,65 @@ services:
     networks:
       - dev-net
 
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: dev-redis-exporter
+    environment:
+      - REDIS_ADDR=redis://dev-redis:6379
+    ports:
+      - "9121:9121"
+    restart: unless-stopped
+    depends_on:
+      - redis
+    networks:
+      - dev-net
+
   kafka:
     image: apache/kafka:4.1.1
     container_name: dev-kafka
     ports:
       - "9092:9092"
       - "9093:9093"
+      # JMX exporter metrics port
+      - "9404:9404"
     # server.properties 파일은 "파일"로 매핑
     volumes:
       - ./kafka/config/server.properties:/opt/kafka/config/server.properties
       - ./kafka/data:/var/lib/kafka/data
+      - ./kafka/jmx:/opt/kafka/jmx:ro
     command:
       - sh
       - -c
       - |
         set -e
-        
+        export KAFKA_OPTS="-javaagent:/opt/kafka/jmx/jmx_prometheus_javaagent-1.5.0.jar=9404:/opt/kafka/jmx/kafka.yml"
+        export KAFKA_JMX_OPTS="-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.rmi.port=9999 -Djava.rmi.server.hostname=dev-kafka"
+  
         CLUSTER_ID="$(/opt/kafka/bin/kafka-storage.sh random-uuid)"
         echo "Generated CLUSTER_ID=${CLUSTER_ID}"
-        
+  
         /opt/kafka/bin/kafka-storage.sh format \
           --config /opt/kafka/config/server.properties \
           --cluster-id "${CLUSTER_ID}" \
           --ignore-formatted
-        
+  
         exec /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
     restart: unless-stopped
+    networks:
+      - dev-net
+
+  # Consumer lag / consumer group 상태용 (Kafka protocol 기반)
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: dev-kafka-exporter
+    command:
+      - --kafka.server=dev-kafka:9092
+    ports:
+      - "9308:9308"
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
     networks:
       - dev-net
 
