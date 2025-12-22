@@ -44,7 +44,8 @@ public class UserController {
 
 	/**
 	 * 이메일 회원가입 - 이메일 인증 요청
- 	 * @param req
+	 *
+	 * @param req
 	 * @return
 	 */
 	@PostMapping("/public/signup/email-request")
@@ -57,6 +58,7 @@ public class UserController {
 
 	/**
 	 * 이메일 회원가입 - 이메일 인증 확인
+	 *
 	 * @param req
 	 * @return
 	 */
@@ -70,6 +72,7 @@ public class UserController {
 
 	/**
 	 * 이메일 회원가입
+	 *
 	 * @param memberSignUpRequest
 	 * @return
 	 */
@@ -83,6 +86,7 @@ public class UserController {
 
 	/**
 	 * 이메일 로그인
+	 *
 	 * @param req
 	 * @return
 	 */
@@ -95,6 +99,7 @@ public class UserController {
 
 	/**
 	 * 아이디 찾기
+	 *
 	 * @param findEmailRequest
 	 * @return
 	 */
@@ -108,6 +113,7 @@ public class UserController {
 
 	/**
 	 * 비밀번호 재설정 메일 전송
+	 *
 	 * @param passwordResetRequest
 	 * @return
 	 */
@@ -121,6 +127,7 @@ public class UserController {
 
 	/**
 	 * 비밀번호 재설정 메일 확인
+	 *
 	 * @param passwordResetConfirmRequest
 	 * @return
 	 */
@@ -134,6 +141,7 @@ public class UserController {
 
 	/**
 	 * 마이 페이지 - 조회 (SUMMARY, BASIC, PERSONALIZATION 가능)
+	 *
 	 * @param authPrincipal
 	 * @param include
 	 * @return
@@ -154,6 +162,7 @@ public class UserController {
 
 	/**
 	 * 마이 페이지 - 요약 수정
+	 *
 	 * @param authPrincipal
 	 * @param myPageSummaryUpdateRequest
 	 * @return
@@ -170,6 +179,7 @@ public class UserController {
 
 	/**
 	 * 마이 페이지 - 기본 정보 수정
+	 *
 	 * @param authPrincipal
 	 * @param myPageBasicUpdateRequest
 	 * @return
@@ -186,6 +196,7 @@ public class UserController {
 
 	/**
 	 * 마이 페이지 - 개인 정보 수정
+	 *
 	 * @param authPrincipal
 	 * @param myPagePersonalizationUpdateRequest
 	 * @return
@@ -202,6 +213,7 @@ public class UserController {
 
 	/**
 	 * 마이 페이지 - 내 통계 조회
+	 *
 	 * @param authPrincipal
 	 * @return
 	 */
@@ -217,22 +229,4 @@ public class UserController {
 
 	// TODO OAuth Kakao
 
-	// TODO 내 프로필 정보
-
-	// TODO 내 프로필 정보 수정
-
-
-	// User(Community) -------------------
-
-	// TODO 댓글 리스트
-
-	// TODO 댓글 쓰기
-
-	// TODO 댓글 수정
-
-	// TODO 좋아요
-
-	// TODO 저장하기
-
-	// TODO 내 활동 통계
 }

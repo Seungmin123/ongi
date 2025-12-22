@@ -1,7 +1,7 @@
 package com.ongi.api.user.messaging.consumer;
 
-import com.ongi.api.user.adapter.out.cache.persistence.repository.UserProcessedEventRepository;
-import com.ongi.api.user.adapter.out.cache.persistence.repository.UserStatsRepository;
+import com.ongi.api.user.adapter.out.persistence.repository.UserProcessedEventRepository;
+import com.ongi.api.user.adapter.out.persistence.repository.UserStatsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

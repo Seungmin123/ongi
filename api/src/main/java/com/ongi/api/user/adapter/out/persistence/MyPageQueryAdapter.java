@@ -1,10 +1,10 @@
-package com.ongi.api.user.adapter.out.cache.persistence;
+package com.ongi.api.user.adapter.out.persistence;
 
-import com.ongi.api.user.adapter.out.cache.persistence.projection.MeBasicRow;
-import com.ongi.api.user.adapter.out.cache.persistence.projection.MePersonalizationRow;
-import com.ongi.api.user.adapter.out.cache.persistence.projection.MeSummaryRow;
-import com.ongi.api.user.adapter.out.cache.persistence.repository.UserProfileRepository;
-import com.ongi.api.user.adapter.out.cache.persistence.repository.UserRepository;
+import com.ongi.api.user.adapter.out.persistence.projection.MeBasicRow;
+import com.ongi.api.user.adapter.out.persistence.projection.MePersonalizationRow;
+import com.ongi.api.user.adapter.out.persistence.projection.MeSummaryRow;
+import com.ongi.api.user.adapter.out.persistence.repository.UserProfileRepository;
+import com.ongi.api.user.adapter.out.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

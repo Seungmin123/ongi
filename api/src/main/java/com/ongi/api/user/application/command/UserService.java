@@ -1,7 +1,7 @@
 package com.ongi.api.user.application.command;
 
-import com.ongi.api.user.adapter.out.cache.persistence.MyPageQueryAdapter;
-import com.ongi.api.user.adapter.out.cache.persistence.UserAdapter;
+import com.ongi.api.user.adapter.out.persistence.MyPageQueryAdapter;
+import com.ongi.api.user.adapter.out.persistence.UserAdapter;
 import com.ongi.api.user.web.dto.MyPageBasicUpdateRequest;
 import com.ongi.api.user.web.dto.MyPagePersonalizationUpdateRequest;
 import com.ongi.api.user.web.dto.MyPageResponse;

@@ -1,6 +1,6 @@
-package com.ongi.api.user.adapter.out.cache.persistence.repository;
+package com.ongi.api.user.adapter.out.persistence.repository;
 
-import com.ongi.api.user.adapter.out.cache.persistence.UserStatsEntity;
+import com.ongi.api.user.adapter.out.persistence.UserStatsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserStatsRepository extends JpaRepository<UserStatsEntity, Long> {

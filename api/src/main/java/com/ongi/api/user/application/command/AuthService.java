@@ -9,7 +9,7 @@ import com.ongi.api.user.application.component.MailSender;
 import com.ongi.api.user.adapter.out.cache.store.PasswordResetTokenStore;
 import com.ongi.api.user.adapter.out.cache.store.RefreshTokenStore;
 import com.ongi.api.config.properties.JwtProperties;
-import com.ongi.api.user.adapter.out.cache.persistence.UserAdapter;
+import com.ongi.api.user.adapter.out.persistence.UserAdapter;
 import com.ongi.api.user.web.dto.EmailVerifyConfirmRequest;
 import com.ongi.api.user.web.dto.EmailVerifyRequest;
 import com.ongi.api.user.web.dto.FindEmailRequest;

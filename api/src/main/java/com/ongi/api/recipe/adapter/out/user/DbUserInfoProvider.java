@@ -2,7 +2,7 @@ package com.ongi.api.recipe.adapter.out.user;
 
 import com.ongi.api.recipe.port.UserInfoProvider;
 import com.ongi.api.recipe.web.dto.UserSummary;
-import com.ongi.api.user.adapter.out.cache.persistence.UserAdapter;
+import com.ongi.api.user.adapter.out.persistence.UserAdapter;
 import com.ongi.user.domain.UserProfile;
 import java.util.Map;
 import java.util.Set;

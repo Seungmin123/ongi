@@ -1,4 +1,4 @@
-package com.ongi.api.user.adapter.out.cache.persistence;
+package com.ongi.api.user.adapter.out.persistence;
 
 import com.ongi.user.domain.User;
 import com.ongi.user.domain.UserProfile;

@@ -1,4 +1,4 @@
-package com.ongi.api.user.adapter.out.cache.persistence;
+package com.ongi.api.user.adapter.out.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

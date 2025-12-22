@@ -1,9 +1,9 @@
-package com.ongi.api.user.adapter.out.cache.persistence.repository;
+package com.ongi.api.user.adapter.out.persistence.repository;
 
-import com.ongi.api.user.adapter.out.cache.persistence.UserProfileEntity;
-import com.ongi.api.user.adapter.out.cache.persistence.projection.MeBasicRow;
-import com.ongi.api.user.adapter.out.cache.persistence.projection.MePersonalizationRow;
-import com.ongi.api.user.adapter.out.cache.persistence.projection.MeSummaryRow;
+import com.ongi.api.user.adapter.out.persistence.UserProfileEntity;
+import com.ongi.api.user.adapter.out.persistence.projection.MeBasicRow;
+import com.ongi.api.user.adapter.out.persistence.projection.MePersonalizationRow;
+import com.ongi.api.user.adapter.out.persistence.projection.MeSummaryRow;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

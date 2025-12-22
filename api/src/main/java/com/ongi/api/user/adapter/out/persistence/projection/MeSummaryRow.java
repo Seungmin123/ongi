@@ -1,4 +1,4 @@
-package com.ongi.api.user.adapter.out.cache.persistence.projection;
+package com.ongi.api.user.adapter.out.persistence.projection;
 
 public record MeSummaryRow(
 	String email,

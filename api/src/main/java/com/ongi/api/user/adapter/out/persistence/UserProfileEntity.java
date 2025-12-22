@@ -1,4 +1,4 @@
-package com.ongi.api.user.adapter.out.cache.persistence;
+package com.ongi.api.user.adapter.out.persistence;
 
 import com.ongi.api.common.persistence.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
