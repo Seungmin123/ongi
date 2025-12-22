@@ -225,8 +225,8 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 
 	@Override
 	public RecipeUserFlags getFlags(Long userId, Long recipeId) {
-		boolean liked = recipeLikeRepository.existsByUserIdAndRecipeId(userId, recipeId);
-		boolean saved = recipeBookmarkRepository.existsByUserIdAndRecipeId(userId, recipeId);
+		boolean liked = recipeLikeRepository.existsByIdUserIdAndIdRecipeId(userId, recipeId);
+		boolean saved = recipeBookmarkRepository.existsByIdUserIdAndIdRecipeId(userId, recipeId);
 		return new RecipeUserFlags(liked, saved);
 	}
 

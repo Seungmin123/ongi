@@ -7,7 +7,10 @@ import com.ongi.api.recipe.adapter.out.persistence.RecipeAdapter;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeDetailMapper;
 import com.ongi.api.recipe.messaging.consumer.RecipeCacheVersionResolver;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
+import com.ongi.api.recipe.web.dto.RecipeCacheValue;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
+import com.ongi.api.recipe.web.dto.RecipeIngredientCacheValue;
+import com.ongi.api.recipe.web.dto.RecipeStepsCacheValue;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
 import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
 import com.ongi.api.recipe.web.dto.RecipeIngredientCreateRequest;
@@ -134,22 +137,22 @@ public class RecipeService {
 	@Transactional(readOnly = true, transactionManager = "transactionManager")
 	public RecipeDetailBaseResponse getRecipeDetail(Long recipeId) {
 		int ver = recipeCacheVersionResolver.getOrInit(recipeId);
-		Recipe recipe = recipeCacheReader.getRecipeById(recipeId, ver);
-		List<RecipeIngredientResponse> recipeIngredients = recipeCacheReader.getRecipeIngredients(recipeId, ver);
-		List<RecipeStepsResponse> recipeSteps = recipeCacheReader.getRecipeSteps(recipeId, ver);
+		RecipeCacheValue recipe = recipeCacheReader.getRecipeById(recipeId, ver);
+		RecipeIngredientCacheValue recipeIngredients = recipeCacheReader.getRecipeIngredients(recipeId, ver);
+		RecipeStepsCacheValue recipeSteps = recipeCacheReader.getRecipeSteps(recipeId, ver);
 
 		RecipeStats recipeStats = recipeAdapter.findRecipeStatsByRecipeId(recipeId).orElseThrow(() -> new IllegalStateException("Recipe Stats not found"));
 
-		Integer cookTime = recipe.getCookingTimeMin();
+		Integer cookTime = recipe.cookingTimeMin();
 		String cookTimeText = formatCookTime(cookTime);
 
 		return new RecipeDetailBaseResponse(
-			recipe.getImageUrl(),
-			recipe.getTitle(),
+			recipe.imageUrl(),
+			recipe.title(),
 			cookTime,
 			cookTimeText,
-			recipe.getServing() == null ? null : recipe.getServing().intValue(),
-			recipe.getDifficulty() != null ? recipe.getDifficulty().getCode() : null,
+			recipe.serving() == null ? null : recipe.serving().intValue(),
+			recipe.difficulty() != null ? recipe.difficulty().getCode() : null,
 			recipeStats.getLikeCount(),
 			recipeStats.getCommentCount(),
 			recipeStats.getBookmarkCount(),
@@ -238,10 +241,6 @@ public class RecipeService {
 		recipeAdapter.saveAllRecipeSteps(domains);
 	}
 
-	@Caching(evict = {
-		@CacheEvict(cacheNames = "recipeDetail", key = "#request.recipeId()"),
-		@CacheEvict(cacheNames = "recipeList", allEntries = true)
-	})
 	@Transactional(transactionManager = "transactionManager")
 	public Recipe updateRecipe(Long userId, RecipeUpsertRequest request) {
 		Recipe recipe = recipeAdapter.findRecipeById(request.recipeId()).orElseThrow(() -> new IllegalStateException("Recipe not found"));
@@ -291,10 +290,6 @@ public class RecipeService {
 		return recipeAdapter.save(recipe);
 	}
 
-	@Caching(evict = {
-		@CacheEvict(cacheNames = "recipeDetail", key = "#recipeId"),
-		@CacheEvict(cacheNames = "recipeList", allEntries = true)
-	})
 	@Transactional(transactionManager = "transactionManager")
 	public boolean deleteRecipe(long userId, long recipeId) {
 		Recipe recipe = recipeAdapter.findRecipeById(recipeId).orElseThrow(() -> new IllegalStateException("Recipe not found"));

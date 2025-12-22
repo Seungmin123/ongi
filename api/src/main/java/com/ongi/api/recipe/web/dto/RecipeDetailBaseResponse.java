@@ -1,7 +1,5 @@
 package com.ongi.api.recipe.web.dto;
 
-import java.util.List;
-
 public record RecipeDetailBaseResponse(
 	String recipeImageUrl,
 	String title,
@@ -13,7 +11,7 @@ public record RecipeDetailBaseResponse(
 	Long commentCount,
 	Long bookmarkCount,
 
-	List<RecipeIngredientResponse> ingredients,
-	List<RecipeStepsResponse> recipeSteps
+	RecipeIngredientCacheValue ingredients,
+	RecipeStepsCacheValue recipeSteps
 ) {
 }

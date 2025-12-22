@@ -3,7 +3,10 @@ package com.ongi.api.recipe.adapter.out.cache;
 import com.ongi.api.ingredients.persistence.IngredientAdapter;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeAdapter;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeDetailMapper;
+import com.ongi.api.recipe.web.dto.RecipeCacheValue;
+import com.ongi.api.recipe.web.dto.RecipeIngredientCacheValue;
 import com.ongi.api.recipe.web.dto.RecipeIngredientResponse;
+import com.ongi.api.recipe.web.dto.RecipeStepsCacheValue;
 import com.ongi.api.recipe.web.dto.RecipeStepsResponse;
 import com.ongi.recipe.domain.Recipe;
 import java.util.List;
@@ -22,14 +25,16 @@ public class RecipeCacheReader {
 
 	@Cacheable(
 		cacheNames = "recipeDetail",
-		key = "'recipe:' + #recipeId + ':detail:' + #ver"
+		key = "'recipe:' + #recipeId + ':detail:' + #ver",
+		unless = "#result == null"
 	)
 	@Transactional(
 		readOnly = true,
 		transactionManager = "transactionManager"
 	)
-	public Recipe getRecipeById(Long recipeId, int ver) {
-		return recipeAdapter.findRecipeById(recipeId).orElseThrow(() -> new IllegalStateException("Recipe not found"));
+	public RecipeCacheValue getRecipeById(Long recipeId, int ver) {
+		Recipe r = recipeAdapter.findRecipeById(recipeId).orElseThrow(() -> new IllegalStateException("Recipe not found"));
+		return RecipeCacheValue.from(r);
 	}
 
 	@Cacheable(
@@ -40,10 +45,11 @@ public class RecipeCacheReader {
 		readOnly = true,
 		transactionManager = "transactionManager"
 	)
-	public List<RecipeIngredientResponse> getRecipeIngredients(Long recipeId, int ver) {
-		return ingredientAdapter.findRecipeIngredientByRecipeId(recipeId).stream()
+	public RecipeIngredientCacheValue getRecipeIngredients(Long recipeId, int ver) {
+		var list = ingredientAdapter.findRecipeIngredientByRecipeId(recipeId).stream()
 			.map(RecipeDetailMapper::toIngredientResponse)
 			.toList();
+		return new RecipeIngredientCacheValue(list);
 	}
 
 	@Cacheable(
@@ -54,9 +60,10 @@ public class RecipeCacheReader {
 		readOnly = true,
 		transactionManager = "transactionManager"
 	)
-	public List<RecipeStepsResponse> getRecipeSteps(Long recipeId, int ver) {
-		return recipeAdapter.findRecipeStepsByRecipeId(recipeId).stream()
+	public RecipeStepsCacheValue getRecipeSteps(Long recipeId, int ver) {
+		var list = recipeAdapter.findRecipeStepsByRecipeId(recipeId).stream()
 			.map(RecipeDetailMapper::toStepsResponse)
 			.toList();
+		return new RecipeStepsCacheValue(list);
 	}
 }
