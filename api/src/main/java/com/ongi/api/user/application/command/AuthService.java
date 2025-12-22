@@ -1,15 +1,15 @@
-package com.ongi.api.user.application;
+package com.ongi.api.user.application.command;
 
 import com.ongi.api.common.web.dto.JwtTokens;
 import com.ongi.api.config.auth.JwtTokenProvider;
-import com.ongi.api.user.cache.UserRedisTemplate;
-import com.ongi.api.user.cache.store.EmailVerificationStore;
-import com.ongi.api.user.cache.store.SignUpTokenStore;
+import com.ongi.api.user.adapter.out.cache.UserRedisTemplate;
+import com.ongi.api.user.adapter.out.cache.store.EmailVerificationStore;
+import com.ongi.api.user.adapter.out.cache.store.SignUpTokenStore;
 import com.ongi.api.user.application.component.MailSender;
-import com.ongi.api.user.cache.store.PasswordResetTokenStore;
-import com.ongi.api.user.cache.store.RefreshTokenStore;
+import com.ongi.api.user.adapter.out.cache.store.PasswordResetTokenStore;
+import com.ongi.api.user.adapter.out.cache.store.RefreshTokenStore;
 import com.ongi.api.config.properties.JwtProperties;
-import com.ongi.api.user.persistence.UserAdapter;
+import com.ongi.api.user.adapter.out.cache.persistence.UserAdapter;
 import com.ongi.api.user.web.dto.EmailVerifyConfirmRequest;
 import com.ongi.api.user.web.dto.EmailVerifyRequest;
 import com.ongi.api.user.web.dto.FindEmailRequest;

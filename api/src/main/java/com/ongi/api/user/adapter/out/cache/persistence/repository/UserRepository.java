@@ -1,6 +1,6 @@
-package com.ongi.api.user.persistence.repository;
+package com.ongi.api.user.adapter.out.cache.persistence.repository;
 
-import com.ongi.api.user.persistence.UserEntity;
+import com.ongi.api.user.adapter.out.cache.persistence.UserEntity;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

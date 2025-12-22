@@ -1,8 +1,8 @@
-package com.ongi.api.user.application;
+package com.ongi.api.user.application.command;
 
 import com.ongi.api.common.web.dto.UploadMeta;
-import com.ongi.api.user.cache.UserRedisTemplate;
-import com.ongi.api.user.cache.store.UploadSessionStore;
+import com.ongi.api.user.adapter.out.cache.UserRedisTemplate;
+import com.ongi.api.user.adapter.out.cache.store.UploadSessionStore;
 import com.ongi.api.user.application.component.FileUploader;
 import com.ongi.api.user.web.dto.ConfirmResponse;
 import com.ongi.api.user.web.dto.PresignResponse;

@@ -1,8 +1,8 @@
-package com.ongi.api.user.persistence;
+package com.ongi.api.user.adapter.out.cache.persistence;
 
-import com.ongi.api.user.persistence.repository.UserProfileRepository;
-import com.ongi.api.user.persistence.repository.UserRepository;
-import com.ongi.api.user.persistence.repository.UserStatsRepository;
+import com.ongi.api.user.adapter.out.cache.persistence.repository.UserProfileRepository;
+import com.ongi.api.user.adapter.out.cache.persistence.repository.UserRepository;
+import com.ongi.api.user.adapter.out.cache.persistence.repository.UserStatsRepository;
 import com.ongi.user.domain.User;
 import com.ongi.user.domain.UserProfile;
 import com.ongi.user.domain.UserStats;

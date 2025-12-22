@@ -1,10 +1,7 @@
-package com.ongi.api.user.persistence.repository;
+package com.ongi.api.user.adapter.out.cache.persistence.repository;
 
-import com.ongi.api.user.persistence.UserStatsEntity;
+import com.ongi.api.user.adapter.out.cache.persistence.UserStatsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface UserStatsRepository extends JpaRepository<UserStatsEntity, Long> {
 

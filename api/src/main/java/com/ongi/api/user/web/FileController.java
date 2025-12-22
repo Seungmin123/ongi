@@ -1,7 +1,7 @@
 package com.ongi.api.user.web;
 
 import com.ongi.api.common.web.dto.ApiResponse;
-import com.ongi.api.user.application.FileService;
+import com.ongi.api.user.application.command.FileService;
 import com.ongi.api.user.web.dto.ConfirmRequest;
 import com.ongi.api.user.web.dto.ConfirmResponse;
 import com.ongi.api.user.web.dto.PresignRequest;

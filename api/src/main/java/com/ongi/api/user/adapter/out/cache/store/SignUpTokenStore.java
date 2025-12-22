@@ -1,4 +1,4 @@
-package com.ongi.api.user.cache.store;
+package com.ongi.api.user.adapter.out.cache.store;
 
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;

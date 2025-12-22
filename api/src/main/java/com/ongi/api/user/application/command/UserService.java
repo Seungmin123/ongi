@@ -1,7 +1,7 @@
-package com.ongi.api.user.application;
+package com.ongi.api.user.application.command;
 
-import com.ongi.api.user.persistence.MyPageQueryAdapter;
-import com.ongi.api.user.persistence.UserAdapter;
+import com.ongi.api.user.adapter.out.cache.persistence.MyPageQueryAdapter;
+import com.ongi.api.user.adapter.out.cache.persistence.UserAdapter;
 import com.ongi.api.user.web.dto.MyPageBasicUpdateRequest;
 import com.ongi.api.user.web.dto.MyPagePersonalizationUpdateRequest;
 import com.ongi.api.user.web.dto.MyPageResponse;
@@ -10,7 +10,6 @@ import com.ongi.api.user.web.dto.MyPageResponse.Personalization;
 import com.ongi.api.user.web.dto.MyPageResponse.Summary;
 import com.ongi.api.user.web.dto.MyPageStatsResponse;
 import com.ongi.api.user.web.dto.MyPageSummaryUpdateRequest;
-import com.ongi.user.domain.UserProfile;
 import com.ongi.user.domain.enums.MeInclude;
 import java.util.List;
 import java.util.Set;

@@ -1,6 +1,6 @@
-package com.ongi.api.user.persistence.repository;
+package com.ongi.api.user.adapter.out.cache.persistence.repository;
 
-import com.ongi.api.user.persistence.UserProcessedEventEntity;
+import com.ongi.api.user.adapter.out.cache.persistence.UserProcessedEventEntity;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

@@ -1,4 +1,4 @@
-package com.ongi.api.user.persistence.projection;
+package com.ongi.api.user.adapter.out.cache.persistence.projection;
 
 public record MeBasicRow(
 	String name,
