@@ -55,7 +55,7 @@ public class CommunityController {
 		return ApiResponse.ok(attachmentAttachService.createUploadUrl(userId, req));
 	}
 
-	@PostMapping("/private/upload-url")
+	@PostMapping("/private/upload-url-temp")
 	public ApiResponse<CreateTempAttachmentResponse> createTemp(
 		@AuthenticationPrincipal Long userId,
 		@RequestBody CreateTempAttachmentRequest req
