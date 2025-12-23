@@ -22,8 +22,7 @@ public interface RecipeStatsRepository extends JpaRepository<RecipeStatsEntity, 
       set r.likeCount = r.likeCount + :delta
       where r.recipeId = :recipeId
     """)
-	void incrementLikeCount(@Param("recipeId") long recipeId,
-		@Param("delta") long delta);
+	void incrementLikeCount(@Param("recipeId") long recipeId, @Param("delta") long delta);
 
 	@Query("""
       select r.likeCount from RecipeStatsEntity r where r.recipeId = :recipeId
@@ -36,8 +35,7 @@ public interface RecipeStatsRepository extends JpaRepository<RecipeStatsEntity, 
       set r.bookmarkCount = r.bookmarkCount + :delta
       where r.recipeId = :recipeId
     """)
-	void incrementBookmarkCount(@Param("recipeId") long recipeId,
-		@Param("delta") long delta);
+	void incrementBookmarkCount(@Param("recipeId") long recipeId, @Param("delta") long delta);
 
 	@Query("""
       select r.bookmarkCount from RecipeStatsEntity r where r.recipeId = :recipeId
@@ -59,11 +57,4 @@ public interface RecipeStatsRepository extends JpaRepository<RecipeStatsEntity, 
     """)
 	long findCommentCount(@Param("recipeId") long recipeId);
 
-	/*@Modifying
-	@Query(value = """
-        update recipe_stats
-        set saved_recipe_count = saved_recipe_count + :delta
-        where user_id = :userId
-        """, nativeQuery = true)
-	int incrementSavedCount(@Param("userId") long userId, @Param("delta") long delta);*/
 }

@@ -44,6 +44,46 @@ public class OutboxPublishRouter {
 				)
 			));
 
+			case
+				COMMUNITY_POST_CREATED, COMMUNITY_POST_UPDATED, COMMUNITY_POST_DELETED, COMMUNITY_POST_VIEW,
+				COMMUNITY_COMMENT_CREATED, COMMUNITY_COMMENT_UPDATED, COMMUNITY_COMMENT_DELETED
+				-> new PublishPlan(List.of(
+				new PublishTarget(
+					TopicMapper.topicOf(type),
+					payload.get("postId").asString()
+				),
+				new PublishTarget(
+					"user-action-events",
+					payload.get("userId").asString()
+				)
+			));
+
+			case
+				COMMUNITY_POST_LIKED, COMMUNITY_POST_UNLIKED
+				-> new PublishPlan(List.of(
+//				new PublishTarget(
+//					"post-like-events",
+//					payload.get("postId").asString()
+//				),
+				new PublishTarget(
+					"user-action-events",
+					payload.get("userId").asString()
+				)
+			));
+
+			case
+				COMMUNITY_COMMENT_LIKED, COMMUNITY_COMMENT_UNLIKED
+				-> new PublishPlan(List.of(
+//				new PublishTarget(
+//					"comment-like-events",
+//					payload.get("postId").asString()
+//				),
+				new PublishTarget(
+					"user-action-events",
+					payload.get("userId").asString()
+				)
+			));
+
 		};
 	}
 }

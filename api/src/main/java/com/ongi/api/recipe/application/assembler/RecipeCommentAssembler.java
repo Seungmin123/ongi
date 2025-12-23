@@ -4,6 +4,10 @@ import com.ongi.api.recipe.adapter.out.persistence.QRecipeCommentEntity;
 import com.ongi.api.recipe.port.UserInfoProvider;
 import com.ongi.api.recipe.web.dto.CommentRow;
 import com.ongi.recipe.domain.enums.CommentSortOption;
+import com.ongi.recipe.domain.enums.RecipeCommentStatus;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -26,23 +30,24 @@ public class RecipeCommentAssembler extends AbstractCommentAssembler {
 		QRecipeCommentEntity c = QRecipeCommentEntity.recipeCommentEntity;
 
 		var order = (sort == CommentSortOption.OLDEST)
-			? new com.querydsl.core.types.OrderSpecifier[]{
-			new com.querydsl.core.types.OrderSpecifier<>(com.querydsl.core.types.Order.ASC, c.createdAt),
-			new com.querydsl.core.types.OrderSpecifier<>(com.querydsl.core.types.Order.ASC, c.id)
+			? new OrderSpecifier[]{
+			new OrderSpecifier<>(Order.ASC, c.createdAt),
+			new OrderSpecifier<>(Order.ASC, c.id)
 		}
-			: new com.querydsl.core.types.OrderSpecifier[]{
-				new com.querydsl.core.types.OrderSpecifier<>(com.querydsl.core.types.Order.DESC, c.createdAt),
-				new com.querydsl.core.types.OrderSpecifier<>(com.querydsl.core.types.Order.DESC, c.id)
+			: new OrderSpecifier[]{
+				new OrderSpecifier<>(Order.DESC, c.createdAt),
+				new OrderSpecifier<>(Order.DESC, c.id)
 			};
 
 		List<CommentRow> content = queryFactory
-			.select(com.querydsl.core.types.Projections.constructor(
+			.select(Projections.constructor(
 				CommentRow.class,
 				c.id, c.rootId, c.parentId, c.depth,
 				c.userId, c.content, c.status, c.createdAt
 			))
 			.from(c)
-			.where(c.recipeId.eq(recipeId))
+			.where(c.recipeId.eq(recipeId)
+				.and(c.status.ne(RecipeCommentStatus.BLOCKED)))
 			.orderBy(order)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
@@ -51,7 +56,8 @@ public class RecipeCommentAssembler extends AbstractCommentAssembler {
 		Long total = queryFactory
 			.select(c.count())
 			.from(c)
-			.where(c.recipeId.eq(recipeId))
+			.where(c.recipeId.eq(recipeId)
+				.and(c.status.ne(RecipeCommentStatus.BLOCKED)))
 			.fetchOne();
 
 		return new PageImpl<>(content, pageable, total == null ? 0 : total);

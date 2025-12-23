@@ -136,10 +136,12 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 		QRecipeEntity recipe = QRecipeEntity.recipeEntity;
 		QRecipeTagsEntity recipeTags = QRecipeTagsEntity.recipeTagsEntity;
 		QRecipeIngredientEntity recipeIngredients = QRecipeIngredientEntity.recipeIngredientEntity;
+		QRecipeStatsEntity recipeStats = QRecipeStatsEntity.recipeStatsEntity;
 		// QIngredientEntity ingredients = QIngredientEntity.ingredientEntity;
 
 		JPAQuery<RecipeEntity> query = queryFactory
 			.selectFrom(recipe)
+				.join(recipeStats).on(recipeStats.recipeId.eq(recipe.id))
 			.distinct();
 
 		BooleanBuilder where = new BooleanBuilder();
@@ -194,7 +196,7 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 		query.where(where);
 
 		// ====== 3) 정렬 ======
-		OrderSpecifier<?>[] orderSpecifiers = toOrderSpecifiers(sort, recipe);
+		OrderSpecifier<?>[] orderSpecifiers = toOrderSpecifiers(sort, recipe, recipeStats);
 		query.orderBy(orderSpecifiers);
 
 		// ====== 4) limit ======
@@ -315,7 +317,7 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	}
 
 
-	private OrderSpecifier<?>[] toOrderSpecifiers(PageSortOptionEnum sort, QRecipeEntity recipe) {
+	private OrderSpecifier<?>[] toOrderSpecifiers(PageSortOptionEnum sort, QRecipeEntity recipe, QRecipeStatsEntity recipeStats) {
 		return switch (sort) {
 			case CREATED_ASC -> new OrderSpecifier[]{
 				new OrderSpecifier<>(Order.ASC, recipe.createdAt),
@@ -331,22 +333,12 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 			case ID_DESC -> new OrderSpecifier[]{
 				new OrderSpecifier<>(Order.DESC, recipe.id)
 			};
-
-			// TODO View 관련 추가 필요.
 			case VIEWS_ASC -> new OrderSpecifier[]{
-				new OrderSpecifier<>(Order.ASC, recipe.id),
+				new OrderSpecifier<>(Order.ASC, recipeStats.viewCount),
 			};
 			case VIEWS_DESC -> new OrderSpecifier[]{
-				new OrderSpecifier<>(Order.DESC, recipe.id),
+				new OrderSpecifier<>(Order.DESC, recipeStats.viewCount),
 			};
-			/*case VIEWS_ASC -> new OrderSpecifier[]{
-				new OrderSpecifier<>(Order.ASC, recipe.views),
-				new OrderSpecifier<>(Order.ASC, recipe.id)
-			};
-			case VIEWS_DESC -> new OrderSpecifier[]{
-				new OrderSpecifier<>(Order.DESC, recipe.views),
-				new OrderSpecifier<>(Order.DESC, recipe.id)
-			};*/
 		};
 	}
 

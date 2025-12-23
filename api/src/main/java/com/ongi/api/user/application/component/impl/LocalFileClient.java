@@ -1,6 +1,6 @@
 package com.ongi.api.user.application.component.impl;
 
-import com.ongi.api.user.application.component.FileUploader;
+import com.ongi.api.user.application.component.FileClient;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -13,13 +13,14 @@ import java.nio.file.StandardCopyOption;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LocalFileUploader implements FileUploader {
+public class LocalFileClient implements FileClient {
 
 	private final Clock clock = Clock.systemUTC();
 
@@ -107,6 +108,12 @@ public class LocalFileUploader implements FileUploader {
 	@Override
 	public void consume(String token) {
 		presignStore.remove(token);
+	}
+
+	@Override
+	public String generateSignedUrl(String storageKey, Integer minute) {
+		String key = baseUrl + "/" + storageKey;
+		return Base64.getEncoder().encodeToString(key.getBytes());
 	}
 
 	private Path resolvePath(String safeKey) {

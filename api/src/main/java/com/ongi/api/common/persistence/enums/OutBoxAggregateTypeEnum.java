@@ -9,7 +9,8 @@ public enum OutBoxAggregateTypeEnum {
 
 	RECIPE("RECIPE"),
 	INGREDIENT("INGREDIENT"),
-	USER("USER");
+	USER("USER"),
+	COMMUNITY("COMMUNITY");
 
 	private final String code;
 }

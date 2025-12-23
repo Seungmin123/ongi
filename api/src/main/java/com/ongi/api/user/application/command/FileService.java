@@ -3,7 +3,7 @@ package com.ongi.api.user.application.command;
 import com.ongi.api.common.web.dto.UploadMeta;
 import com.ongi.api.user.adapter.out.cache.UserRedisTemplate;
 import com.ongi.api.user.adapter.out.cache.store.UploadSessionStore;
-import com.ongi.api.user.application.component.FileUploader;
+import com.ongi.api.user.application.component.FileClient;
 import com.ongi.api.user.web.dto.ConfirmResponse;
 import com.ongi.api.user.web.dto.PresignResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ public class FileService {
 	private static final Duration SESSION_TTL = Duration.ofMinutes(30);
 
 	private final UploadSessionStore uploadSessionStore;
-	private final FileUploader fileUploader;
+	private final FileClient fileClient;
 
 	@Transactional(transactionManager = "transactionManager")
 	public PresignResponse createProfileImagePresign(String contentType, long contentLength, String fileName) {
@@ -38,7 +38,7 @@ public class FileService {
 		UUID token = UUID.randomUUID();
 		String tempKey = "profile/tmp/" + token + "/original"; // 확장자 굳이 필요없음(원하면 contentType으로 결정)
 
-		URL presignedUrl = fileUploader.presignPut(tempKey, contentType, contentLength, PRESIGN_TTL);
+		URL presignedUrl = fileClient.presignPut(tempKey, contentType, contentLength, PRESIGN_TTL);
 
 		String tokenHash = UserRedisTemplate.sha256(token.toString());
 		uploadSessionStore.savePresigned(
@@ -69,7 +69,7 @@ public class FileService {
 		}
 
 		// 파일 실체 확인
-		if (!fileUploader.head(objectKey)) {
+		if (!fileClient.head(objectKey)) {
 			throw new IllegalArgumentException("head object not found");
 		}
 
@@ -87,18 +87,18 @@ public class FileService {
 			throw new IllegalArgumentException("Profile image session is not UPLOADED or already used");
 		}
 
-		if (!fileUploader.head(objectKey)) {
+		if (!fileClient.head(objectKey)) {
 			throw new IllegalArgumentException("head object not found");
 		}
 
 		String finalKey = "profile/" + userId + "/original";
-		fileUploader.promote(objectKey, finalKey);
+		fileClient.promote(objectKey, finalKey);
 
 		return finalKey;
 	}
 
 	public ResponseEntity<Void> upload(String token, HttpServletRequest request, String contentType) throws IOException {
-		var meta = fileUploader.requireValidMeta(token);
+		var meta = fileClient.requireValidMeta(token);
 
 		// Content-Type 검증(선택)
 		if (contentType != null && !contentType.equalsIgnoreCase(meta.contentType())) {
@@ -111,8 +111,8 @@ public class FileService {
 			return ResponseEntity.status(409).build();
 		}
 
-		fileUploader.upload(meta.objectKey(), "original", request.getInputStream());
-		fileUploader.consume(token);
+		fileClient.upload(meta.objectKey(), "original", request.getInputStream());
+		fileClient.consume(token);
 
 		return ResponseEntity.ok().build();
 	}

@@ -20,20 +20,20 @@ public abstract class AbstractCommentAssembler {
 	private final UserInfoProvider userInfoProvider;
 
 	public final Page<RecipeCommentItem> assemble(Long recipeId, Pageable pageable, CommentSortOption sort) {
-		Page<CommentRow> commentPage = fetchComments(recipeId, pageable, sort);
+		var page = fetchComments(recipeId, pageable, sort);
 
-		Set<Long> userIds = commentPage.getContent().stream()
+		var authorIds = page.getContent().stream()
 			.map(CommentRow::userId)
 			.filter(java.util.Objects::nonNull)
 			.collect(java.util.stream.Collectors.toSet());
 
-		Map<Long, UserSummary> users = userInfoProvider.getUsersByIds(userIds);
+		var users = userInfoProvider.getUsersByIds(authorIds);
 
-		List<RecipeCommentItem> mapped = commentPage.getContent().stream()
+		var items = page.getContent().stream()
 			.map(row -> merge(row, users.get(row.userId())))
 			.toList();
 
-		return new PageImpl<>(mapped, pageable, commentPage.getTotalElements());
+		return new PageImpl<>(items, pageable, page.getTotalElements());
 	}
 
 	protected abstract Page<CommentRow> fetchComments(Long recipeId, Pageable pageable, CommentSortOption sort);
@@ -46,11 +46,8 @@ public abstract class AbstractCommentAssembler {
 			c.rootId(),
 			c.parentId(),
 			c.depth(),
-			c.userId(),
-			u != null ? u.nickname() : null,
-			u != null ? u.profileUrl() : null,
 			deleted ? "삭제된 댓글입니다." : c.content(),
-			c.status(),
+			u,
 			c.createdAt()
 		);
 	}

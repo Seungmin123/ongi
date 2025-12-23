@@ -4,7 +4,6 @@ import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.ingredients.persistence.IngredientAdapter;
 import com.ongi.api.recipe.adapter.out.cache.RecipeCacheReader;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeAdapter;
-import com.ongi.api.recipe.adapter.out.persistence.RecipeDetailMapper;
 import com.ongi.api.recipe.messaging.consumer.RecipeCacheVersionResolver;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
 import com.ongi.api.recipe.web.dto.RecipeCacheValue;
@@ -14,9 +13,7 @@ import com.ongi.api.recipe.web.dto.RecipeStepsCacheValue;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
 import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
 import com.ongi.api.recipe.web.dto.RecipeIngredientCreateRequest;
-import com.ongi.api.recipe.web.dto.RecipeIngredientResponse;
 import com.ongi.api.recipe.web.dto.RecipeStepCreateRequest;
-import com.ongi.api.recipe.web.dto.RecipeStepsResponse;
 import com.ongi.recipe.domain.RecipeUserFlags;
 import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.RecipeIngredient;
@@ -32,9 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -166,10 +161,6 @@ public class RecipeService {
 		return recipeAdapter.getFlags(userId, recipeId);
 	}
 
-	@CacheEvict(
-		cacheNames = "recipeList",
-		allEntries = true
-	)
 	@Transactional(transactionManager = "transactionManager")
 	public Recipe createRecipe(Long userId, RecipeUpsertRequest request) {
 		Recipe recipe = Recipe.create(

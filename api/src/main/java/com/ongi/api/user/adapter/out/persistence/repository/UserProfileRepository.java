@@ -17,7 +17,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfileEntity, 
 	Optional<UserProfileEntity> findByUserId(Long userId);
 
 	@Query("""
-      select new com.ongi.api.user.persistence.projection.MeSummaryRow(
+      select new com.ongi.api.user.adapter.out.persistence.projection.MeSummaryRow(
         :email, p.displayName, p.profileImageUrl
       )
       from UserProfileEntity p
@@ -26,7 +26,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfileEntity, 
 	MeSummaryRow findMeSummary(@Param("userId") Long userId, @Param("email") String email);
 
 	@Query("""
-      select new com.ongi.api.user.persistence.projection.MeBasicRow(
+      select new com.ongi.api.user.adapter.out.persistence.projection.MeBasicRow(
         p.name, p.birth, p.zipCode, p.address, p.addressDetail
       )
       from UserProfileEntity p
@@ -35,7 +35,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfileEntity, 
 	MeBasicRow findMeBasic(@Param("userId") Long userId);
 
 	@Query("""
-      select new com.ongi.api.user.persistence.projection.MePersonalizationRow(
+      select new com.ongi.api.user.adapter.out.persistence.projection.MePersonalizationRow(
         p.allergens, p.dietGoal, p.dislikedIngredients
       )
       from UserProfileEntity p

@@ -3,6 +3,7 @@ package com.ongi.api.config.cache;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
@@ -55,10 +56,7 @@ public class CacheManagerConfig {
 	@Profile("local")
 	@ConditionalOnProperty(name = "spring.data.redis.enabled", havingValue = "false", matchIfMissing = true)
 	public CacheManager LocalCacheManager() {
-		return new ConcurrentMapCacheManager(
-			"userCache", "shortLived", "longLived", "content"
-			, "recipeList", "recipeDetail", "recipeIngredient", "recipeSteps"
-		);
+		return new ConcurrentMapCacheManager(CacheSpec.cacheNames());
 	}
 
 	@Bean
@@ -70,28 +68,16 @@ public class CacheManagerConfig {
 
 	private Map<String, RedisCacheConfiguration> perCacheTTL(GenericJacksonJsonRedisSerializer serializer) {
 		RedisCacheConfiguration baseConfig = RedisCacheConfiguration.defaultCacheConfig()
-			.serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
+			.serializeValuesWith(
+				RedisSerializationContext.SerializationPair.fromSerializer(serializer)
+			)
 			.disableCachingNullValues();
 
-		Map<String, RedisCacheConfiguration> configMap = new HashMap<>();
-		perCacheTtlSpec().forEach((name, ttl) ->
-			configMap.put(name, baseConfig.entryTtl(ttl))
-		);
-		return configMap;
-	}
-
-	private Map<String, Duration> perCacheTtlSpec() {
-		Map<String, Duration> m = new HashMap<>();
-		m.put("userCache",  Duration.ofMinutes(5));
-		m.put("shortLived", Duration.ofSeconds(30));
-		m.put("longLived",  Duration.ofHours(1));
-		m.put("content",    Duration.ofDays(1));
-
-		m.put("recipeList", Duration.ofMinutes(5));
-		m.put("recipeDetail", Duration.ofMinutes(5));
-		m.put("recipeIngredient", Duration.ofMinutes(5));
-		m.put("recipeSteps", Duration.ofMinutes(5));
-		return m;
+		return CacheSpec.ttlMap().entrySet().stream()
+			.collect(Collectors.toMap(
+				Map.Entry::getKey,
+				e -> baseConfig.entryTtl(e.getValue())
+			));
 	}
 
 }

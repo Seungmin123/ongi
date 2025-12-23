@@ -38,7 +38,7 @@ public enum PageSortOptionEnum {
 			.findFirst()
 			// 2) alias 지원 (created → created_desc 처럼)
 			.orElseGet(() -> switch (s) {
-				case "created" -> CREATED_DESC;
+				case "created" -> CREATED_ASC;
 				case "id" -> ID_DESC;
 				case "views" -> VIEWS_DESC;
 				default -> CREATED_DESC;

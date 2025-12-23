@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecipeViewFlushScheduler {
 
 	private static final String KEY = "recipe:view:delta";
+
 	private final StringRedisTemplate redis;
+
 	private final RecipeStatsRepository recipeStatsRepository;
 
 	@Scheduled(fixedDelayString = "300000") // 5분

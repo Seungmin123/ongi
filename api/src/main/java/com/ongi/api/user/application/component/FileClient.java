@@ -1,11 +1,11 @@
 package com.ongi.api.user.application.component;
 
-import com.ongi.api.user.application.component.impl.LocalFileUploader.PresignMeta;
+import com.ongi.api.user.application.component.impl.LocalFileClient.PresignMeta;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.Duration;
 
-public interface FileUploader {
+public interface FileClient {
 
 	URL presignPut(String objectKey, String contentType, long contentLength, Duration ttl);
 
@@ -19,4 +19,6 @@ public interface FileUploader {
 	PresignMeta requireValidMeta(String token);
 
 	void consume(String token);
+
+	String generateSignedUrl(String storageKey, Integer minute);
 }

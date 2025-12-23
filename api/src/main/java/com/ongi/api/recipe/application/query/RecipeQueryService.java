@@ -36,24 +36,15 @@ public class RecipeQueryService {
 	@Transactional(transactionManager = "transactionManager")
 	public boolean like(long userId, long recipeId) {
 		boolean inserted = recipeLikeRepository.insertIfNotExists(userId, recipeId);
-
-		if (inserted) {
-			recipeStatsRepository.incrementLikeCount(recipeId, 1);
-		}
-
+		if (inserted) recipeStatsRepository.incrementLikeCount(recipeId, 1);
 		return inserted;
 	}
 
 	@Transactional(transactionManager = "transactionManager")
 	public boolean unlike(long userId, long recipeId) {
-		int deleted = recipeLikeRepository.deleteByRecipeIdAndUserId(userId, recipeId);
-
-		if (deleted == 1) {
-			recipeStatsRepository.incrementLikeCount(recipeId, -1);
-			return true;
-		}
-
-		return false;
+		boolean deleted = recipeLikeRepository.delete(userId, recipeId);
+		if (deleted) recipeStatsRepository.incrementLikeCount(recipeId, -1);
+		return deleted;
 	}
 
 	@Transactional(transactionManager = "transactionManager", readOnly = true)
@@ -64,24 +55,15 @@ public class RecipeQueryService {
 	@Transactional(transactionManager = "transactionManager")
 	public boolean bookmark(long userId, long recipeId) {
 		boolean inserted = recipeBookmarkRepository.insertIfNotExists(userId, recipeId);
-
-		if (inserted) {
-			recipeStatsRepository.incrementBookmarkCount(recipeId, 1);
-		}
-
+		if (inserted) recipeStatsRepository.incrementBookmarkCount(recipeId, 1);
 		return inserted;
 	}
 
 	@Transactional(transactionManager = "transactionManager")
 	public boolean unbookmark(long userId, long recipeId) {
-		int deleted = recipeBookmarkRepository.deleteByRecipeIdAndUserId(userId, recipeId);
-
-		if (deleted == 1) {
-			recipeStatsRepository.incrementBookmarkCount(recipeId, -1);
-			return true;
-		}
-
-		return false;
+		boolean deleted = recipeBookmarkRepository.delete(userId, recipeId);
+		if (deleted) recipeStatsRepository.incrementBookmarkCount(recipeId, -1);
+		return deleted;
 	}
 
 	@Transactional(transactionManager = "transactionManager", readOnly = true)
@@ -145,6 +127,7 @@ public class RecipeQueryService {
 		return recipeStatsRepository.findCommentCount(recipeId);
 	}
 
+	@Transactional(transactionManager = "transactionManager", readOnly = true)
 	public Page<RecipeCommentItem> getComments(Long recipeId, Pageable pageable, CommentSortOption sort) {
 		return assembler.assemble(recipeId, pageable, sort);
 	}

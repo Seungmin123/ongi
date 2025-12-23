@@ -1,6 +1,5 @@
 package com.ongi.api.recipe.web.dto;
 
-import com.ongi.recipe.domain.enums.RecipeCommentStatus;
 import java.time.LocalDateTime;
 
 public record RecipeCommentItem(
@@ -8,10 +7,7 @@ public record RecipeCommentItem(
 	Long rootId,
 	Long parentId,
 	int depth,
-	Long userId,
-	String userName,
-	String profileUrl,
 	String content,
-	RecipeCommentStatus status,
+	UserSummary userSummary,
 	LocalDateTime createdAt
 ) {}

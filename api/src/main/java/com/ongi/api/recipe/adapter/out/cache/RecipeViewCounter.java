@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class RecipeViewCounter {
 
 	private static final String KEY = "recipe:view:delta";
+
 	private final StringRedisTemplate redis;
 
 	public void incr(long recipeId) {

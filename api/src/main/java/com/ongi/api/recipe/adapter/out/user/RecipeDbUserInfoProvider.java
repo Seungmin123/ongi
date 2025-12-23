@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class DbUserInfoProvider implements UserInfoProvider {
+public class RecipeDbUserInfoProvider implements UserInfoProvider {
 
 	private final UserAdapter userAdapter;
 
