@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,11 +14,11 @@ import java.nio.file.StandardCopyOption;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriUtils;
 
 @Component
 public class LocalFileClient implements FileClient {
@@ -112,8 +113,7 @@ public class LocalFileClient implements FileClient {
 
 	@Override
 	public String generateSignedUrl(String storageKey, Integer minute) {
-		String key = baseUrl + "/" + storageKey;
-		return Base64.getEncoder().encodeToString(key.getBytes());
+		return baseUrl + "/file/public/" + UriUtils.encodePath(storageKey, StandardCharsets.UTF_8);
 	}
 
 	private Path resolvePath(String safeKey) {

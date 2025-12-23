@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -34,11 +35,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class FileController {
 
+	@Value("${spring.storage.base-dir:/Users/leeseumgin/Documents/온기/File}")
+	private String baseDir;
+
 	private final FileService fileService;
 
 	@PostMapping("/public/presign")
 	public ApiResponse<PresignResponse> presign(@RequestBody @Valid PresignRequest req) {
-		return ApiResponse.ok(fileService.createProfileImagePresign(req.contentType(), req.contentLength(), req.fileName()));
+		return ApiResponse.ok(fileService.createProfileImagePresign(req.contentType(), req.contentLength()));
 	}
 
 	@PostMapping("/public/confirm")
@@ -59,18 +63,44 @@ public class FileController {
 		return fileService.upload(token, request, contentType);
 	}
 
-	@GetMapping("/{fileKey}")
-	public ResponseEntity<Resource> getFile(@PathVariable String fileKey) {
-		Path path = Paths.get(Arrays.toString(Base64.getDecoder().decode(fileKey)));
+	@GetMapping("/public/**")
+	public ResponseEntity<Resource> getFile(HttpServletRequest request) throws IOException {
+		// /file/public/{storageKey}
+		String path = request.getRequestURI()
+			.replaceFirst("/file/public/", "");
 
-		if (!Files.exists(path)) {
+		String safeKey = sanitizeKey(path);
+
+		Path filePath = resolvePath(safeKey);
+		if (!Files.exists(filePath) || !Files.isRegularFile(filePath)) {
 			return ResponseEntity.notFound().build();
 		}
 
-		Resource resource = new FileSystemResource(path);
+		Resource resource = new FileSystemResource(filePath);
+
+		String contentType = Files.probeContentType(filePath);
+		if (contentType == null) {
+			contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+		}
+
 		return ResponseEntity.ok()
-			.header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+			.contentType(MediaType.parseMediaType(contentType))
+			.header(HttpHeaders.CACHE_CONTROL, "max-age=3600") // CDN 흉내
 			.body(resource);
+	}
+
+	private Path resolvePath(String safeKey) {
+		Path root = Paths.get(baseDir).toAbsolutePath().normalize();
+		Path resolved = root.resolve(safeKey).normalize();
+		if (!resolved.startsWith(root)) {
+			throw new IllegalArgumentException("Invalid path");
+		}
+		return resolved;
+	}
+
+	private String sanitizeKey(String key) {
+		if (key.contains("..")) throw new IllegalArgumentException("Invalid key");
+		return key.replace("\\", "/");
 	}
 
 }

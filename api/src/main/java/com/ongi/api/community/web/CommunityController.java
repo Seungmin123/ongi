@@ -2,12 +2,17 @@ package com.ongi.api.community.web;
 
 import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.common.web.dto.AuthPrincipal;
+import com.ongi.api.community.application.command.AttachmentAttachService;
 import com.ongi.api.community.application.facade.CommunityCommentEventFacade;
 import com.ongi.api.community.application.facade.CommunityPostEventFacade;
 import com.ongi.api.community.application.query.CommentQueryService;
 import com.ongi.api.community.application.query.PostQueryService;
 import com.ongi.api.community.web.dto.CommentItem;
 import com.ongi.api.community.web.dto.CommentUpsertRequest;
+import com.ongi.api.community.web.dto.CreateAttachmentUploadUrlRequest;
+import com.ongi.api.community.web.dto.CreateAttachmentUploadUrlResponse;
+import com.ongi.api.community.web.dto.CreateTempAttachmentRequest;
+import com.ongi.api.community.web.dto.CreateTempAttachmentResponse;
 import com.ongi.api.community.web.dto.LikeResponse;
 import com.ongi.api.community.web.dto.PostCardItem;
 import com.ongi.api.community.web.dto.PostDetailResponse;
@@ -39,6 +44,24 @@ public class CommunityController {
 	private final CommunityCommentEventFacade commentEventFacade;
 
 	private final CommentQueryService commentQueryService;
+
+	private final AttachmentAttachService attachmentAttachService;
+
+	@PostMapping("/private/upload-url")
+	public ApiResponse<CreateAttachmentUploadUrlResponse> createUploadUrl(
+		@AuthenticationPrincipal Long userId,
+		@RequestBody CreateAttachmentUploadUrlRequest req
+	) {
+		return ApiResponse.ok(attachmentAttachService.createUploadUrl(userId, req));
+	}
+
+	@PostMapping("/private/upload-url")
+	public ApiResponse<CreateTempAttachmentResponse> createTemp(
+		@AuthenticationPrincipal Long userId,
+		@RequestBody CreateTempAttachmentRequest req
+	) {
+		return ApiResponse.ok(attachmentAttachService.createTemp(userId, req));
+	}
 
 	/**
 	 * 커뮤니티 게시글 등록

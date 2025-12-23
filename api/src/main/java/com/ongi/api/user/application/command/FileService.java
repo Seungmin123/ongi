@@ -29,14 +29,16 @@ public class FileService {
 	private final FileClient fileClient;
 
 	@Transactional(transactionManager = "transactionManager")
-	public PresignResponse createProfileImagePresign(String contentType, long contentLength, String fileName) {
+	public PresignResponse createProfileImagePresign(String contentType, long contentLength) {
 		if (!ALLOWED.contains(contentType)) {
 			// TODO Custom Exception
 			throw new IllegalArgumentException("Unsupported contentType: " + contentType);
 		}
 
+		String ext = extensionFrom(contentType);
+
 		UUID token = UUID.randomUUID();
-		String tempKey = "profile/tmp/" + token + "/original"; // 확장자 굳이 필요없음(원하면 contentType으로 결정)
+		String tempKey = "profile/tmp/" + token + "/original." + ext;
 
 		URL presignedUrl = fileClient.presignPut(tempKey, contentType, contentLength, PRESIGN_TTL);
 
@@ -91,7 +93,8 @@ public class FileService {
 			throw new IllegalArgumentException("head object not found");
 		}
 
-		String finalKey = "profile/" + userId + "/original";
+		String ext = objectKey.substring(objectKey.lastIndexOf('.') + 1);
+		String finalKey = "profile/" + userId + "/original." + ext;
 		fileClient.promote(objectKey, finalKey);
 
 		return finalKey;
@@ -130,5 +133,15 @@ public class FileService {
 		private static boolean isConsumed(String status) {
 			return "CONSUMED".equals(status);
 		}
+	}
+
+	private static String extensionFrom(String contentType) {
+		return switch (contentType) {
+			case "image/jpeg" -> "jpg";
+			case "image/png" -> "png";
+			case "image/webp" -> "webp";
+			default -> throw new IllegalArgumentException("Unsupported type");
+
+		};
 	}
 }
