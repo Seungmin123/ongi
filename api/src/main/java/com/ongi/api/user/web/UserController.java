@@ -3,6 +3,7 @@ package com.ongi.api.user.web;
 import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.common.web.dto.AuthPrincipal;
 import com.ongi.api.common.web.dto.JwtTokens;
+import com.ongi.api.community.web.dto.JwtRefreshRequest;
 import com.ongi.api.user.application.command.AuthService;
 import com.ongi.api.user.application.command.UserService;
 import com.ongi.api.user.web.dto.EmailVerifyConfirmRequest;
@@ -41,6 +42,13 @@ public class UserController {
 	private final UserService userService;
 
 	private final AuthService authService;
+
+	@PostMapping("/private/refresh")
+	public ApiResponse<JwtTokens> refreshToken(
+		@RequestBody JwtRefreshRequest req
+	) throws Exception {
+		return ApiResponse.ok(authService.refresh(req.refreshToken()));
+	}
 
 	/**
 	 * 이메일 회원가입 - 이메일 인증 요청
