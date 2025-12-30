@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,7 +21,19 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "recipe")
+@Table(
+	name = "recipe",
+	indexes = {
+		@Index(
+			name = "idx_recipe_category_id",
+			columnList = "category, recipe_id"
+		),
+		@Index(
+			name = "idx_recipe_created_id",
+			columnList = "created_at, recipe_id"
+		)
+	}
+)
 public class RecipeEntity extends BaseTimeEntity {
 
 	@Id

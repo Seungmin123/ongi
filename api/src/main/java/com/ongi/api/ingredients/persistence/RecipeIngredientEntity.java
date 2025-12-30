@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -22,7 +23,19 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "recipe_ingredient")
+@Table(
+	name = "recipe_ingredient",
+	indexes = {
+		@Index(
+			name = "idx_ri_recipe_ing",
+			columnList = "recipe_id, ingredient_id"
+		),
+		@Index(
+			name = "idx_ri_ing_recipe",
+			columnList = "ingredient_id, recipe_id"
+		)
+	}
+)
 public class RecipeIngredientEntity extends BaseTimeEntity {
 
 	@Id
