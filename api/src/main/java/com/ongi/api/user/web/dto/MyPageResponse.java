@@ -1,5 +1,7 @@
 package com.ongi.api.user.web.dto;
 
+import com.ongi.api.user.adapter.out.persistence.projection.AllergensGroupRow;
+import com.ongi.api.user.adapter.out.persistence.projection.DislikedIngredientsRow;
 import java.util.List;
 
 public record MyPageResponse(
@@ -23,8 +25,8 @@ public record MyPageResponse(
 	) {}
 
 	public record Personalization(
-		List<String> allergens,
 		Double dietGoal,
-		List<String> dislikedIngredients
+		List<AllergensGroupRow> allergens,
+		List<DislikedIngredientsRow> dislikedIngredients
 	) {}
 }

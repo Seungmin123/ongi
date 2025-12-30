@@ -1,11 +1,13 @@
 package com.ongi.ingredients.port;
 
+import com.ongi.ingredients.domain.AllergenGroup;
 import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.IngredientNutrition;
 import com.ongi.ingredients.domain.Nutrition;
 import com.ongi.ingredients.domain.RecipeIngredient;
 import com.ongi.ingredients.domain.enums.IngredientCategoryEnum;
 import com.ongi.ingredients.domain.enums.NutritionEnum;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +16,8 @@ public interface IngredientsRepositoryPort {
 	Ingredient save(Ingredient ingredient);
 
 	Optional<Ingredient> findIngredientById(Long id);
+
+	List<Ingredient> findIngredientsByIds(Collection<Long> ingredientIds);
 
 	IngredientNutrition save(IngredientNutrition ingredientNutrition);
 
@@ -46,4 +50,6 @@ public interface IngredientsRepositoryPort {
 	Ingredient findLikeOrCreateIngredient(String name, IngredientCategoryEnum ingredientCategory, Double caloriesKcal, Double proteinG, Double fatG, Double carbsG);
 
 	Nutrition findNutritionByCode(NutritionEnum code);
+
+	List<AllergenGroup> findAllergenGroupsByIds(Collection<Long> allergenGroupIds);
 }

@@ -1,5 +1,7 @@
 package com.ongi.api.user.adapter.out.persistence;
 
+import com.ongi.api.user.adapter.out.persistence.repository.UserAllergenRepository;
+import com.ongi.api.user.adapter.out.persistence.repository.UserDislikedIngredientRepository;
 import com.ongi.api.user.adapter.out.persistence.repository.UserProfileRepository;
 import com.ongi.api.user.adapter.out.persistence.repository.UserRepository;
 import com.ongi.api.user.adapter.out.persistence.repository.UserStatsRepository;
@@ -22,6 +24,10 @@ public class UserAdapter implements UserRepositoryPort {
 	private final UserProfileRepository userProfileRepository;
 
 	private final UserStatsRepository userStatsRepository;
+
+	private final UserAllergenRepository userAllergenRepository;
+
+	private final UserDislikedIngredientRepository userDislikedIngredientRepository;
 
 	@Override
 	public User save(User user) {
@@ -110,5 +116,29 @@ public class UserAdapter implements UserRepositoryPort {
 		return userStatsRepository
 			.findById(id)
 			.map(UserMapper::toDomain);
+	}
+
+	@Override
+	public void saveAllUserAllergen(Long userId, Set<Long> allergenIds) {
+		List<UserAllergenEntity> rows = allergenIds.stream()
+			.map(id -> UserAllergenEntity.builder()
+				.userId(userId)
+				.allergenGroupId(id)
+				.build())
+			.toList();
+
+		userAllergenRepository.saveAll(rows);
+	}
+
+	@Override
+	public void saveAllDislikedIngredients(Long userId, Set<Long> dislikedIngredientIds) {
+		List<UserDislikedIngredientEntity> rows = dislikedIngredientIds.stream()
+			.map(id -> UserDislikedIngredientEntity.builder()
+				.userId(userId)
+				.ingredientId(id)
+				.build())
+			.toList();
+
+		userDislikedIngredientRepository.saveAll(rows);
 	}
 }

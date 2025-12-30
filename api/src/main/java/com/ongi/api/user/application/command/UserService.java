@@ -2,6 +2,7 @@ package com.ongi.api.user.application.command;
 
 import com.ongi.api.user.adapter.out.persistence.MyPageQueryAdapter;
 import com.ongi.api.user.adapter.out.persistence.UserAdapter;
+import com.ongi.api.user.port.IngredientsProvider;
 import com.ongi.api.user.web.dto.MyPageBasicUpdateRequest;
 import com.ongi.api.user.web.dto.MyPagePersonalizationUpdateRequest;
 import com.ongi.api.user.web.dto.MyPageResponse;
@@ -10,9 +11,14 @@ import com.ongi.api.user.web.dto.MyPageResponse.Personalization;
 import com.ongi.api.user.web.dto.MyPageResponse.Summary;
 import com.ongi.api.user.web.dto.MyPageStatsResponse;
 import com.ongi.api.user.web.dto.MyPageSummaryUpdateRequest;
+import com.ongi.ingredients.domain.AllergenGroup;
+import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.user.domain.enums.MeInclude;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +34,8 @@ public class UserService {
 	private final UserAdapter userAdapter;
 
 	private final MyPageQueryAdapter myPageQueryAdapter;
+
+	private final IngredientsProvider ingredientsProvider;
 
 	private final ObjectMapper objectMapper;
 
@@ -52,11 +60,14 @@ public class UserService {
 		}
 
 		if (includes.contains(MeInclude.PERSONALIZATION)) {
-			var row = myPageQueryAdapter.findMePersonalization(userId);
+			var userProfile = userAdapter.findUserProfileByUserId(userId).orElseThrow(() -> new IllegalStateException("User not found"));
+			var userAllergens = myPageQueryAdapter.findUserAllergenRowByUserId(userId);
+			var userDislikedIngredients = myPageQueryAdapter.findDislikedIngredientRowByUserId(userId);
+
 			personalization = new MyPageResponse.Personalization(
-				readList(row.allergens()),
-				row.dietGoal(),
-				readList(row.dislikedIngredients())
+				userProfile.getDietGoal(),
+				userAllergens,
+				userDislikedIngredients
 			);
 		}
 
@@ -117,11 +128,90 @@ public class UserService {
 
 	@Transactional(transactionManager = "transactionManager")
 	public void myPagePersonalizationUpdate(Long userId, MyPagePersonalizationUpdateRequest request) {
-		var userProfile = userAdapter.findUserProfileByUserId(userId).orElseThrow(() -> new IllegalStateException("User not found"));
+		updateDietGoal(userId, request.dietGoal());
 
-		userProfile.setAllergens(writeList(request.allergens()));
-		userProfile.setDietGoal(request.dietGoal());
-		userProfile.setDislikedIngredients(writeList(request.dislikedIngredients()));
+		Set<Long> newAllergenIds = new LinkedHashSet<>(request.allergenGroupIds());
+		updateUserAllergens(userId, newAllergenIds);
+
+		Set<Long> newDislikedIds = new LinkedHashSet<>(request.dislikedIngredientIds());
+		updateUserDisliked(userId, newDislikedIds);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public void updateDietGoal(Long userId, Double dietGoal) {
+		var userProfile = userAdapter.findUserProfileByUserId(userId).orElseThrow(() -> new IllegalStateException("User not found"));
+		userProfile.setDietGoal(dietGoal);
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public void updateUserAllergens(Long userId, Set<Long> allergensGroupIds) {
+		validateAllergenGroupsExist(allergensGroupIds);
+
+		Set<Long> curAllergenIds = myPageQueryAdapter.findUserAllergenIdsByUserId(userId);
+
+		Set<Long> toDelAllergen = diff(curAllergenIds, allergensGroupIds);
+		Set<Long> toAddAllergen = diff(allergensGroupIds, curAllergenIds);
+
+		// delete 먼저 (unique 충돌 방지)
+		if (!toDelAllergen.isEmpty()) {
+			myPageQueryAdapter.deleteUserAllergenByUserIdAndAllergenGroupIdIn(userId, toDelAllergen);
+		}
+
+		if (!toAddAllergen.isEmpty()) {
+			userAdapter.saveAllUserAllergen(userId, toAddAllergen);
+		}
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public void updateUserDisliked(Long userId, Set<Long> dislikedIngredientIds) {
+		validateIngredientsExist(dislikedIngredientIds);
+
+		Set<Long> curDislikedIngredientIds = myPageQueryAdapter.findUserDislikedIngredientIdsByUserId(userId);
+
+		Set<Long> toDelDislikedIngredientsIds = diff(curDislikedIngredientIds, dislikedIngredientIds);
+		Set<Long> toAddDislikedIngredientsIds = diff(dislikedIngredientIds, curDislikedIngredientIds);
+
+		if (!toDelDislikedIngredientsIds.isEmpty()) {
+			myPageQueryAdapter.deleteDislikedIngredientByUserIdAndIngredientIdIn(userId, toDelDislikedIngredientsIds);
+		}
+
+		if(!toAddDislikedIngredientsIds.isEmpty()) {
+			userAdapter.saveAllDislikedIngredients(userId, toAddDislikedIngredientsIds);
+		}
+	}
+
+	private Set<Long> diff(Set<Long> a, Set<Long> b) {
+		Set<Long> r = new HashSet<>(a);
+		r.removeAll(b);
+		return r;
+	}
+
+	private void validateAllergenGroupsExist(Set<Long> ids) {
+		if (ids.isEmpty()) return;
+
+		Set<Long> existsIds = ingredientsProvider.findAllergenGroupsByIds(ids).stream()
+			.map(AllergenGroup::getId)
+			.collect(Collectors.toSet());
+
+		if (existsIds.size() != ids.size()) {
+			Set<Long> missing = new HashSet<>(ids);
+			missing.removeAll(existsIds);
+			throw new IllegalArgumentException("Unknown allergenGroupIds: " + missing);
+		}
+	}
+
+	private void validateIngredientsExist(Set<Long> ids) {
+		if (ids.isEmpty()) return;
+
+		Set<Long> existsIds = ingredientsProvider.findIngredientsByIds(ids).stream()
+			.map(Ingredient::getIngredientId)
+			.collect(Collectors.toSet());
+
+		if (existsIds.size() != ids.size()) {
+			Set<Long> missing = new HashSet<>(ids);
+			missing.removeAll(existsIds);
+			throw new IllegalArgumentException("Unknown IngredientsIds: " + missing);
+		}
 	}
 
 	@Transactional(transactionManager = "transactionManager", readOnly = true)

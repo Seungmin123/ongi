@@ -34,4 +34,8 @@ public interface UserRepositoryPort {
 	UserStats save(UserStats userStats);
 
 	Optional<UserStats> findUserStatsById(Long id);
+
+	void saveAllUserAllergen(Long userId, Set<Long> allergenIds);
+
+	void saveAllDislikedIngredients(Long userId, Set<Long> dislikedIngredientIds);
 }

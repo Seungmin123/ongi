@@ -8,13 +8,7 @@ public class UserProfile {
 
 	private String displayName;
 
-	// TODO List
-	private String allergens;
-
 	private Double dietGoal;
-
-	// TODO List
-	private String dislikedIngredients;
 
 	private String profileImageUrl;
 
@@ -34,9 +28,7 @@ public class UserProfile {
 		Long id,
 		Long userId,
 		String displayName,
-		String allergens,
 		Double dietGoal,
-		String dislikedIngredients,
 		String profileImageUrl,
 		String name,
 		String phoneNumber,
@@ -48,9 +40,7 @@ public class UserProfile {
 		this.id = id;
 		this.userId = userId;
 		this.displayName = displayName;
-		this.allergens = allergens;
 		this.dietGoal = dietGoal;
-		this.dislikedIngredients = dislikedIngredients;
 		this.profileImageUrl = profileImageUrl;
 		this.name = name;
 		this.phoneNumber = phoneNumber;
@@ -61,16 +51,16 @@ public class UserProfile {
 	}
 
 	public static UserProfile create(
-		Long id, Long userId, String displayName, String allergens, Double dietGoal, String dislikedIngredients,
-		String profileImageUrl, String name, String phoneNumber, String birth, String zipCode, String address, String addressDetail
+		Long id, Long userId, String displayName, Double dietGoal, String profileImageUrl,
+		String name, String phoneNumber, String birth, String zipCode, String address, String addressDetail
 	) {
-		return new UserProfile(id, userId, displayName, allergens, dietGoal, dislikedIngredients, profileImageUrl, name, phoneNumber, birth, zipCode, address, addressDetail);
+		return new UserProfile(id, userId, displayName, dietGoal, profileImageUrl, name, phoneNumber, birth, zipCode, address, addressDetail);
 	}
 
 	public static UserProfile create(
 		Long userId, String displayName, String profileImageUrl
 	) {
-		return new UserProfile(null, userId, displayName, null, null, null, profileImageUrl, null, null, null, null, null, null);
+		return new UserProfile(null, userId, displayName, null,   profileImageUrl, null, null, null, null, null, null);
 	}
 
 	public Long getId() {
@@ -97,28 +87,12 @@ public class UserProfile {
 		this.displayName = displayName;
 	}
 
-	public String getAllergens() {
-		return allergens;
-	}
-
-	public void setAllergens(String allergens) {
-		this.allergens = allergens;
-	}
-
 	public Double getDietGoal() {
 		return dietGoal;
 	}
 
 	public void setDietGoal(Double dietGoal) {
 		this.dietGoal = dietGoal;
-	}
-
-	public String getDislikedIngredients() {
-		return dislikedIngredients;
-	}
-
-	public void setDislikedIngredients(String dislikedIngredients) {
-		this.dislikedIngredients = dislikedIngredients;
 	}
 
 	public String getProfileImageUrl() {

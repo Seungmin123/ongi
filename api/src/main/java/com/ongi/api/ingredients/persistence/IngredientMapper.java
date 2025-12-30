@@ -1,6 +1,8 @@
 package com.ongi.api.ingredients.persistence;
 
+import com.ongi.ingredients.domain.AllergenGroup;
 import com.ongi.ingredients.domain.Ingredient;
+import com.ongi.ingredients.domain.IngredientAllergen;
 import com.ongi.ingredients.domain.IngredientNutrition;
 import com.ongi.ingredients.domain.Nutrition;
 import com.ongi.ingredients.domain.RecipeIngredient;
@@ -8,34 +10,34 @@ import com.ongi.ingredients.domain.enums.RecipeIngredientUnitEnum;
 
 public class IngredientMapper {
 
-	public static IngredientEntity toEntity(Ingredient ingredient) {
-		if (ingredient.getIngredientId() == null) {
+	public static IngredientEntity toEntity(Ingredient domain) {
+		if (domain.getIngredientId() == null) {
 			return IngredientEntity.builder()
-				.name(ingredient.getName())
-				.code(ingredient.getCode())
-				.category(ingredient.getCategory())
-				.caloriesKcal(ingredient.getCaloriesKcal())
-				.carbsG(ingredient.getCarbsG())
-				.proteinG(ingredient.getProteinG())
-				.fatG(ingredient.getFatG())
+				.name(domain.getName())
+				.code(domain.getCode())
+				.category(domain.getCategory())
+				.caloriesKcal(domain.getCaloriesKcal())
+				.carbsG(domain.getCarbsG())
+				.proteinG(domain.getProteinG())
+				.fatG(domain.getFatG())
 				.build();
 		} else {
 			return IngredientEntity.builder()
-				.id(ingredient.getIngredientId())
-				.name(ingredient.getName())
-				.code(ingredient.getCode())
-				.category(ingredient.getCategory())
-				.caloriesKcal(ingredient.getCaloriesKcal())
-				.carbsG(ingredient.getCarbsG())
-				.proteinG(ingredient.getProteinG())
-				.fatG(ingredient.getFatG())
+				.id(domain.getIngredientId())
+				.name(domain.getName())
+				.code(domain.getCode())
+				.category(domain.getCategory())
+				.caloriesKcal(domain.getCaloriesKcal())
+				.carbsG(domain.getCarbsG())
+				.proteinG(domain.getProteinG())
+				.fatG(domain.getFatG())
 				.build();
 		}
 	}
 
-	public static Ingredient toDomain(IngredientEntity ingredientEntity) {
-		return Ingredient.create(ingredientEntity.getId(), ingredientEntity.getName(), ingredientEntity.getCode(), ingredientEntity.getCategory(),
-			ingredientEntity.getCaloriesKcal(), ingredientEntity.getProteinG(), ingredientEntity.getFatG(), ingredientEntity.getCarbsG());
+	public static Ingredient toDomain(IngredientEntity entity) {
+		return Ingredient.create(entity.getId(), entity.getName(), entity.getCode(), entity.getCategory(),
+			entity.getCaloriesKcal(), entity.getProteinG(), entity.getFatG(), entity.getCarbsG());
 	}
 
 	public static IngredientNutritionEntity toEntity(IngredientNutrition domain, IngredientEntity ingredientRef, NutritionEntity nutritionRef) {
@@ -52,11 +54,11 @@ public class IngredientMapper {
 		return IngredientNutrition.create(entity.getId(), IngredientMapper.toDomain(entity.getIngredient()), IngredientMapper.toDomain(entity.getNutrition()), entity.getQuantity(), entity.getBasis());
 	}
 
-	public static NutritionEntity toEntity(Nutrition nutrition) {
+	public static NutritionEntity toEntity(Nutrition domain) {
 		return NutritionEntity.builder()
-			.id(nutrition.getId())
-			.code(nutrition.getCode())
-			.unit(nutrition.getUnit())
+			.id(domain.getId())
+			.code(domain.getCode())
+			.unit(domain.getUnit())
 			.build();
 	}
 
@@ -78,6 +80,32 @@ public class IngredientMapper {
 
 	public static RecipeIngredient toDomain(RecipeIngredientEntity entity) {
 		return RecipeIngredient.create(entity.getId(), entity.getRecipeId(), IngredientMapper.toDomain(entity.getIngredient()), entity.getQuantity(), entity.getUnit(), entity.getNote(), entity.getSortOrder());
+	}
+
+	public static AllergenGroupEntity toEntity(AllergenGroup domain) {
+		return AllergenGroupEntity.builder()
+			.id(domain.getId())
+			.code(domain.getCode())
+			.nameKo(domain.getNameKo())
+			.build();
+	}
+
+	public static AllergenGroup toDomain(AllergenGroupEntity entity){
+		return AllergenGroup.create(entity.getId(), entity.getCode(), entity.getNameKo());
+	}
+
+	public static IngredientAllergenEntity toEntity(IngredientAllergen domain) {
+		return IngredientAllergenEntity.builder()
+			.id(domain.getId())
+			.ingredientId(domain.getIngredientId())
+			.allergenGroupId(domain.getAllergenGroupId())
+			.confidence(domain.getConfidence())
+			.reason(domain.getReason())
+			.build();
+	}
+
+	public static IngredientAllergen toDomain(IngredientAllergenEntity entity){
+		return IngredientAllergen.create(entity.getId(), entity.getIngredientId(), entity.getAllergenGroupId(), entity.getConfidence(), entity.getReason());
 	}
 
 	public static RecipeIngredientUnitEnum mapUnit(String unitStr) {

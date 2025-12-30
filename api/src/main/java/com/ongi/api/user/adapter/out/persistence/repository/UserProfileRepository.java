@@ -2,7 +2,6 @@ package com.ongi.api.user.adapter.out.persistence.repository;
 
 import com.ongi.api.user.adapter.out.persistence.UserProfileEntity;
 import com.ongi.api.user.adapter.out.persistence.projection.MeBasicRow;
-import com.ongi.api.user.adapter.out.persistence.projection.MePersonalizationRow;
 import com.ongi.api.user.adapter.out.persistence.projection.MeSummaryRow;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,15 +33,6 @@ public interface UserProfileRepository extends JpaRepository<UserProfileEntity, 
     """)
 	MeBasicRow findMeBasic(@Param("userId") Long userId);
 
-	@Query("""
-      select new com.ongi.api.user.adapter.out.persistence.projection.MePersonalizationRow(
-        p.allergens, p.dietGoal, p.dislikedIngredients
-      )
-      from UserProfileEntity p
-      where p.userId = :userId
-    """)
-	MePersonalizationRow findMePersonalization(@Param("userId") Long userId);
-
 	@Modifying
 	@Query("""
 	update UserProfileEntity p set
@@ -67,10 +57,8 @@ public interface UserProfileRepository extends JpaRepository<UserProfileEntity, 
 	@Modifying
 	@Query("""
 	update UserProfileEntity p set
-	  p.allergens = coalesce(:allergens, p.allergens),
-	  p.dietGoal = coalesce(:dietGoal, p.dietGoal),
-	  p.dislikedIngredients = coalesce(:dislikedIngredients, p.dislikedIngredients)
+	  p.dietGoal = coalesce(:dietGoal, p.dietGoal)
 	where p.userId = :userId
 	""")
-	int updatePersonalization(Long userId, String allergens, Double dietGoal, String dislikedIngredients);
+	int updatePersonalization(Long userId, Double dietGoal);
 }

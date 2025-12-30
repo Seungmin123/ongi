@@ -1,9 +1,11 @@
 package com.ongi.api.ingredients.persistence;
 
+import com.ongi.api.ingredients.persistence.repository.AllergenGroupRepository;
 import com.ongi.api.ingredients.persistence.repository.IngredientNutritionRepository;
 import com.ongi.api.ingredients.persistence.repository.IngredientRepository;
 import com.ongi.api.ingredients.persistence.repository.NutritionRepository;
 import com.ongi.api.ingredients.persistence.repository.RecipeIngredientRepository;
+import com.ongi.ingredients.domain.AllergenGroup;
 import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.IngredientNutrition;
 import com.ongi.ingredients.domain.Nutrition;
@@ -11,6 +13,7 @@ import com.ongi.ingredients.domain.RecipeIngredient;
 import com.ongi.ingredients.domain.enums.IngredientCategoryEnum;
 import com.ongi.ingredients.domain.enums.NutritionEnum;
 import com.ongi.ingredients.port.IngredientsRepositoryPort;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,8 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 
 	private final RecipeIngredientRepository recipeIngredientRepository;
 
+	private final AllergenGroupRepository allergenGroupRepository;
+
 	@Override
 	public Ingredient save(Ingredient ingredient) {
 		IngredientEntity entity = IngredientMapper.toEntity(ingredient);
@@ -45,6 +50,13 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 		return ingredientRepository
 			.findById(id)
 			.map(IngredientMapper::toDomain);
+	}
+
+	@Override
+	public List<Ingredient> findIngredientsByIds(Collection<Long> ingredientIds) {
+		return ingredientRepository.findAllById(ingredientIds).stream()
+			.map(IngredientMapper::toDomain)
+			.toList();
 	}
 
 	@Override
@@ -221,6 +233,13 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 		return nutritionRepository.findByCode(code)
 			.map(IngredientMapper::toDomain)
 			.orElse(null);
+	}
+
+	@Override
+	public List<AllergenGroup> findAllergenGroupsByIds(Collection<Long> allergenGroupIds) {
+		return allergenGroupRepository.findAllById(allergenGroupIds).stream()
+			.map(IngredientMapper::toDomain)
+			.toList();
 	}
 
 	// TODO Cache 관련 로직 추가

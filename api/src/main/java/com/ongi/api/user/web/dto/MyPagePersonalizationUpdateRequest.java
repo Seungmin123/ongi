@@ -9,7 +9,7 @@ import java.util.List;
 public record MyPagePersonalizationUpdateRequest(
 	@NotNull
 	@Size(max = 50)
-	List<@Size(max = 50) String> allergens,
+	List<@Size(max = 50) Long> allergenGroupIds,
 
 	@Min(0)
 	@Max(100000) // 정책에 맞게
@@ -17,7 +17,7 @@ public record MyPagePersonalizationUpdateRequest(
 
 	@NotNull
 	@Size(max = 200)
-	List<@Size(max = 50) String> dislikedIngredients
+	List<@Size(max = 50) Long> dislikedIngredientIds
 ) {
 
 }
