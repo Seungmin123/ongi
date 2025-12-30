@@ -10,6 +10,7 @@ import com.ongi.ingredients.domain.enums.NutritionEnum;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IngredientsRepositoryPort {
 
@@ -17,7 +18,7 @@ public interface IngredientsRepositoryPort {
 
 	Optional<Ingredient> findIngredientById(Long id);
 
-	List<Ingredient> findIngredientsByIds(Collection<Long> ingredientIds);
+	Set<Ingredient> findIngredientsByIds(Collection<Long> ingredientIds);
 
 	IngredientNutrition save(IngredientNutrition ingredientNutrition);
 
@@ -51,5 +52,5 @@ public interface IngredientsRepositoryPort {
 
 	Nutrition findNutritionByCode(NutritionEnum code);
 
-	List<AllergenGroup> findAllergenGroupsByIds(Collection<Long> allergenGroupIds);
+	Set<AllergenGroup> findAllergenGroupsByIds(Collection<Long> allergenGroupIds);
 }

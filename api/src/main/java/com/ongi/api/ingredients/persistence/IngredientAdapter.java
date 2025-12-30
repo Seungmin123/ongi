@@ -18,6 +18,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -53,10 +55,10 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 	}
 
 	@Override
-	public List<Ingredient> findIngredientsByIds(Collection<Long> ingredientIds) {
+	public Set<Ingredient> findIngredientsByIds(Collection<Long> ingredientIds) {
 		return ingredientRepository.findAllById(ingredientIds).stream()
 			.map(IngredientMapper::toDomain)
-			.toList();
+			.collect(Collectors.toSet());
 	}
 
 	@Override
@@ -236,10 +238,10 @@ public class IngredientAdapter implements IngredientsRepositoryPort {
 	}
 
 	@Override
-	public List<AllergenGroup> findAllergenGroupsByIds(Collection<Long> allergenGroupIds) {
+	public Set<AllergenGroup> findAllergenGroupsByIds(Collection<Long> allergenGroupIds) {
 		return allergenGroupRepository.findAllById(allergenGroupIds).stream()
 			.map(IngredientMapper::toDomain)
-			.toList();
+			.collect(Collectors.toSet());
 	}
 
 	// TODO Cache 관련 로직 추가
