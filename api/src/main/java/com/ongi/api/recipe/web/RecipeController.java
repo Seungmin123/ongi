@@ -82,6 +82,15 @@ public class RecipeController {
 		@PathVariable Long recipeId
 	) throws Exception {
 		Long userId = (authPrincipal == null) ? null : authPrincipal.userId();
+		// TODO 조회 시 사용자 활동 데이터 수집을 위한 체류 시간, 스크롤 Depth 등을 Event로 발송할 별도의 API 필요.
+		/*
+		"recipeId": 123,
+	  "viewSessionId": "uuid",
+	  "dwellMs": 18450,
+	  "maxScrollDepth": 0.72,
+	  "referrer": "feed",
+	  "occurredAt": "2025-12-30T10:11:12Z"
+	  */
 		return ApiResponse.ok(recipeEventFacade.view(userId, recipeId));
 	}
 
