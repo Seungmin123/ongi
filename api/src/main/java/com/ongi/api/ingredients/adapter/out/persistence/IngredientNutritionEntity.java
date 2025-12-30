@@ -1,4 +1,4 @@
-package com.ongi.api.ingredients.persistence;
+package com.ongi.api.ingredients.adapter.out.persistence;
 
 import com.ongi.api.common.persistence.entity.BaseTimeEntity;
 import com.ongi.ingredients.domain.enums.NutritionBasisEnum;
@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

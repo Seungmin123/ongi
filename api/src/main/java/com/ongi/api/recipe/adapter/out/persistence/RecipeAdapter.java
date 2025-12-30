@@ -1,6 +1,6 @@
 package com.ongi.api.recipe.adapter.out.persistence;
 
-import com.ongi.api.ingredients.persistence.QRecipeIngredientEntity;
+import com.ongi.api.ingredients.adapter.out.persistence.QRecipeIngredientEntity;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeBookmarkRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeCommentRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeLikeRepository;

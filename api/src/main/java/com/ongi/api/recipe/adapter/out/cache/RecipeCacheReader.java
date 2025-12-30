@@ -1,15 +1,12 @@
 package com.ongi.api.recipe.adapter.out.cache;
 
-import com.ongi.api.ingredients.persistence.IngredientAdapter;
+import com.ongi.api.ingredients.adapter.out.persistence.IngredientAdapter;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeAdapter;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeDetailMapper;
 import com.ongi.api.recipe.web.dto.RecipeCacheValue;
 import com.ongi.api.recipe.web.dto.RecipeIngredientCacheValue;
-import com.ongi.api.recipe.web.dto.RecipeIngredientResponse;
 import com.ongi.api.recipe.web.dto.RecipeStepsCacheValue;
-import com.ongi.api.recipe.web.dto.RecipeStepsResponse;
 import com.ongi.recipe.domain.Recipe;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;

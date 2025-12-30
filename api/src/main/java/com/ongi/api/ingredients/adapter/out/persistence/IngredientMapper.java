@@ -1,4 +1,4 @@
-package com.ongi.api.ingredients.persistence;
+package com.ongi.api.ingredients.adapter.out.persistence;
 
 import com.ongi.ingredients.domain.AllergenGroup;
 import com.ongi.ingredients.domain.Ingredient;

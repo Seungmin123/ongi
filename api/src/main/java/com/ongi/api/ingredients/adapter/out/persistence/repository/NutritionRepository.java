@@ -1,6 +1,6 @@
-package com.ongi.api.ingredients.persistence.repository;
+package com.ongi.api.ingredients.adapter.out.persistence.repository;
 
-import com.ongi.api.ingredients.persistence.NutritionEntity;
+import com.ongi.api.ingredients.adapter.out.persistence.NutritionEntity;
 import com.ongi.ingredients.domain.enums.NutritionEnum;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

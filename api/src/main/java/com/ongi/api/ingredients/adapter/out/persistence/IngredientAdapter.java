@@ -1,10 +1,10 @@
-package com.ongi.api.ingredients.persistence;
+package com.ongi.api.ingredients.adapter.out.persistence;
 
-import com.ongi.api.ingredients.persistence.repository.AllergenGroupRepository;
-import com.ongi.api.ingredients.persistence.repository.IngredientNutritionRepository;
-import com.ongi.api.ingredients.persistence.repository.IngredientRepository;
-import com.ongi.api.ingredients.persistence.repository.NutritionRepository;
-import com.ongi.api.ingredients.persistence.repository.RecipeIngredientRepository;
+import com.ongi.api.ingredients.adapter.out.persistence.repository.AllergenGroupRepository;
+import com.ongi.api.ingredients.adapter.out.persistence.repository.IngredientNutritionRepository;
+import com.ongi.api.ingredients.adapter.out.persistence.repository.IngredientRepository;
+import com.ongi.api.ingredients.adapter.out.persistence.repository.NutritionRepository;
+import com.ongi.api.ingredients.adapter.out.persistence.repository.RecipeIngredientRepository;
 import com.ongi.ingredients.domain.AllergenGroup;
 import com.ongi.ingredients.domain.Ingredient;
 import com.ongi.ingredients.domain.IngredientNutrition;

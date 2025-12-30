@@ -1,6 +1,6 @@
-package com.ongi.api.ingredients.persistence.repository;
+package com.ongi.api.ingredients.adapter.out.persistence.repository;
 
-import com.ongi.api.ingredients.persistence.RecipeIngredientEntity;
+import com.ongi.api.ingredients.adapter.out.persistence.RecipeIngredientEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

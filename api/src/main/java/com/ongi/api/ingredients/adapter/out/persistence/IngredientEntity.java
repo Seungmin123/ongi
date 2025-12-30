@@ -1,4 +1,4 @@
-package com.ongi.api.ingredients.persistence;
+package com.ongi.api.ingredients.adapter.out.persistence;
 
 import com.ongi.api.common.persistence.entity.BaseTimeEntity;
 import com.ongi.ingredients.domain.enums.IngredientCategoryEnum;

@@ -1,7 +1,7 @@
 package com.ongi.api.recipe.application.command;
 
 import com.ongi.api.common.web.dto.ApiResponse;
-import com.ongi.api.ingredients.persistence.IngredientAdapter;
+import com.ongi.api.ingredients.adapter.out.persistence.IngredientAdapter;
 import com.ongi.api.recipe.adapter.out.cache.RecipeCacheReader;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeAdapter;
 import com.ongi.api.recipe.messaging.consumer.RecipeCacheVersionResolver;

@@ -5,6 +5,7 @@ import com.ongi.api.common.web.dto.AuthPrincipal;
 import com.ongi.api.recipe.application.command.RecipeService;
 import com.ongi.api.recipe.application.facade.RecipeEventFacade;
 import com.ongi.api.recipe.application.query.RecipeQueryService;
+import com.ongi.api.recipe.application.query.RecipeRelatedService;
 import com.ongi.api.recipe.web.dto.BookmarkResponse;
 import com.ongi.api.recipe.web.dto.CommentCreateRequest;
 import com.ongi.api.recipe.web.dto.CommentCreateResponse;
@@ -19,6 +20,7 @@ import com.ongi.api.recipe.web.dto.RecipeCommentItem;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
 import com.ongi.api.recipe.web.dto.RecipeUpsertRequest;
 import com.ongi.api.recipe.web.dto.RecipeSearchRequest;
+import com.ongi.api.recipe.web.dto.RelatedRecipeItem;
 import com.ongi.recipe.domain.search.RecipeSearch;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
 import jakarta.validation.Valid;
@@ -49,6 +51,8 @@ public class RecipeController {
 
 	private final RecipeQueryService recipeQueryService;
 
+	private final RecipeRelatedService recipeRelatedService;
+
 	private final RecipeEventFacade recipeEventFacade;
 
 	/**
@@ -67,6 +71,16 @@ public class RecipeController {
 		RecipeSearch search = searchRequest.toSearch();
 		RecipeSearchCondition condition = RecipeSearchCondition.from(search);
 		return recipeService.search(cursorPageRequest, condition);
+	}
+
+	@GetMapping("/public/recipe/{id}/related")
+	public ApiResponse<List<RelatedRecipeItem>> getRecipesRelated(
+		@PathVariable Long recipeId,
+		@RequestParam(defaultValue = "20") int limit
+	) {
+		// 정책상 상한
+		int safeLimit = Math.min(limit, 50);
+		return ApiResponse.ok(recipeRelatedService.getRelated(recipeId, safeLimit));
 	}
 
 	/**
