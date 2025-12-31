@@ -1,6 +1,5 @@
 package com.ongi.api.recipe.messaging.consumer;
 
-import com.ongi.api.common.persistence.enums.OutBoxEventTypeEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;

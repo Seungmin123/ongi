@@ -28,5 +28,5 @@ public final class TopicMapper {
 		};
 	}
 
-	public static final String USER_EVENTS = "user-action-events";
+	public static final String USER_EVENTS = "user.action.events";
 }
