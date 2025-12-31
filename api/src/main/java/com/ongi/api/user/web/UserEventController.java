@@ -2,7 +2,7 @@ package com.ongi.api.user.web;
 
 import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.common.web.dto.AuthPrincipal;
-import com.ongi.api.user.application.command.UserEventService;
+import com.ongi.api.user.application.event.UserEventService;
 import com.ongi.api.user.web.dto.UserEventBatchRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

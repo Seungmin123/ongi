@@ -1,7 +1,6 @@
-package com.ongi.api.user.application.command;
+package com.ongi.api.user.application.event;
 
 import com.ongi.api.user.adapter.out.cache.store.UserEventDedupStore;
-import com.ongi.api.user.application.event.UserEventProducer;
 import com.ongi.api.user.web.dto.UserEventBatchRequest;
 import com.ongi.api.user.web.dto.UserEventDto;
 import com.ongi.user.domain.enums.UserEventType;
@@ -17,6 +16,7 @@ public class UserEventService {
 	private static final Duration DEDUP_TTL = Duration.ofDays(7);
 
 	private final UserEventProducer producer;
+
 	private final UserEventDedupStore dedupStore;
 
 	public void ingest(Long userId, UserEventBatchRequest req) {
