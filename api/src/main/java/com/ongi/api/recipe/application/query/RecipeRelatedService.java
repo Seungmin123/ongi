@@ -74,7 +74,7 @@ public class RecipeRelatedService {
 	public List<RelatedRecipeFinalRow> findRelatedWithPopularityBoost(Long recipeId, int limit) {
 		var cfg = configRepository.findSingleton().orElseThrow();
 
-		List<RelatedRecipeRow> related = relatedRepository.findRelatedByIdfNative(
+		List<RelatedRecipeRow> related = relatedRepository.findRelatedWithPopularityBoost(
 			recipeId,
 			limit,
 			cfg.getIdfBase(),

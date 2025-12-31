@@ -14,7 +14,7 @@ public class RecipeWindowMetricsScheduler {
 	/**
 	 * 매일 00:10 실행
 	 */
-	@Scheduled(cron = "0 10 0 * * *")
+	@Scheduled(cron = "0 51 18 * * *")
 	public void refresh() {
 		batchService.refreshTodayWindows();
 	}

@@ -23,7 +23,7 @@ public class RecipeDailyMetricsNativeRepository {
 			VALUES (?, ?, 1)
 			ON DUPLICATE KEY UPDATE
 			  view_cnt = view_cnt + 1,
-			  updated_at = NOW(6)
+			  modified_at = NOW(6)
 		""";
 
 		return em.createNativeQuery(sql)
@@ -72,7 +72,7 @@ public class RecipeDailyMetricsNativeRepository {
 			  dwell_ge_10s_cnt = dwell_ge_10s_cnt + VALUES(dwell_ge_10s_cnt),
 			  scroll_ge_50_cnt = scroll_ge_50_cnt + VALUES(scroll_ge_50_cnt),
 			  scroll_ge_90_cnt = scroll_ge_90_cnt + VALUES(scroll_ge_90_cnt),
-			  updated_at = NOW(6)
+			  modified_at = NOW(6)
 		""";
 
 		return em.createNativeQuery(sql)
@@ -128,7 +128,7 @@ public class RecipeDailyMetricsNativeRepository {
 			VALUES (?, ?, 1)
 			ON DUPLICATE KEY UPDATE
 			  like_cnt = like_cnt + 1,
-			  updated_at = NOW(6)
+			  modified_at = NOW(6)
 		""";
 		return em.createNativeQuery(sql)
 			.setParameter(1, Date.valueOf(metricDate))
@@ -142,7 +142,7 @@ public class RecipeDailyMetricsNativeRepository {
 			VALUES (?, ?, 1)
 			ON DUPLICATE KEY UPDATE
 			  unlike_cnt = unlike_cnt + 1,
-			  updated_at = NOW(6)
+			  modified_at = NOW(6)
 		""";
 		return em.createNativeQuery(sql)
 			.setParameter(1, Date.valueOf(metricDate))
@@ -156,7 +156,7 @@ public class RecipeDailyMetricsNativeRepository {
 			VALUES (?, ?, 1)
 			ON DUPLICATE KEY UPDATE
 			  save_cnt = save_cnt + 1,
-			  updated_at = NOW(6)
+			  modified_at = NOW(6)
 		""";
 		return em.createNativeQuery(sql)
 			.setParameter(1, Date.valueOf(metricDate))
@@ -170,7 +170,7 @@ public class RecipeDailyMetricsNativeRepository {
 			VALUES (?, ?, 1)
 			ON DUPLICATE KEY UPDATE
 			  unsave_cnt = unsave_cnt + 1,
-			  updated_at = NOW(6)
+			  modified_at = NOW(6)
 		""";
 		return em.createNativeQuery(sql)
 			.setParameter(1, Date.valueOf(metricDate))

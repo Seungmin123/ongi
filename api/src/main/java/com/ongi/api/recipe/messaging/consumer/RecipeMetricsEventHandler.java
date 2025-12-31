@@ -7,6 +7,7 @@ import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeProcessedEve
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 @Service
@@ -21,6 +22,7 @@ public class RecipeMetricsEventHandler {
 
 	private final RecipeCategoryDailyMetricsNativeRepository recipeCategoryDailyRepo;
 
+	@Transactional(transactionManager = "transactionManager")
 	public void handle(String json) throws Exception {
 		RecipeEvent e = objectMapper.readValue(json, RecipeEvent.class);
 

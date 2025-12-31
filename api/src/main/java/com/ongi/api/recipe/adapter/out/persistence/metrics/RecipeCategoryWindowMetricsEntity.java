@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "recipe_category_daily_metrics")
-public class RecipeCategoryDailyMetricsEntity extends BaseTimeEntity {
+@Table(name = "recipe_category_window_metrics")
+public class RecipeCategoryWindowMetricsEntity extends BaseTimeEntity {
 
 	@EmbeddedId
-	private RecipeCategoryDailyMetricsId id;
+	private RecipeCategoryWindowMetricsId id;
 
 	@Column(name = "view_cnt", nullable = false)
 	private long viewCnt;
@@ -24,16 +24,16 @@ public class RecipeCategoryDailyMetricsEntity extends BaseTimeEntity {
 	@Column(name = "engaged_view_cnt", nullable = false)
 	private long engagedViewCnt;
 
-	@Column(name = "like_cnt", nullable = false)
-	private long likeCnt;
+	@Column(name = "like_net", nullable = false)
+	private long likeNet;
 
-	@Column(name = "save_cnt", nullable = false)
-	private long saveCnt;
+	@Column(name = "save_net", nullable = false)
+	private long saveNet;
 
-	@Column(name = "unlike_cnt", nullable = false)
-	private long unlikeCnt;
+	@Column(name = "dwell_ms_sum", nullable = false)
+	private long dwellMsSum;
 
-	@Column(name = "unsave_cnt", nullable = false)
-	private long unsaveCnt;
+	@Column(name = "scroll_depth_sum", nullable = false)
+	private long scrollDepthSum;
 
 }

@@ -1,10 +1,10 @@
 package com.ongi.api.recipe.adapter.out.persistence.metrics;
 
+import com.ongi.api.common.persistence.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "recipe_window_metrics")
-public class RecipeWindowMetricsEntity {
+public class RecipeWindowMetricsEntity extends BaseTimeEntity {
 
 	@EmbeddedId
 	private RecipeWindowMetricsId id;
@@ -36,9 +36,4 @@ public class RecipeWindowMetricsEntity {
 	@Column(name = "scroll_depth_sum", nullable = false)
 	private long scrollDepthSum;
 
-	@Column(name = "created_at", nullable = false)
-	private LocalDateTime createdAt;
-
-	@Column(name = "updated_at", nullable = false)
-	private LocalDateTime updatedAt;
 }

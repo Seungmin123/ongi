@@ -2,6 +2,7 @@ package com.ongi.api.recipe.web;
 
 import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.common.web.dto.AuthPrincipal;
+import com.ongi.api.recipe.adapter.out.persistence.metrics.projection.RelatedRecipeFinalRow;
 import com.ongi.api.recipe.application.command.RecipeService;
 import com.ongi.api.recipe.application.facade.RecipeEventFacade;
 import com.ongi.api.recipe.application.query.RecipeQueryService;
@@ -88,6 +89,23 @@ public class RecipeController {
 		int safeLimit = Math.min(limit, 50);
 
 		return ApiResponse.ok(recipeRelatedService.getRelated(recipeId, safeLimit));
+	}
+
+	/**
+	 * 연관 레시피 리스트 조회 By Popularity
+	 * @param recipeId
+	 * @param limit
+	 * @return
+	 */
+	@GetMapping("/public/recipe/{recipeId}/related/boost")
+	public ApiResponse<List<RelatedRecipeFinalRow>> getRecipesRelatedByBoost(
+		@PathVariable Long recipeId,
+		@RequestParam(defaultValue = "20") int limit
+	) {
+		// 정책으로 별도 정의
+		int safeLimit = Math.min(limit, 50);
+
+		return ApiResponse.ok(recipeRelatedService.findRelatedWithPopularityBoost(recipeId, safeLimit));
 	}
 
 	/**
