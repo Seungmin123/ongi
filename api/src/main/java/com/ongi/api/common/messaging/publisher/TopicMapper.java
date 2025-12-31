@@ -27,4 +27,6 @@ public final class TopicMapper {
 				-> "community.events";
 		};
 	}
+
+	public static final String USER_EVENTS = "user-action-events";
 }

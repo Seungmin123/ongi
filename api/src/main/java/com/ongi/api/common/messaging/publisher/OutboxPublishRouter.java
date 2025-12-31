@@ -16,7 +16,7 @@ public class OutboxPublishRouter {
 					payload.get("recipeId").asString()
 				),
 				new PublishTarget(
-					"user-action-events",
+					TopicMapper.USER_EVENTS,
 					payload.get("userId").asString()
 				)
 			));
@@ -30,7 +30,7 @@ public class OutboxPublishRouter {
 //					payload.get("recipeId").asString()
 //				),
 				new PublishTarget(
-					"user-action-events",
+					TopicMapper.USER_EVENTS,
 					payload.get("userId").asString()
 				)
 			));
@@ -39,7 +39,7 @@ public class OutboxPublishRouter {
 				RECIPE_COMMENT_CREATED, RECIPE_COMMENT_UPDATED, RECIPE_COMMENT_DELETED
 				-> new PublishPlan(List.of(
 				new PublishTarget(
-					"user-action-events",
+					TopicMapper.USER_EVENTS,
 					payload.get("userId").asString()
 				)
 			));
@@ -53,7 +53,7 @@ public class OutboxPublishRouter {
 					payload.get("postId").asString()
 				),
 				new PublishTarget(
-					"user-action-events",
+					TopicMapper.USER_EVENTS,
 					payload.get("userId").asString()
 				)
 			));
@@ -66,7 +66,7 @@ public class OutboxPublishRouter {
 //					payload.get("postId").asString()
 //				),
 				new PublishTarget(
-					"user-action-events",
+					TopicMapper.USER_EVENTS,
 					payload.get("userId").asString()
 				)
 			));
@@ -79,7 +79,7 @@ public class OutboxPublishRouter {
 //					payload.get("postId").asString()
 //				),
 				new PublishTarget(
-					"user-action-events",
+					TopicMapper.USER_EVENTS,
 					payload.get("userId").asString()
 				)
 			));

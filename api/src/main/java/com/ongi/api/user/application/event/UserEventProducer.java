@@ -1,5 +1,6 @@
 package com.ongi.api.user.application.event;
 
+import com.ongi.api.common.messaging.publisher.TopicMapper;
 import com.ongi.api.user.web.dto.UserEventBatchRequest;
 import com.ongi.api.user.web.dto.UserEventDto;
 import java.time.Instant;
@@ -36,6 +37,6 @@ public class UserEventProducer {
 			e.props()
 		);
 		String payload = objectMapper.writeValueAsString(userEvent);
-		kafkaTemplate.send(UserEventTopics.USER_EVENTS, String.valueOf(userId), payload);
+		kafkaTemplate.send(TopicMapper.USER_EVENTS, String.valueOf(userId), payload);
 	}
 }
