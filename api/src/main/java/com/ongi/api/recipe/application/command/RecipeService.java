@@ -65,7 +65,6 @@ public class RecipeService {
 		int size = cursorPageRequest.resolvedSize();
 		PageSortOptionEnum sort = cursorPageRequest.resolveSort();
 
-		// TODO RecipeStats 추가함 해결 필요.
 		List<Recipe> recipes = recipeAdapter.search(condition, cursor, size, sort);
 		if (recipes.isEmpty()) {
 			return ApiResponse.ok(List.of());

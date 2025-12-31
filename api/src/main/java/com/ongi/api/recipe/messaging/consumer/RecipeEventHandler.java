@@ -1,6 +1,7 @@
 package com.ongi.api.recipe.messaging.consumer;
 
 import com.ongi.api.common.persistence.enums.OutBoxEventTypeEnum;
+import com.ongi.api.recipe.adapter.out.cache.RecipeCategoryCacheStore;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeProcessedEventRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeStatsRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import tools.jackson.databind.ObjectMapper;
 public class RecipeEventHandler {
 
 	private final ObjectMapper objectMapper;
+
+	private final RecipeCategoryCacheStore recipeCategoryCacheStore;
 
 	private final RecipeProcessedEventRepository processedRepository;
 
@@ -58,7 +61,10 @@ public class RecipeEventHandler {
 		switch (type) {
 			case RECIPE_CREATED -> evictListCache();
 			case RECIPE_UPDATED, RECIPE_DELETED ->  {
+				// Detail 정보 등
 				recipeCacheVersionResolver.bump(e.recipeId());
+				// Category 정보
+				recipeCategoryCacheStore.evict(e.recipeId());
 				evictListCache();
 			}
 			default -> {

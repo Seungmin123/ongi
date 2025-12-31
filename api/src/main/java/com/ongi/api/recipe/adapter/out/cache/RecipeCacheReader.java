@@ -20,6 +20,8 @@ public class RecipeCacheReader {
 
 	private final IngredientAdapter ingredientAdapter;
 
+	private final RecipeCategoryCacheStore recipeCategoryCacheStore;
+
 	@Cacheable(
 		cacheNames = "recipeDetail",
 		key = "'recipe:' + #recipeId + ':detail:' + #ver",
@@ -31,6 +33,8 @@ public class RecipeCacheReader {
 	)
 	public RecipeCacheValue getRecipeById(Long recipeId, int ver) {
 		Recipe r = recipeAdapter.findRecipeById(recipeId).orElseThrow(() -> new IllegalStateException("Recipe not found"));
+		// User Action Consumer Cache Hit 위하여 여기서 삽입
+		recipeCategoryCacheStore.putIfAbsent(recipeId, r.getCategory().getCode());
 		return RecipeCacheValue.from(r);
 	}
 
