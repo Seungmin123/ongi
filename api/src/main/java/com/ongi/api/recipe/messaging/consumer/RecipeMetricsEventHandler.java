@@ -1,8 +1,8 @@
 package com.ongi.api.recipe.messaging.consumer;
 
 import com.ongi.api.common.persistence.enums.OutBoxEventTypeEnum;
-import com.ongi.api.recipe.adapter.out.persistence.metrics.repository.RecipeCategoryDailyMetricsNativeRepository;
-import com.ongi.api.recipe.adapter.out.persistence.metrics.repository.RecipeDailyMetricsNativeRepository;
+import com.ongi.api.recipe.adapter.out.persistence.metrics.repository.RecipeCategoryDailyMetricsRepository;
+import com.ongi.api.recipe.adapter.out.persistence.metrics.repository.RecipeDailyMetricsRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeProcessedEventRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +18,9 @@ public class RecipeMetricsEventHandler {
 
 	private final RecipeProcessedEventRepository processedRepository;
 
-	private final RecipeDailyMetricsNativeRepository recipeDailyMetricsRepo;
+	private final RecipeDailyMetricsRepository recipeDailyMetricsRepository;
 
-	private final RecipeCategoryDailyMetricsNativeRepository recipeCategoryDailyRepo;
+	private final RecipeCategoryDailyMetricsRepository categoryDailyRepository;
 
 	@Transactional(transactionManager = "transactionManager")
 	public void handle(String json) throws Exception {
@@ -38,26 +38,26 @@ public class RecipeMetricsEventHandler {
 
 		switch (type) {
 			case RECIPE_VIEW -> {
-				recipeDailyMetricsRepo.upsertView(metricDate, recipeId);
-				if (category != null) recipeCategoryDailyRepo.upsertView(metricDate, category);
+				recipeDailyMetricsRepository.upsertView(metricDate, recipeId);
+				if (category != null) categoryDailyRepository.upsertView(metricDate, category);
 			}
 
 			case RECIPE_LIKED -> {
-				recipeDailyMetricsRepo.upsertLike(metricDate, recipeId);
-				if (category != null) recipeCategoryDailyRepo.upsertLike(metricDate, category);
+				recipeDailyMetricsRepository.upsertLike(metricDate, recipeId);
+				if (category != null) categoryDailyRepository.upsertLike(metricDate, category);
 			}
 			case RECIPE_UNLIKED -> {
-				recipeDailyMetricsRepo.upsertUnlike(metricDate, recipeId);
-				if (category != null) recipeCategoryDailyRepo.upsertUnlike(metricDate, category);
+				recipeDailyMetricsRepository.upsertUnlike(metricDate, recipeId);
+				if (category != null) categoryDailyRepository.upsertUnlike(metricDate, category);
 			}
 
 			case RECIPE_BOOKMARKED -> {
-				recipeDailyMetricsRepo.upsertSave(metricDate, recipeId);
-				if (category != null) recipeCategoryDailyRepo.upsertSave(metricDate, category);
+				recipeDailyMetricsRepository.upsertSave(metricDate, recipeId);
+				if (category != null) categoryDailyRepository.upsertSave(metricDate, category);
 			}
 			case RECIPE_UNBOOKMARKED -> {
-				recipeDailyMetricsRepo.upsertUnsave(metricDate, recipeId);
-				if (category != null) recipeCategoryDailyRepo.upsertUnsave(metricDate, category);
+				recipeDailyMetricsRepository.upsertUnsave(metricDate, recipeId);
+				if (category != null) categoryDailyRepository.upsertUnsave(metricDate, category);
 			}
 
 			// engaged view(스크롤/체류 등) 이벤트 타입을 따로 만들었다면 여기서 처리

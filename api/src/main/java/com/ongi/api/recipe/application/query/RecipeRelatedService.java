@@ -1,18 +1,12 @@
 package com.ongi.api.recipe.application.query;
 
-import com.ongi.api.ingredients.adapter.out.persistence.RecipeRelatedConfigEntity;
 import com.ongi.api.ingredients.adapter.out.persistence.projection.RelatedRecipeRow;
 import com.ongi.api.ingredients.adapter.out.persistence.repository.RecipeRelatedConfigRepository;
 import com.ongi.api.ingredients.adapter.out.persistence.repository.RecipeRelatedNativeRepository;
-import com.ongi.api.recipe.adapter.out.persistence.metrics.projection.RecipeView7dRow;
-import com.ongi.api.recipe.adapter.out.persistence.metrics.projection.RelatedRecipeFinalRow;
-import com.ongi.api.recipe.adapter.out.persistence.metrics.repository.RecipeDailyMetricsNativeRepository;
+import com.ongi.api.recipe.adapter.out.persistence.metrics.repository.RecipeDailyMetricsRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeCardQueryRepository;
 import com.ongi.api.recipe.web.dto.RelatedRecipeItem;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,7 +25,7 @@ public class RecipeRelatedService {
 
 	private final RecipeRelatedConfigRepository configRepository;
 
-	private final RecipeDailyMetricsNativeRepository dailyMetricsRepository;
+	private final RecipeDailyMetricsRepository dailyMetricsRepository;
 
 	// Mark 2 / 식재료 간 IDF + 인기도 집계
 	@Transactional(readOnly = true, transactionManager = "transactionManager")

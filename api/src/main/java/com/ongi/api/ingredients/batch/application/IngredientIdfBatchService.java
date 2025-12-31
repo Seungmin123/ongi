@@ -15,7 +15,6 @@ public class IngredientIdfBatchService {
 	public void recomputeIdf() {
 		// 값이 클 수록 희귀, 작을수록 흔함
 
-
 		// 1) N 계산 (recipe table)
 		Long n = ((Number) em.createNativeQuery("SELECT COUNT(*) FROM recipe").getSingleResult()).longValue();
 
@@ -62,7 +61,9 @@ public class IngredientIdfBatchService {
 		""";
 
 		em.createNativeQuery(sql).executeUpdate();
+	}
 
+	public void refreshCenteredScore() {
 		String centeredScoreSql = """
 			UPDATE recipe_related_config c
 			JOIN (
