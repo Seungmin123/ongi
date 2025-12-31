@@ -3,8 +3,11 @@ package com.ongi.api.common.messaging.publisher;
 import com.ongi.api.common.persistence.entity.OutBoxEventEntity;
 import com.ongi.api.common.persistence.entity.repository.OutBoxEventRepository;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
@@ -37,11 +40,42 @@ public class OutBoxPublisher {
 
 		for (OutBoxEventEntity e : events) {
 			try {
-				publishFanout(e);        // Kafka 발행
+				publishFanoutAsync(e);        // Kafka 발행
 				outBoxPublisherTx.markSuccess(e.getId());  // DB 업데이트
 			} catch (Exception ex) {
 				outBoxPublisherTx.handleFailure(e, ex);
 			}
+		}
+	}
+
+	private void publishFanoutAsync(OutBoxEventEntity e) throws Exception {
+		JsonNode payload = objectMapper.readTree(e.getPayload());
+		PublishPlan plan = OutboxPublishRouter.plan(e.getEventType(), payload);
+		if (plan.isEmpty()) return;
+
+		String value = e.getPayload();
+		List<PublishTarget> targets = plan.targets();
+
+		AtomicInteger remaining = new AtomicInteger(targets.size());
+		Throwable[] firstError = new Throwable[1];
+
+		for (PublishTarget target : targets) {
+			CompletableFuture<SendResult<String, String>> future =
+				kafkaTemplate.send(target.topic(), target.key(), value);
+
+			future.whenComplete((result, ex) -> {
+				if (ex != null && firstError[0] == null) {
+					firstError[0] = ex;
+				}
+
+				if (remaining.decrementAndGet() == 0) {
+					if (firstError[0] == null) {
+						outBoxPublisherTx.markSuccess(e.getId());
+					} else {
+						outBoxPublisherTx.handleFailure(e, firstError[0]);
+					}
+				}
+			});
 		}
 	}
 

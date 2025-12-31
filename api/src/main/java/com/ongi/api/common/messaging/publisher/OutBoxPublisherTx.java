@@ -41,8 +41,10 @@ public class OutBoxPublisherTx {
 	}
 
 	@Transactional(transactionManager = "transactionManager")
-	public void handleFailure(OutBoxEventEntity e, Exception ex) {
-		String err = safeError(ex);
+	public void handleFailure(OutBoxEventEntity e, Throwable ex) {
+		Throwable cause = unwrap(ex);
+		String err = safeError(cause);
+
 		int retry = e.getRetryCount();
 
 		if (retry >= MAX_RETRY) {
@@ -61,8 +63,29 @@ public class OutBoxPublisherTx {
 		return capped + jitter;
 	}
 
-	private String safeError(Exception ex) {
-		String msg = ex.getClass().getSimpleName() + ": " + ex.getMessage();
+	private Throwable unwrap(Throwable t) {
+		// CompletableFuture에서 흔하게 감싸는 래퍼들 벗기기
+		while (t instanceof java.util.concurrent.CompletionException
+			|| t instanceof java.util.concurrent.ExecutionException) {
+			if (t.getCause() == null) break;
+			t = t.getCause();
+		}
+		return t;
+	}
+
+	private String safeError(Throwable ex) {
+		String msg = ex.getClass().getSimpleName() + ": " + (ex.getMessage() == null ? "" : ex.getMessage());
+
+		// root cause 메시지도 붙여서 운영 디버깅 쉽게
+		Throwable root = ex;
+		while (root.getCause() != null && root.getCause() != root) {
+			root = root.getCause();
+		}
+		if (root != ex) {
+			String rootMsg = root.getClass().getSimpleName() + ": " + (root.getMessage() == null ? "" : root.getMessage());
+			msg = msg + " | root=" + rootMsg;
+		}
+
 		return msg.length() > 1000 ? msg.substring(0, 1000) : msg;
 	}
 }
