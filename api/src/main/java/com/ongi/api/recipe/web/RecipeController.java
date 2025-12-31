@@ -73,13 +73,20 @@ public class RecipeController {
 		return recipeService.search(cursorPageRequest, condition);
 	}
 
-	@GetMapping("/public/recipe/{id}/related")
+	/**
+	 * 연관 레시피 리스트 조회
+	 * @param recipeId
+	 * @param limit
+	 * @return
+	 */
+	@GetMapping("/public/recipe/{recipeId}/related")
 	public ApiResponse<List<RelatedRecipeItem>> getRecipesRelated(
 		@PathVariable Long recipeId,
 		@RequestParam(defaultValue = "20") int limit
 	) {
-		// 정책상 상한
+		// 정책으로 별도 정의
 		int safeLimit = Math.min(limit, 50);
+
 		return ApiResponse.ok(recipeRelatedService.getRelated(recipeId, safeLimit));
 	}
 

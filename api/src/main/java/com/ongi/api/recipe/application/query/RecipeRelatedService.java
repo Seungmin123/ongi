@@ -1,6 +1,8 @@
 package com.ongi.api.recipe.application.query;
 
+import com.ongi.api.ingredients.adapter.out.persistence.RecipeRelatedConfigEntity;
 import com.ongi.api.ingredients.adapter.out.persistence.projection.RelatedRecipeRow;
+import com.ongi.api.ingredients.adapter.out.persistence.repository.RecipeRelatedConfigRepository;
 import com.ongi.api.ingredients.adapter.out.persistence.repository.RecipeRelatedNativeRepository;
 import com.ongi.api.recipe.adapter.out.persistence.repository.RecipeCardQueryRepository;
 import com.ongi.api.recipe.web.dto.RelatedRecipeItem;
@@ -21,8 +23,22 @@ public class RecipeRelatedService {
 
 	private final RecipeCardQueryRepository cardRepo;
 
+	private final RecipeRelatedConfigRepository configRepository;
+
 	public List<RelatedRecipeItem> getRelated(Long recipeId, int limit) {
-		List<RelatedRecipeRow> candidates = relatedRepo.findRelatedByIdfNative(recipeId, limit);
+		var cfg = configRepository.findSingleton().orElseThrow();
+
+		List<RelatedRecipeRow> candidates = relatedRepo.findRelatedByIdfNative(
+			recipeId,
+			limit,
+			cfg.getIdfBase(),
+			cfg.getRareMinIdf(),
+			cfg.getCategoryAlpha(),
+			cfg.getMinScore(),
+			cfg.getMinOverlapCount(),
+			cfg.getMinRareOverlapCount(),
+			cfg.getMinCenteredScore()
+		);
 
 		Set<Long> ids = candidates.stream().map(RelatedRecipeRow::recipeId).collect(Collectors.toSet());
 		var cards = cardRepo.findCardsByIds(ids);

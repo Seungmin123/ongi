@@ -16,4 +16,9 @@ public class IngredientIdfScheduler {
 	public void run() {
 		batchService.recomputeIdf();
 	}
+
+	@Scheduled(cron = "0 10 4 * * *")
+	public void refreshIdfQuantiles() {
+		batchService.refreshIdfQuantiles();
+	}
 }
