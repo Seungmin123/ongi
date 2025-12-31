@@ -45,31 +45,19 @@ public class IngredientIdfBatchService {
 		String sql = """
 			UPDATE recipe_related_config c
 			JOIN (
-			 WITH ranked AS (
-			   SELECT
-			     idf,
-			     ROW_NUMBER() OVER (ORDER BY idf) AS rn,
-			     COUNT(*) OVER () AS cnt
-			   FROM ingredient_idf
-			   WHERE idf IS NOT NULL
-			 )
-			 SELECT
-			   MIN(idf) AS min_idf,
-			   MAX(idf) AS max_idf,
-			   AVG(idf) AS avg_idf,
-			   MAX(CASE WHEN rn >= CEIL(cnt * 0.10) THEN idf END) AS p10,
-			   MAX(CASE WHEN rn >= CEIL(cnt * 0.25) THEN idf END) AS p25,
-			   MAX(CASE WHEN rn >= CEIL(cnt * 0.50) THEN idf END) AS p50,
-			   MAX(CASE WHEN rn >= CEIL(cnt * 0.75) THEN idf END) AS p75,
-			   MAX(CASE WHEN rn >= CEIL(cnt * 0.90) THEN idf END) AS p90
-			 FROM ranked
+				WITH ranked AS (
+					SELECT
+					idf,
+					PERCENT_RANK() OVER (ORDER BY idf) AS pr
+					FROM ingredient_idf
+				)
+				SELECT
+					MIN(CASE WHEN pr >= 0.25 THEN idf END) AS p25
+				FROM ranked
 			) x
 			SET
-			 -- centered base는 보통 p25~p50 사이에서 시작하는 게 안정적.
-			 c.idf_base = x.p25,
-			 -- 희귀 기준은 p50은 너무 낮을 수 있어서, 실제 운영에선 p75~p90도 후보로.
-			 c.rare_min_idf = x.p50,
-			 c.updated_at = NOW(6)
+				c.idf_base = x.p25,
+				c.updated_at = NOW(6)
 			WHERE c.config_id = 1;
 		""";
 
@@ -117,8 +105,8 @@ public class IngredientIdfBatchService {
 			 WHERE best_centered_sum IS NOT NULL
 			)
 			SELECT
-			 MAX(CASE WHEN rn >= CEIL(cnt * 0.25) THEN v END) AS p25_best,
-			 MAX(CASE WHEN rn >= CEIL(cnt * 0.50) THEN v END) AS p50_best
+			 MIN(CASE WHEN rn >= CEIL(cnt * 0.25) THEN v END) AS p25_best,
+			 MIN(CASE WHEN rn >= CEIL(cnt * 0.50) THEN v END) AS p50_best
 			FROM ranked
 			) x
 			SET

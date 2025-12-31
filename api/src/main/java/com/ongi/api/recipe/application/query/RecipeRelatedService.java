@@ -33,26 +33,33 @@ public class RecipeRelatedService {
 
 	private final RecipeDailyMetricsNativeRepository dailyMetricsRepository;
 
-	public List<RelatedRecipeItem> getRelated(Long recipeId, int limit) {
+	// Mark 2 / 식재료 간 IDF + 인기도 집계
+	@Transactional(readOnly = true, transactionManager = "transactionManager")
+	public List<RelatedRecipeItem> findRelatedWithPopularityBoost(Long recipeId, int limit) {
 		var cfg = configRepository.findSingleton().orElseThrow();
 
-		List<RelatedRecipeRow> candidates = relatedRepository.findRelatedByIdfNative(
+		List<RelatedRecipeRow> related = relatedRepository.findRelatedWithPopularityBoost(
 			recipeId,
 			limit,
-			cfg.getIdfBase(),
-			cfg.getRareMinIdf(),
 			cfg.getCategoryAlpha(),
+			cfg.getIdfBase(),
 			cfg.getMinScore(),
 			cfg.getMinOverlapCount(),
-			cfg.getMinRareOverlapCount(),
-			cfg.getMinCenteredScore()
+			cfg.getMinCenteredScore(),
+			cfg.getSeedK(),
+			cfg.getSeedMinIdf(),
+			cfg.getSeedMinHit(),
+			cfg.getSeedAlpha(),
+			cfg.getPopBeta()
 		);
+		if (related.isEmpty()) return List.of();
 
-		Set<Long> ids = candidates.stream().map(RelatedRecipeRow::recipeId).collect(Collectors.toSet());
+		// 2) view_7d 집계(IN)
+		Set<Long> ids = related.stream().map(RelatedRecipeRow::recipeId).distinct().collect(Collectors.toSet());
 		var cards = cardRepository.findCardsByIds(ids);
 
 		// score 붙여서 반환
-		return candidates.stream()
+		return related.stream()
 			.map(row -> {
 				var c = cards.get(row.recipeId());
 				if (c == null) return null; // 혹시 레시피가 soft delete 됐다면 제외
@@ -67,48 +74,6 @@ public class RecipeRelatedService {
 				);
 			})
 			.filter(Objects::nonNull)
-			.toList();
-	}
-
-	@Transactional(readOnly = true, transactionManager = "transactionManager")
-	public List<RelatedRecipeFinalRow> findRelatedWithPopularityBoost(Long recipeId, int limit) {
-		var cfg = configRepository.findSingleton().orElseThrow();
-
-		List<RelatedRecipeRow> related = relatedRepository.findRelatedWithPopularityBoost(
-			recipeId,
-			limit,
-			cfg.getIdfBase(),
-			cfg.getRareMinIdf(),
-			cfg.getCategoryAlpha(),
-			cfg.getMinScore(),
-			cfg.getMinOverlapCount(),
-			cfg.getMinRareOverlapCount(),
-			cfg.getMinCenteredScore(),
-			cfg.getPopBeta()
-		);
-		if (related.isEmpty()) return List.of();
-
-		// 2) view_7d 집계(IN)
-		List<Long> ids = related.stream().map(RelatedRecipeRow::recipeId).distinct().toList();
-		List<RecipeView7dRow> views = dailyMetricsRepository.findView7dByRecipeIds(ids);
-
-		Map<Long, Long> view7dMap = new HashMap<>();
-		for (RecipeView7dRow v : views) {
-			view7dMap.put(v.recipeId(), v.view7d());
-		}
-
-		// 3) final_score 계산 + 정렬 + limit
-		return related.stream()
-			.map(r -> {
-				long v = view7dMap.getOrDefault(r.recipeId(), 0L);
-				double finalScore = r.score() * Math.log(1.0 + v); // 자연로그
-				return new RelatedRecipeFinalRow(r.recipeId(), r.score(), v, finalScore);
-			})
-			.sorted(Comparator
-				.comparingDouble(RelatedRecipeFinalRow::finalScore).reversed()
-				.thenComparing(RelatedRecipeFinalRow::recipeId, Comparator.reverseOrder())
-			)
-			.limit(limit)
 			.toList();
 	}
 }
