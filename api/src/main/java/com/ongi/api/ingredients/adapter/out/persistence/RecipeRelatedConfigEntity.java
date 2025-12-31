@@ -45,6 +45,9 @@ public class RecipeRelatedConfigEntity {
 	@Column(name = "min_centered_score", nullable = false, comment = "centered_sum_idf 기준 하한")
 	private Double minCenteredScore;
 
+	@Column(name = "pop_beta", nullable = false, comment = "view 데이터가 없을 경우 대비한 score 가산점 / 0.3 ~ 2.0")
+	private Double popBeta;
+
 	@Column(name = "updated_at", nullable = false)
 	private LocalDateTime updatedAt;
 

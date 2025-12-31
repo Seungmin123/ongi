@@ -108,7 +108,8 @@ public class RecipeRelatedNativeRepository {
 		double minScore,            // raw_sum_idf 기준 하한
 		int minOverlapCount,
 		int minRareOverlapCount,
-		double minCenteredScore     // centered_sum_idf 기준 하한(옵션)
+		double minCenteredScore,     // centered_sum_idf 기준 하한(옵션)
+		double popBeta              // final_score view가 없을 경우 대비한 가산점
 	) {
 		String sql = """
 			SELECT
@@ -138,7 +139,7 @@ public class RecipeRelatedNativeRepository {
 				        THEN :categoryAlpha
 				        ELSE 0
 				      END
-				  ) * LOG(1 + COALESCE(m.view_cnt, 0))
+				  ) + (:popBeta * LOG(1 + COALESCE(m.view_cnt, 0)))
 				) AS final_score
 			FROM recipe_ingredient ri1
 			JOIN ingredient_idf idf
@@ -181,6 +182,7 @@ public class RecipeRelatedNativeRepository {
 			.setParameter("minOverlapCount", minOverlapCount)
 			.setParameter("minRareOverlapCount", minRareOverlapCount)
 			.setParameter("minCenteredScore", minCenteredScore)
+			.setParameter("popBeta", popBeta)
 			.getResultList();
 
 		return rows.stream()

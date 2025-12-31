@@ -83,7 +83,8 @@ public class RecipeRelatedService {
 			cfg.getMinScore(),
 			cfg.getMinOverlapCount(),
 			cfg.getMinRareOverlapCount(),
-			cfg.getMinCenteredScore()
+			cfg.getMinCenteredScore(),
+			cfg.getPopBeta()
 		);
 		if (related.isEmpty()) return List.of();
 
