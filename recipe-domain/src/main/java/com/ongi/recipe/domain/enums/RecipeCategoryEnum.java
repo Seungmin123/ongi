@@ -3,23 +3,30 @@ package com.ongi.recipe.domain.enums;
 import java.util.Arrays;
 
 public enum RecipeCategoryEnum {
-	SOUP("국/탕/수프"),
-	STEW("찌개/전골"),
-	RICE("밥/덮밥/볶음밥/비빔밥"),
-	NOODLE("면/파스타/국수"),
-	SIDE_DISH("반찬(볶음, 조림, 무침 등)"),
-	SALAD("샐러드"),
-	DESSERT("디저트/베이킹"),
-	SNACK("간식/분식"),
-	MAIN_DISH("고기/생선 메인 요리"),
-	SAUCE("소스/드레싱"),
-	DRINK("음료"),
-	ETC("기타");
+	SOUP("SOUP", "국/탕/수프"),
+	STEW("STEW", "찌개/전골"),
+	RICE("RICE", "밥/덮밥/볶음밥/비빔밥"),
+	NOODLE("NOODLE", "면/파스타/국수"),
+	SIDE_DISH("SIDE_DISH", "반찬(볶음, 조림, 무침 등)"),
+	SALAD("SALAD", "샐러드"),
+	DESSERT("DESSERT", "디저트/베이킹"),
+	SNACK("SNACK", "간식/분식"),
+	MAIN_DISH("MAIN_DISH", "고기/생선 메인 요리"),
+	SAUCE("SAUCE", "소스/드레싱"),
+	DRINK("DRINK", "음료"),
+	ETC("ETC", "기타");
+
+	private final String code;
 
 	private final String name;
 
-	RecipeCategoryEnum(String name) {
+	RecipeCategoryEnum(String code, String name) {
+		this.code = code;
 		this.name = name;
+	}
+
+	public String getCode() {
+		return code;
 	}
 
 	public String getName() {

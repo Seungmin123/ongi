@@ -7,5 +7,6 @@ public record RecipeEvent(
 	long userId,
 	long recipeId,
 	String eventType,      // RECIPE_LIKED, RECIPE_UNLIKED, BOOKMARK_CREATED, BOOKMARK_DELETED ...
+	String category,
 	LocalDateTime occurredAt
 ) {}

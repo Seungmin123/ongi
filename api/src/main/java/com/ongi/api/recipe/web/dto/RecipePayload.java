@@ -7,6 +7,7 @@ public record RecipePayload (
 	UUID eventId,
 	long userId,
 	long recipeId,
+	String category,
 	String eventType,
 	LocalDateTime occurredAt
 ) {

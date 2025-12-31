@@ -47,7 +47,7 @@ public class RecipeEventFacade {
 		if(recipe != null) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_CREATED;
-			var payload = new RecipePayload(eventId, userId, recipe.getId(), eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipePayload(eventId, userId, recipe.getId(), recipe.getCategory().getCode(), eventType.getCode(), LocalDateTime.now());
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipe.getId(), eventType, payload);
 		}
 	}
@@ -59,7 +59,7 @@ public class RecipeEventFacade {
 		if(recipe != null) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_UPDATED;
-			var payload = new RecipePayload(eventId, userId, recipe.getId(), eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipePayload(eventId, userId, recipe.getId(), recipe.getCategory().getCode(), eventType.getCode(), LocalDateTime.now());
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipe.getId(), eventType, payload);
 		}
 	}
@@ -71,7 +71,7 @@ public class RecipeEventFacade {
 		if(deleted) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_DELETED;
-			var payload = new RecipePayload(eventId, userId, recipeId, eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipePayload(eventId, userId, recipeId, null, eventType.getCode(), LocalDateTime.now());
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 	}
@@ -87,13 +87,14 @@ public class RecipeEventFacade {
 		if(userId != null) {
 			UUID eventId = UUID.randomUUID();
 			OutBoxEventTypeEnum eventType = OutBoxEventTypeEnum.RECIPE_VIEW;
-			var payload = new RecipeLikePayload(eventId, userId, recipeId, eventType.getCode(), LocalDateTime.now());
+			var payload = new RecipePayload(eventId, userId, recipeId, detail.category().getCode(), eventType.getCode(), LocalDateTime.now());
 			outBoxService.enqueuePending(eventId, OutBoxAggregateTypeEnum.RECIPE, recipeId, eventType, payload);
 		}
 
 		return new RecipeDetailResponse(detail, flags.liked(), flags.saved());
 	}
 
+	// TODO Category 대책 강구
 	@Transactional(transactionManager = "transactionManager")
 	public LikeResponse like(long userId, long recipeId) {
 		boolean inserted = recipeQueryService.like(userId, recipeId);

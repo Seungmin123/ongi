@@ -48,16 +48,16 @@ public class RecipeEventHandler {
 	@Transactional(transactionManager = "transactionManager")
 	public void cacheHandle(String json) throws Exception {
 		RecipeEvent e = objectMapper.readValue(json, RecipeEvent.class);
+		OutBoxEventTypeEnum type = OutBoxEventTypeEnum.valueOf(e.eventType());
 
-		// 1) 멱등 체크
+		// 멱등 체크
 		if (!processedRepository.firstTime(e.eventId())) {
 			return; // 이미 처리한 이벤트
 		}
 
-		// 2) 타입별 카운터 반영
-		switch (e.eventType()) {
-			case "RECIPE_CREATED" -> evictListCache();
-			case "RECIPE_UPDATED", "RECIPE_DELETED" ->  {
+		switch (type) {
+			case RECIPE_CREATED -> evictListCache();
+			case RECIPE_UPDATED, RECIPE_DELETED ->  {
 				recipeCacheVersionResolver.bump(e.recipeId());
 				evictListCache();
 			}

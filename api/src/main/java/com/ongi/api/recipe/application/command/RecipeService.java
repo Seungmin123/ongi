@@ -148,6 +148,7 @@ public class RecipeService {
 			cookTimeText,
 			recipe.serving() == null ? null : recipe.serving().intValue(),
 			recipe.difficulty() != null ? recipe.difficulty().getCode() : null,
+			recipe.category(),
 			recipeStats.getLikeCount(),
 			recipeStats.getCommentCount(),
 			recipeStats.getBookmarkCount(),
