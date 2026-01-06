@@ -413,7 +413,7 @@ spec:
         - name: kafka-exporter
           image: danielqsj/kafka-exporter:latest
           args:
-            - -kafka.server=kafka.ongi-data.svc.cluster.local:9092
+            - --kafka.server=kafka.ongi-data.svc.cluster.local:9092
           ports:
             - containerPort: 9308
           resources:
