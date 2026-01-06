@@ -1,0 +1,8 @@
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+# prepareDocker 결과물
+COPY build/docker/app/*.jar /app/app.jar
+COPY build/docker/deps/ /app/deps/
+
+ENTRYPOINT ["java","-cp","/app/app.jar:/app/deps/*","com.ongi.aggregate.spark.RecipeTrendingJob"]

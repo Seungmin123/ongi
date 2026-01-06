@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ongi-agg
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recipe-trending
+  namespace: ongi-agg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recipe-trending
+  template:
+    metadata:
+      labels:
+        app: recipe-trending
+    spec:
+      containers:
+        - name: recipe-trending
+          image: ongi-spark-trending:0.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BOOTSTRAP
+              value: "kafka.ongi-data.svc.cluster.local:9092"
+            - name: REDIS_HOST
+              value: "redis.ongi-data.svc.cluster.local"
+            - name: REDIS_PORT
+              value: "6379"
+
+            # 개발용(빠르게 키 나오게)
+            - name: WINDOW_SIZE
+              value: "1 minute"
+            - name: SLIDE_SIZE
+              value: "10 seconds"
+            - name: WATERMARK
+              value: "20 seconds"
+            - name: CHECKPOINT_DIR
+              value: "/checkpoint/recipe-trending"
+
+            - name: SPARK_MASTER
+              value: "local[*]"
+            - name: SPARK_SHUFFLE_PARTITIONS
+              value: "8"
+
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Xms512m -Xmx768m"
+
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "200m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"

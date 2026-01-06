@@ -6,4 +6,4 @@ pluginManagement {
 }
 rootProject.name = 'ongi'
 
-include 'api', 'recipe-domain', 'ingredients-domain', 'user-domain'
+include 'api', 'recipe-domain', 'ingredients-domain', 'user-domain', 'aggregate-domain'

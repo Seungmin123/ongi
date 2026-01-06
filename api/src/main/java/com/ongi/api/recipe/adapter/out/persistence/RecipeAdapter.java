@@ -66,6 +66,14 @@ public class RecipeAdapter implements RecipeRepositoryPort {
 	}
 
 	@Override
+	public List<Recipe> findAllRecipesByIds(List<Long> ids) {
+		return recipeRepository
+			.findAllById(ids).stream()
+			.map(RecipeMapper::toDomain)
+			.toList();
+	}
+
+	@Override
 	public boolean existsRecipeById(Long id) {
 		return recipeRepository.existsById(id);
 	}

@@ -20,6 +20,8 @@ public interface RecipeRepositoryPort {
 
 	Optional<Recipe> findRecipeById(Long id);
 
+	List<Recipe> findAllRecipesByIds(List<Long> ids);
+
 	boolean existsRecipeById(Long id);
 
 	void deleteRecipeById(Long id);

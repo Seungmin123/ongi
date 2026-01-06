@@ -91,6 +91,13 @@ public class RecipeController {
 		return ApiResponse.ok(recipeRelatedService.findRelatedWithPopularityBoost(recipeId, safeLimit));
 	}
 
+	@GetMapping("/public/recipe/list/trending")
+	public ApiResponse<List<RecipeCardResponse>> getTrendingRecipes(
+
+	) {
+		return ApiResponse.ok(recipeService.getTrendingRecipeIds(20));
+	}
+
 	/**
 	 * 레시피 디테일 조회
 	 * @param authPrincipal

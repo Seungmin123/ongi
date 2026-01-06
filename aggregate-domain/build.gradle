@@ -1,0 +1,38 @@
+// ongi/aggregate-domain/build.gradle
+
+plugins {
+	id 'java'
+	id 'io.spring.dependency-management'
+}
+
+dependencies {
+	implementation libs.spark.sql
+	implementation libs.spark.sql.kafka
+
+	implementation 'redis.clients:jedis:5.1.5'
+	implementation libs.mysql.connector
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+tasks.register("copyRuntimeDeps", Copy) {
+	from(configurations.runtimeClasspath)
+	into(layout.buildDirectory.dir("deps"))
+}
+
+tasks.register("prepareDocker", Copy) {
+	dependsOn(tasks.jar, tasks.copyRuntimeDeps)
+	into(layout.buildDirectory.dir("docker"))
+	from(tasks.jar.archiveFile) {
+		into("app")
+	}
+	from(layout.buildDirectory.dir("deps")) {
+		into("deps")
+	}
+}
+
+build.dependsOn tasks.prepareDocker

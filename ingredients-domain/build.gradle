@@ -1,4 +1,4 @@
-// ongi/ingredients-domain/build.gradle
+// ongi/spark/build.gradle
 
 plugins {
 	id 'java-library'

@@ -3,6 +3,7 @@ package com.ongi.api.recipe.application.command;
 import com.ongi.api.common.web.dto.ApiResponse;
 import com.ongi.api.ingredients.adapter.out.persistence.IngredientAdapter;
 import com.ongi.api.recipe.adapter.out.cache.RecipeCacheReader;
+import com.ongi.api.recipe.adapter.out.cache.TrendingReicpeStore;
 import com.ongi.api.recipe.adapter.out.persistence.RecipeAdapter;
 import com.ongi.api.recipe.messaging.consumer.RecipeCacheVersionResolver;
 import com.ongi.api.recipe.web.dto.CursorPageRequest;
@@ -25,9 +26,12 @@ import com.ongi.recipe.domain.RecipeSteps;
 import com.ongi.recipe.domain.enums.PageSortOptionEnum;
 import com.ongi.recipe.domain.enums.RecipeCommentStatus;
 import com.ongi.recipe.domain.search.RecipeSearchCondition;
+import java.time.Clock;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -45,6 +49,8 @@ public class RecipeService {
 	private final RecipeAdapter recipeAdapter;
 
 	private final IngredientAdapter ingredientAdapter;
+
+	private final TrendingReicpeStore trendingReicpeStore;
 
 	@Cacheable(
 		value = "recipeList",
@@ -191,6 +197,22 @@ public class RecipeService {
 		}
 
 		return recipe;
+	}
+
+	@Transactional(transactionManager = "transactionManager")
+	public List<RecipeCardResponse> getTrendingRecipeIds(int limit) {
+		List<Long> recipeIds = trendingReicpeStore.getMergedTopRecipeIds(limit);
+
+		// findAllById
+		List<Recipe> recipes = recipeAdapter.findAllRecipesByIds(recipeIds);
+
+		Map<Long, RecipeStats> statsMap =
+			recipeAdapter.findRecipeStatsByRecipeIds(recipeIds).stream()
+				.collect(Collectors.toMap(RecipeStats::getRecipeId, s -> s));
+
+		return recipes.stream()
+			.map(r -> toRecipeCardResponse(r, statsMap.get(r.getId())))
+			.toList();
 	}
 
 	private void saveAllRecipeIngredients(Long recipeId, List<RecipeIngredientCreateRequest> ingredients) {

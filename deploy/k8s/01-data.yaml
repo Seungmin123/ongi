@@ -126,7 +126,7 @@ spec:
           image: oliver006/redis_exporter:latest
           env:
             - name: REDIS_ADDR
-              value: "redis://redis:6379"
+              value: "redis://redis.ongi-data.svc.cluster.local:6379"
           ports:
             - containerPort: 9121
           resources:
@@ -165,11 +165,11 @@ data:
     process.roles=broker,controller
     node.id=1
     listeners=INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
-    advertised.listeners=INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+    advertised.listeners=INTERNAL://kafka.ongi-data.svc.cluster.local:9092,EXTERNAL://localhost:29092
     listener.security.protocol.map=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
     inter.broker.listener.name=INTERNAL
     controller.listener.names=CONTROLLER
-    controller.quorum.voters=1@kafka:9093
+    controller.quorum.voters=1@kafka.ongi-data.svc.cluster.local:9093
     log.dirs=/var/lib/kafka/data
     num.network.threads=3
     num.io.threads=8
@@ -334,13 +334,21 @@ spec:
             - -c
             - |
               set -e
-              CLUSTER_ID="$(/opt/kafka/bin/kafka-storage.sh random-uuid)"
-              echo "Generated CLUSTER_ID=${CLUSTER_ID}"
 
-              /opt/kafka/bin/kafka-storage.sh format \
-                --config /opt/kafka/config/server.properties \
-                --cluster-id "${CLUSTER_ID}" \
-                --ignore-formatted
+              DATA_DIR="/var/lib/kafka/data"
+              META="$DATA_DIR/meta.properties"
+
+              if [ -f "$META" ]; then
+                echo "meta.properties exists; skip format"
+              else
+                CLUSTER_ID="$(/opt/kafka/bin/kafka-storage.sh random-uuid)"
+                echo "Generated CLUSTER_ID=${CLUSTER_ID}"
+
+                /opt/kafka/bin/kafka-storage.sh format \
+                  --config /opt/kafka/config/server.properties \
+                  --cluster-id "${CLUSTER_ID}" \
+                  --ignore-formatted
+              fi
 
               exec /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
           volumeMounts:
@@ -405,7 +413,7 @@ spec:
         - name: kafka-exporter
           image: danielqsj/kafka-exporter:latest
           args:
-            - --kafka.server=kafka:9092
+            - -kafka.server=kafka.ongi-data.svc.cluster.local:9092
           ports:
             - containerPort: 9308
           resources:

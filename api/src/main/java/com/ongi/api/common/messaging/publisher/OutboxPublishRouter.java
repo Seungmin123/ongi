@@ -9,12 +9,25 @@ public class OutboxPublishRouter {
 
 		return switch (type) {
 			case
-				RECIPE_CREATED, RECIPE_UPDATED, RECIPE_DELETED, RECIPE_VIEW,
-				RECIPE_LIKED, RECIPE_UNLIKED, RECIPE_BOOKMARKED, RECIPE_UNBOOKMARKED,
-				RECIPE_COMMENT_CREATED, RECIPE_COMMENT_UPDATED, RECIPE_COMMENT_DELETED
+				RECIPE_CREATED, RECIPE_UPDATED, RECIPE_DELETED
+				, RECIPE_COMMENT_CREATED, RECIPE_COMMENT_UPDATED, RECIPE_COMMENT_DELETED
 				-> new PublishPlan(List.of(
 				new PublishTarget(
 					TopicMapper.topicOf(type),
+					payload.get("recipeId").asString()
+				)
+			));
+
+			// Spark Job Topic
+			case
+				RECIPE_VIEW, RECIPE_LIKED, RECIPE_UNLIKED, RECIPE_BOOKMARKED, RECIPE_UNBOOKMARKED
+				-> new PublishPlan(List.of(
+				new PublishTarget(
+					TopicMapper.topicOf(type),
+					payload.get("recipeId").asString()
+				),
+				new PublishTarget(
+					"recipe.engagement.v1",
 					payload.get("recipeId").asString()
 				)
 			));
