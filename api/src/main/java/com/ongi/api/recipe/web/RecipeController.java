@@ -132,7 +132,7 @@ public class RecipeController {
 	@PostMapping("/private/recipe")
 	public ApiResponse<Void> createRecipe(
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
-		@RequestBody RecipeUpsertRequest recipeUpsertRequest
+		@RequestBody @Valid RecipeUpsertRequest recipeUpsertRequest
 	) throws Exception {
 		// TODO 확인할 것 - 등록한 레시피 기반으로 유사 레시피 추천?
 		long userId = authPrincipal.userId();
@@ -150,7 +150,7 @@ public class RecipeController {
 	@PatchMapping("/private/recipe")
 	public ApiResponse<Void> updateRecipe(
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
-		@RequestBody RecipeUpsertRequest request
+		@RequestBody @Valid RecipeUpsertRequest request
 	) throws Exception {
 		long userId = authPrincipal.userId();
 		recipeEventFacade.updateRecipe(userId, request);
@@ -294,7 +294,7 @@ public class RecipeController {
 	@GetMapping("/private/{recipeId}/comment")
 	public ApiResponse<Page<RecipeCommentItem>> getComments(
 		@PathVariable Long recipeId,
-		@ModelAttribute CommentPageRequest req
+		@ModelAttribute @Valid CommentPageRequest req
 	) {
 		Pageable pageable = PageRequest.of(req.page(), req.size());
 		return ApiResponse.ok(recipeQueryService.getComments(recipeId, pageable, req.resolveSort()));
