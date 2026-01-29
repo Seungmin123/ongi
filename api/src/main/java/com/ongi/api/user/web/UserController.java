@@ -45,7 +45,7 @@ public class UserController {
 
 	@PostMapping("/private/refresh")
 	public ApiResponse<JwtTokens> refreshToken(
-		@RequestBody JwtRefreshRequest req
+		@RequestBody @Valid JwtRefreshRequest req
 	) throws Exception {
 		return ApiResponse.ok(authService.refresh(req.refreshToken()));
 	}
@@ -58,7 +58,7 @@ public class UserController {
 	 */
 	@PostMapping("/public/signup/email-request")
 	public ApiResponse<Void> signUpEmailRequest(
-		@RequestBody EmailVerifyRequest req
+		@RequestBody @Valid EmailVerifyRequest req
 	) {
 		authService.requestEmailVerification(req);
 		return ApiResponse.ok();
@@ -72,7 +72,7 @@ public class UserController {
 	 */
 	@PostMapping("/public/signup/email-confirm")
 	public ApiResponse<Void> signUpEmailConfirm(
-		@RequestBody EmailVerifyConfirmRequest req
+		@RequestBody @Valid EmailVerifyConfirmRequest req
 	) {
 		authService.confirmEmailVerification(req);
 		return ApiResponse.ok();
@@ -86,7 +86,7 @@ public class UserController {
 	 */
 	@PostMapping("/public/signup")
 	public ApiResponse<Void> signUp(
-		@RequestBody MemberSignUpRequest memberSignUpRequest
+		@RequestBody @Valid MemberSignUpRequest memberSignUpRequest
 	) {
 		authService.signUp(memberSignUpRequest);
 		return ApiResponse.ok();
@@ -100,7 +100,7 @@ public class UserController {
 	 */
 	@PostMapping("/public/login")
 	public ApiResponse<JwtTokens> login(
-		@RequestBody MemberLoginRequest req
+		@RequestBody @Valid MemberLoginRequest req
 	) {
 		return ApiResponse.ok(authService.login(req));
 	}
@@ -113,7 +113,7 @@ public class UserController {
 	 */
 	@GetMapping("/public/id/find")
 	public ApiResponse<Void> findById(
-		@ModelAttribute FindEmailRequest findEmailRequest
+		@ModelAttribute @Valid FindEmailRequest findEmailRequest
 	) {
 		authService.findEmail(findEmailRequest);
 		return ApiResponse.ok();
@@ -127,7 +127,7 @@ public class UserController {
 	 */
 	@PostMapping("/public/password/reset-request")
 	public ApiResponse<Void> resetPassword(
-		@RequestBody PasswordResetRequest passwordResetRequest
+		@RequestBody @Valid PasswordResetRequest passwordResetRequest
 	) {
 		authService.requestPasswordReset(passwordResetRequest);
 		return ApiResponse.ok();
@@ -141,7 +141,7 @@ public class UserController {
 	 */
 	@PostMapping("/public/password/reset-confirm")
 	public ApiResponse<Void> resetPasswordConfirm(
-		@RequestBody PasswordResetConfirmRequest passwordResetConfirmRequest
+		@RequestBody @Valid PasswordResetConfirmRequest passwordResetConfirmRequest
 	) {
 		authService.confirmPasswordReset(passwordResetConfirmRequest);
 		return ApiResponse.ok();
