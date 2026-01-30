@@ -39,7 +39,7 @@ public class SecurityConfig {
 			)
 			.authorizeHttpRequests(auth -> auth
 				// TODO 수정 필요
-				.requestMatchers("/recipe/public/**", "/user/public/**", "/file/public/**")
+				.requestMatchers("/recipe/public/**", "/user/public/**", "/file/public/**", "/community/public/**")
 				.permitAll()
 				.requestMatchers("/recipe/private/**", "/recipe/private/**", "/file/private/**")
 				.authenticated()

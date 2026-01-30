@@ -18,6 +18,7 @@ import com.ongi.api.community.web.dto.PostCardItem;
 import com.ongi.api.community.web.dto.PostDetailResponse;
 import com.ongi.api.community.web.dto.ListRequest;
 import com.ongi.api.community.web.dto.PostUpsertRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,18 +50,18 @@ public class CommunityController {
 
 	@PostMapping("/private/upload-url")
 	public ApiResponse<CreateAttachmentUploadUrlResponse> createUploadUrl(
-		@AuthenticationPrincipal Long userId,
-		@RequestBody CreateAttachmentUploadUrlRequest req
+		@AuthenticationPrincipal AuthPrincipal authPrincipal,
+		@RequestBody @Valid CreateAttachmentUploadUrlRequest req
 	) {
-		return ApiResponse.ok(attachmentAttachService.createUploadUrl(userId, req));
+		return ApiResponse.ok(attachmentAttachService.createUploadUrl(authPrincipal.userId(), req));
 	}
 
 	@PostMapping("/private/upload-url-temp")
 	public ApiResponse<CreateTempAttachmentResponse> createTemp(
-		@AuthenticationPrincipal Long userId,
-		@RequestBody CreateTempAttachmentRequest req
+		@AuthenticationPrincipal AuthPrincipal authPrincipal,
+		@RequestBody @Valid CreateTempAttachmentRequest req
 	) {
-		return ApiResponse.ok(attachmentAttachService.createTemp(userId, req));
+		return ApiResponse.ok(attachmentAttachService.createTemp(authPrincipal.userId(), req));
 	}
 
 	/**
@@ -73,7 +74,7 @@ public class CommunityController {
 	@PostMapping("/private/posts")
 	public ApiResponse<Void> createPost(
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
-		@RequestBody PostUpsertRequest req
+		@RequestBody @Valid PostUpsertRequest req
 	) throws Exception {
 		Long userId = authPrincipal.userId();
 		postEventFacade.createPost(userId, req);
@@ -90,7 +91,7 @@ public class CommunityController {
 	@PatchMapping("/private/posts/{postId}")
 	public ApiResponse<Void> updatePost(
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
-		@RequestBody PostUpsertRequest req
+		@RequestBody @Valid PostUpsertRequest req
 	) throws Exception {
 		Long userId = authPrincipal.userId();
 		postEventFacade.updatePost(userId, req);
@@ -197,7 +198,7 @@ public class CommunityController {
 	public ApiResponse<Void> createPostComment(
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@PathVariable Long postId,
-		@RequestBody CommentUpsertRequest req
+		@RequestBody @Valid CommentUpsertRequest req
 	) throws Exception {
 		Long userId = authPrincipal.userId();
 		commentEventFacade.createComment(userId, postId, req);
@@ -218,7 +219,7 @@ public class CommunityController {
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
 		@PathVariable Long postId,
 		@PathVariable Long commentId,
-		@RequestBody CommentUpsertRequest req
+		@RequestBody @Valid CommentUpsertRequest req
 	) throws Exception {
 		Long userId = authPrincipal.userId();
 		commentEventFacade.updateComment(userId, postId, commentId, req);
@@ -255,7 +256,7 @@ public class CommunityController {
 	@GetMapping("/public/posts/{postId}/comments/list")
 	public ApiResponse<Page<CommentItem>> getPostComments(
 		@AuthenticationPrincipal AuthPrincipal authPrincipal,
-		@ModelAttribute ListRequest req,
+		@ModelAttribute @Valid ListRequest req,
 		@PathVariable Long postId
 	) throws Exception {
 		Long userId = (authPrincipal == null) ? null : authPrincipal.userId();
