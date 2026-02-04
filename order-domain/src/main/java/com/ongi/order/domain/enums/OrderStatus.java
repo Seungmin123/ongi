@@ -1,8 +1,5 @@
 package com.ongi.order.domain.enums;
 
-import lombok.Getter;
-
-@Getter
 public enum OrderStatus {
 	PENDING("주문대기"),
 	PAYMENT_WAITING("결제대기"),
@@ -17,5 +14,9 @@ public enum OrderStatus {
 
 	OrderStatus(String description) {
 		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 }

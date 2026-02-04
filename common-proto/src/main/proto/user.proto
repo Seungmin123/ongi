@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.ongi.grpc.user;
+
+option java_multiple_files = true;
+option java_package = "com.ongi.grpc.user";
+
+service UserInfoService {
+  rpc GetUserContact (UserContactRequest) returns (UserContactResponse);
+}
+
+message UserContactRequest {
+  int64 user_id = 1;
+}
+
+message UserContactResponse {
+  int64 user_id = 1;
+  string phone_number = 2;
+  string push_token = 3;
+}

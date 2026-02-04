@@ -1,0 +1,23 @@
+server:
+  port: 8081 # api 서버와 충돌 방지
+
+spring:
+  application:
+    name: notification-service
+  
+  # R2DBC 설정
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/ongi
+    username: root
+    password: 
+  
+  # Kafka 설정
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.ongi.api.order.messaging.event"

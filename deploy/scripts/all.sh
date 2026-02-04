@@ -10,7 +10,7 @@
 # DO_PORT_FORWARD=true
 # FORCE_SET_IMAGE=true
 # FORCE_ROLLOUT_RESTART=true
-# ./scripts/deploy/all.sh
+# ./scripts/all.sh
 
 set -euo pipefail
 

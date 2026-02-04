@@ -76,6 +76,12 @@ spring:
   outbox:
     publisher:
       fixed-delay-ms: 30000
+payment:
+  toss:
+    # 토스페이먼츠 개발자 센터에서 발급받은 '시크릿 키' (테스트용은 보통 test_sk_로 시작)
+    secret-key: test_sk_ExampleSecretKey1234567890
+    # 토스페이먼츠 API 기본 URL
+    base-url: https://api.tosspayments.com
 #logging:
 #  level:
 #    io.opentelemetry: DEBUG        # OTel SDK/Export

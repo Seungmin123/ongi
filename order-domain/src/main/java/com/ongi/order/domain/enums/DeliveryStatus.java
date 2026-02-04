@@ -1,8 +1,5 @@
 package com.ongi.order.domain.enums;
 
-import lombok.Getter;
-
-@Getter
 public enum DeliveryStatus {
 	READY("배송준비"),
 	IN_PROGRESS("배송중"),
@@ -13,5 +10,9 @@ public enum DeliveryStatus {
 
 	DeliveryStatus(String description) {
 		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 }

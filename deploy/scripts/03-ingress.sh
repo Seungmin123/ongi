@@ -18,4 +18,10 @@ info "install/upgrade ingress-nginx controller"
 helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx --create-namespace
 
+info "Waiting for ingress-nginx controller to be ready..."
+
+kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=90s
+
+sleep 10
+
 apply_manifest_if_exists "$MANIFEST_03"

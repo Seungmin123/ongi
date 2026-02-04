@@ -32,4 +32,8 @@ pkill -f "kubectl.*port-forward svc/grafana" >/dev/null 2>&1 || true
 pkill -f "kubectl.*port-forward svc/redis" >/dev/null 2>&1 || true
 pkill -f "kubectl.*port-forward svc/kafka" >/dev/null 2>&1 || true
 
+echo "Deleting k3d cluster..."
+k3d cluster delete ongi || true
+echo "Cluster deleted."
+
 echo "DONE"

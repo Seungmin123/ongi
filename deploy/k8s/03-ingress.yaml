@@ -2,6 +2,12 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: ongi
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ongi-obs
+---
   # ------------------------------------------------------------
   # 로컬 JVM(호스트)로 프록시용 Service (k3d: host.k3d.internal)
   # - 스프링부트가 로컬 8080에서 떠있을 때 Ingress가 이 서비스로 보냅니다.
