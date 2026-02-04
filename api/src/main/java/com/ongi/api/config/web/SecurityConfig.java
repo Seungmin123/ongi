@@ -41,7 +41,7 @@ public class SecurityConfig {
 				// TODO 수정 필요
 				.requestMatchers("/recipe/public/**", "/user/public/**", "/file/public/**", "/community/public/**")
 				.permitAll()
-				.requestMatchers("/recipe/private/**", "/recipe/private/**", "/file/private/**")
+				.requestMatchers("/recipe/private/**", "/user/private/**", "/file/private/**", "/order/private/**", "/community/private/**")
 				.authenticated()
 				.anyRequest().authenticated()
 			)

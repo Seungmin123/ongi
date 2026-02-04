@@ -15,6 +15,8 @@ dependencies {
 	implementation project(':recipe-domain')
 	implementation project(':ingredients-domain')
 	implementation project(':user-domain')
+	implementation project(':order-domain')
+	implementation project(':product-domain')
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -38,6 +40,7 @@ dependencies {
 
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.redisson:redisson-spring-boot-starter:3.43.0'
 	implementation 'org.apache.commons:commons-pool2'
 
 	// kafka
