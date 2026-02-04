@@ -4,6 +4,7 @@ import com.ongi.api.order.messaging.event.OrderPaidEvent;
 import com.ongi.notification.domain.NotificationRequest;
 import com.ongi.notification.domain.enums.NotificationType;
 import com.ongi.notification.service.application.NotificationService;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,22 +17,26 @@ public class NotificationConsumer {
 
 	private final NotificationService notificationService;
 
-	/**
-	 * 1. 개별 도메인 이벤트 직접 구독 (Order)
-	 */
 	@KafkaListener(topics = "order.paid", groupId = "notification-service-group")
 	public void handleOrderPaid(OrderPaidEvent event) {
 		log.info("[Consumer] 결제 완료 이벤트 수신: orderId={}", event.orderId());
 		
-		NotificationRequest request = NotificationRequest.builder()
-			.userId(event.userId())
-			.type(NotificationType.ALIMTALK)
-			.title("결제 완료")
-			.content(String.format("주문번호 [%s] 결제가 완료되었습니다.", event.orderId()))
-			.eventId("ORDER_PAID:" + event.orderId())
-			.build();
+		NotificationRequest request =
+			new NotificationRequest(
+				event.userId(),
+				NotificationType.ALIMTALK,
+				"결제 완료",
+				String.format("주문번호 [%s] 결제가 완료되었습니다.", event.orderId()),
+				"ORDER_PAID:" + event.orderId(),
+				null
+			);
 
-		notificationService.processNotification(request).subscribe();
+		try {
+			notificationService.processNotification(request).block(Duration.ofSeconds(10));
+		} catch (Exception e) {
+			log.error("알림 처리 중 오류 발생", e);
+			throw e; // 예외를 던져야 Kafka가 재시도 로직을 수행함
+		}
 	}
 
 	/**
@@ -41,6 +46,11 @@ public class NotificationConsumer {
 	@KafkaListener(topics = "notification.request", groupId = "notification-service-group")
 	public void handleGeneralNotification(NotificationRequest request) {
 		log.info("[Consumer] 공통 알림 요청 수신: eventId={}", request.eventId());
-		notificationService.processNotification(request).subscribe();
+		try {
+			notificationService.processNotification(request).block(Duration.ofSeconds(10));
+		} catch (Exception e) {
+			log.error("알림 처리 중 오류 발생", e);
+			throw e; // 예외를 던져야 Kafka가 재시도 로직을 수행함
+		}
 	}
 }
