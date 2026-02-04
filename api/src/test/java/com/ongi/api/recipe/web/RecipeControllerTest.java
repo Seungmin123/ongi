@@ -1,7 +1,6 @@
 package com.ongi.api.recipe.web;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -23,18 +22,11 @@ import com.ongi.api.recipe.application.command.RecipeService;
 import com.ongi.api.recipe.application.facade.RecipeEventFacade;
 import com.ongi.api.recipe.application.query.RecipeQueryService;
 import com.ongi.api.recipe.application.query.RecipeRelatedService;
-import com.ongi.api.recipe.web.dto.CommentCreateRequest;
-import com.ongi.api.recipe.web.dto.CommentCreateResponse;
 import com.ongi.api.recipe.web.dto.LikeResponse;
 import com.ongi.api.recipe.web.dto.RecipeCardResponse;
-import com.ongi.api.recipe.web.dto.RecipeCommentItem;
 import com.ongi.api.recipe.web.dto.RecipeDetailBaseResponse;
 import com.ongi.api.recipe.web.dto.RecipeDetailResponse;
-import com.ongi.api.recipe.web.dto.UserSummary;
-import com.ongi.recipe.domain.enums.CommentSortOption;
 import com.ongi.recipe.domain.enums.RecipeCategoryEnum;
-import com.ongi.recipe.domain.search.RecipeSearchCondition;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,10 +34,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -54,7 +42,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 @SpringBootTest
 class RecipeControllerTest {
 
@@ -91,7 +79,7 @@ class RecipeControllerTest {
     }
 
     @Test
-    @DisplayName("공개 레시피 목록 조회 - 성공 (토큰 불필요)")
+    @DisplayName("레시피 목록 조회 - 성공 (토큰 불필요)")
     void getRecipes_success() throws Exception {
         // given
         RecipeCardResponse card = new RecipeCardResponse(
@@ -115,7 +103,108 @@ class RecipeControllerTest {
     }
 
     @Test
-    @DisplayName("레시피 등록 - 성공 (유효한 JWT)")
+    @DisplayName("공개 레시피 목록 조회 - 카테고리 필터링 성공")
+    void getRecipes_categoryFilter_success() throws Exception {
+        // given
+        RecipeCardResponse card = new RecipeCardResponse(
+            1L, "소고기 미역국", "image_url", 40, "40분", 4, "NORMAL",
+            50L, 10L, 5L, "SOUP"
+        );
+        ApiResponse<List<RecipeCardResponse>> response = ApiResponse.ok(List.of(card));
+
+        given(recipeService.search(any(), any()))
+            .willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/recipe/public/recipe/list")
+                .param("category", "SOUP")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data[0].category").value("SOUP"));
+    }
+
+    @Test
+    @DisplayName("레시피 목록 조회 - 실패 (ID 타입 불일치)")
+    void getRecipes_typeMismatch_fail() throws Exception {
+        mockMvc.perform(get("/recipe/public/recipe/list")
+                .param("ingredientId", "not-a-long")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("공개 레시피 상세 조회 - 성공 (토큰 없이도 가능)")
+    void getRecipeDetail_noToken_success() throws Exception {
+        // given
+        RecipeDetailBaseResponse base = new RecipeDetailBaseResponse(
+            "img", "Title", 30, "30m", 2, "EASY", RecipeCategoryEnum.SOUP,
+            10L, 5L, 2L, null, null
+        );
+        RecipeDetailResponse detail = new RecipeDetailResponse(base, false, false);
+
+        given(recipeEventFacade.view(eq(null), anyLong()))
+            .willReturn(detail);
+
+        // when & then
+        mockMvc.perform(get("/recipe/public/recipe/{recipeId}", 1L)
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    @DisplayName("레시피 상세 조회 - 성공 (토큰 포함)")
+    void getRecipeDetail_withToken_success() throws Exception {
+        // given
+        String token = createTestToken("123");
+        RecipeDetailBaseResponse base = new RecipeDetailBaseResponse(
+            "img", "Title", 30, "30m", 2, "EASY", RecipeCategoryEnum.SOUP,
+            10L, 5L, 2L, null, null
+        );
+        RecipeDetailResponse detail = new RecipeDetailResponse(base, false, false);
+
+        given(recipeEventFacade.view(eq(123L), anyLong()))
+            .willReturn(detail);
+
+        // when & then
+        mockMvc.perform(get("/recipe/public/recipe/{recipeId}", 1L)
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    @DisplayName("레시피 상세 조회 - 성공 (잘못된 JWT가 있어도 공개 API는 접근 가능해야 함)")
+    void getRecipeDetail_withInavlidToken() throws Exception {
+        // given
+        String invalidToken = "Bearer invalid.token.here";
+        RecipeDetailBaseResponse base = new RecipeDetailBaseResponse(
+            "img", "Title", 30, "30m", 2, "EASY", RecipeCategoryEnum.SOUP,
+            10L, 5L, 2L, null, null
+        );
+        RecipeDetailResponse detail = new RecipeDetailResponse(base, false, false);
+
+        // 토큰이 잘못되면 필터에서 Authentication을 세팅하지 않으므로 principal은 null이 됨
+        given(recipeEventFacade.view(eq(null), anyLong()))
+            .willReturn(detail);
+
+        // when & then
+        mockMvc.perform(get("/recipe/public/recipe/{recipeId}", 1L)
+                .header(HttpHeaders.AUTHORIZATION, invalidToken)
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    @DisplayName("레시피 등록 - 성공")
     void createRecipe_success() throws Exception {
         // given
         String token = createTestToken("123");
@@ -155,46 +244,6 @@ class RecipeControllerTest {
     }
 
     @Test
-    @DisplayName("좋아요 - 성공 (유효한 JWT)")
-    void like_success() throws Exception {
-        // given
-        String token = createTestToken("456");
-        LikeResponse response = new LikeResponse(true, 10L);
-        given(recipeEventFacade.like(eq(456L), anyLong()))
-            .willReturn(response);
-
-        // when & then
-        mockMvc.perform(put("/recipe/private/{recipeId}/like", 1L)
-                .header(HttpHeaders.AUTHORIZATION, token))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.likedByMe").value(true));
-    }
-
-    @Test
-    @DisplayName("레시피 상세 조회 - 성공 (토큰 포함)")
-    void getRecipeDetail_withToken_success() throws Exception {
-        // given
-        String token = createTestToken("123");
-        RecipeDetailBaseResponse base = new RecipeDetailBaseResponse(
-            "img", "Title", 30, "30m", 2, "EASY", RecipeCategoryEnum.SOUP, 
-            10L, 5L, 2L, null, null
-        );
-        RecipeDetailResponse detail = new RecipeDetailResponse(base, false, false);
-        
-        given(recipeEventFacade.view(eq(123L), anyLong()))
-            .willReturn(detail);
-
-        // when & then
-        mockMvc.perform(get("/recipe/public/recipe/{recipeId}", 1L)
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .accept(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.success").value(true));
-    }
-
-    @Test
     @DisplayName("레시피 등록 - 실패 (토큰 없음)")
     void createRecipe_noToken_fail() throws Exception {
         String json = "{\"title\":\"No Token Recipe\", \"category\":\"SOUP\"}";
@@ -204,43 +253,6 @@ class RecipeControllerTest {
                 .content(json))
             .andDo(print())
             .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("좋아요 - 실패 (토큰 없음)")
-    void like_noToken_fail() throws Exception {
-        mockMvc.perform(put("/recipe/private/{recipeId}/like", 1L))
-            .andDo(print())
-            .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("레시피 삭제 - 실패 (토큰 없음)")
-    void deleteRecipe_noToken_fail() throws Exception {
-        mockMvc.perform(delete("/recipe/private/recipe/{recipeId}", 1L))
-            .andDo(print())
-            .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("공개 레시피 상세 조회 - 성공 (토큰 없이도 가능)")
-    void getRecipeDetail_noToken_success() throws Exception {
-        // given
-        RecipeDetailBaseResponse base = new RecipeDetailBaseResponse(
-            "img", "Title", 30, "30m", 2, "EASY", RecipeCategoryEnum.SOUP, 
-            10L, 5L, 2L, null, null
-        );
-        RecipeDetailResponse detail = new RecipeDetailResponse(base, false, false);
-        
-        given(recipeEventFacade.view(eq(null), anyLong()))
-            .willReturn(detail);
-
-        // when & then
-        mockMvc.perform(get("/recipe/public/recipe/{recipeId}", 1L)
-                .accept(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.success").value(true));
     }
 
     @Test
@@ -310,6 +322,39 @@ class RecipeControllerTest {
     }
 
     @Test
+    @DisplayName("레시피 삭제 - 실패 (토큰 없음)")
+    void deleteRecipe_noToken_fail() throws Exception {
+        mockMvc.perform(delete("/recipe/private/recipe/{recipeId}", 1L))
+            .andDo(print())
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("좋아요 - 성공 (유효한 JWT)")
+    void like_success() throws Exception {
+        // given
+        String token = createTestToken("456");
+        LikeResponse response = new LikeResponse(true, 10L);
+        given(recipeEventFacade.like(eq(456L), anyLong()))
+            .willReturn(response);
+
+        // when & then
+        mockMvc.perform(put("/recipe/private/{recipeId}/like", 1L)
+                .header(HttpHeaders.AUTHORIZATION, token))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.likedByMe").value(true));
+    }
+
+    @Test
+    @DisplayName("좋아요 - 실패 (토큰 없음)")
+    void like_noToken_fail() throws Exception {
+        mockMvc.perform(put("/recipe/private/{recipeId}/like", 1L))
+            .andDo(print())
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("댓글 등록 - 실패 (내용이 너무 김 - 1000자 초과)")
     void createComment_validation_fail_too_long() throws Exception {
         // given
@@ -322,16 +367,6 @@ class RecipeControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-            .andDo(print())
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("공개 레시피 목록 조회 - 실패 (ID 타입 불일치)")
-    void getRecipes_typeMismatch_fail() throws Exception {
-        mockMvc.perform(get("/recipe/public/recipe/list")
-                .param("ingredientId", "not-a-long")
-                .accept(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isBadRequest());
     }
@@ -350,4 +385,5 @@ class RecipeControllerTest {
             .andDo(print())
             .andExpect(status().isBadRequest());
     }
+
 }

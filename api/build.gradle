@@ -61,6 +61,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	testRuntimeOnly libs.h2.database
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
