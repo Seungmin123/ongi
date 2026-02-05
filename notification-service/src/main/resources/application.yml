@@ -21,3 +21,9 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.ongi.api.order.messaging.event"
+
+grpc:
+  client:
+    user-service:
+      address: 'static://localhost:9090'
+      negotiation-type: plaintext
