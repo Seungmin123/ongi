@@ -7,10 +7,15 @@ option java_package = "com.ongi.grpc.user";
 
 service UserInfoService {
   rpc GetUserContact (UserContactRequest) returns (UserContactResponse);
+  rpc StreamUsers (StreamUsersRequest) returns (stream UserContactResponse);
 }
 
 message UserContactRequest {
   int64 user_id = 1;
+}
+
+message StreamUsersRequest {
+  string target_group = 1; // ALL, MARKETING_AGREED
 }
 
 message UserContactResponse {

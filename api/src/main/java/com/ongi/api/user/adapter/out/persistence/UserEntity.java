@@ -41,19 +41,34 @@ public class UserEntity extends BaseTimeEntity {
 	@Column(name = "tier", nullable = false, length = 50)
 	private UserTier tier;
 
+	@Column(name = "phone_number")
+	private String phoneNumber;
+
+	@Column(name = "push_token")
+	private String pushToken;
+
+	@Column(name = "marketing_agreed", nullable = false)
+	private boolean marketingAgreed;
+
 	@Builder
 	public UserEntity(
 		Long id,
 		String email,
 		String passwordHash,
 		UserTypeEnum type,
-		UserTier tier
+		UserTier tier,
+		String phoneNumber,
+		String pushToken,
+		boolean marketingAgreed
 	) {
 		this.id = id;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.type = type;
 		this.tier = tier;
+		this.phoneNumber = phoneNumber;
+		this.pushToken = pushToken;
+		this.marketingAgreed = marketingAgreed;
 	}
 
 }

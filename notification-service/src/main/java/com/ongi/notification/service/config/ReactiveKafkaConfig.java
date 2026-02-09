@@ -15,15 +15,14 @@ import java.util.Map;
 @Configuration
 public class ReactiveKafkaConfig {
 
-    @Value("${spring.kafka.consumer.bootstrap-servers}")
+    @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    //@Value("${spring.kafka.consumer.group-id:notification-service-group}")
-    @Value("${group-id:notification-service-group}")
+    @Value("${spring.kafka.consumer.group-id:notification-service-group}")
     private String groupId;
 
     @Bean
-    public ReceiverOptions<String, String> kafkaReceiverOptions() {
+    public ReceiverOptions<String, String> baseReceiverOptions() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -31,13 +30,20 @@ public class ReactiveKafkaConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        ReceiverOptions<String, String> basicOptions = ReceiverOptions.create(props);
-
-        return basicOptions.subscription(List.of("order.paid", "notification.request"));
+        return ReceiverOptions.create(props);
     }
 
     @Bean
-    public KafkaReceiver<String, String> kafkaReceiver(ReceiverOptions<String, String> options) {
+    public KafkaReceiver<String, String> realTimeKafkaReceiver(ReceiverOptions<String, String> baseOptions) {
+        ReceiverOptions<String, String> options = baseOptions.subscription(List.of("order.paid", "notification.request"));
+        return KafkaReceiver.create(options);
+    }
+
+    @Bean
+    public KafkaReceiver<String, String> broadcastKafkaReceiver(ReceiverOptions<String, String> baseOptions) {
+        // Broadcast는 처리가 오래 걸릴 수 있으므로 별도 그룹을 사용하는 것이 안전할 수 있으나,
+        // 여기서는 같은 그룹 내에서 토픽만 분리하여 처리 (필요시 group-id 오버라이딩 가능)
+        ReceiverOptions<String, String> options = baseOptions.subscription(List.of("notification.broadcast"));
         return KafkaReceiver.create(options);
     }
 }
