@@ -17,17 +17,17 @@ NS_AGG="${NS_AGG:-ongi-agg}"
 PF_DIR="${PF_DIR:-/tmp}"
 
 # Manifests
-MANIFEST_01="${MANIFEST_01:-k8s/01-data.yaml}"
-MANIFEST_02="${MANIFEST_02:-k8s/02-obs.yaml}"
-MANIFEST_03="${MANIFEST_03:-k8s/03-ingress.yaml}"
-SPARK_MANIFEST="${SPARK_MANIFEST:-k8s/10-spark-trending.yaml}"
+MANIFEST_01="${MANIFEST_01:-$REPO_ROOT/deploy/k8s/01-data.yaml}"
+MANIFEST_02="${MANIFEST_02:-$REPO_ROOT/deploy/k8s/02-obs.yaml}"
+MANIFEST_03="${MANIFEST_03:-$REPO_ROOT/deploy/k8s/03-ingress.yaml}"
+SPARK_MANIFEST="${SPARK_MANIFEST:-$REPO_ROOT/deploy/k8s/10-spark-trending.yaml}"
 
 # Kafka image
 KAFKA_IMAGE_NAME="${KAFKA_IMAGE_NAME:-ongi-kafka}"
 KAFKA_IMAGE_TAG="${KAFKA_IMAGE_TAG:-4.1.1-jmx}"
 KAFKA_IMAGE="${KAFKA_IMAGE_NAME}:${KAFKA_IMAGE_TAG}"
-KAFKA_DOCKERFILE="${KAFKA_DOCKERFILE:-ongi/kafka/Dockerfile}"
-KAFKA_BUILD_CONTEXT="${KAFKA_BUILD_CONTEXT:-ongi}"
+KAFKA_DOCKERFILE="${KAFKA_DOCKERFILE:-$REPO_ROOT/kafka/Dockerfile}"
+KAFKA_BUILD_CONTEXT="${KAFKA_BUILD_CONTEXT:-$REPO_ROOT}"
 
 # Spark image
 SPARK_IMAGE_NAME="${SPARK_IMAGE_NAME:-ongi-spark-trending}"
